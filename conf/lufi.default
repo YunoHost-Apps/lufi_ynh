@@ -1,0 +1,6 @@
+# LDIR is the path where you installed Lufi
+# It has to end with a final /
+LDIR=__FINALPATH__
+
+# USER is the user who will launch Lufi
+USER=www-data
