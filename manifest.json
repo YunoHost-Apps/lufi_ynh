@@ -1,0 +1,73 @@
+{
+	"name": "Lufi",
+	"id": "lufi",
+	"packaging_format": 1,
+	"requirements": {
+		"yunohost": ">= 2.4"
+	},
+	"description": {
+		"en": "Self hosting images and sharing anonymous application",
+		"fr": "Application d'hébergement et de partage d'images anonyme"
+	},
+	"version": "0.6 dev",
+	"url": "https://git.framasoft.org/luc/lufi",
+	"license": "AGPL",
+	"maintainer": {
+		"name": "frju365",
+		"email": "win10@tutanota.com"
+	},
+	"multi_instance": false,
+	"services": [
+		"nginx"
+	],
+	"arguments": {
+		"install" : [
+			{
+				"name": "domain",
+				"type": "domain",
+				"ask": {
+					"en": "Choose a domain for Lufi",
+					"fr": "Choisissez un domaine pour Lufi"
+				},
+				"example": "domain.org"
+			},
+			{
+				"name": "path",
+				"type": "path",
+				"ask": {
+					"en": "Choose a path for Lufi",
+					"fr": "Choisissez un chemin pour Lufi"
+				},
+				"example": "/lutim",
+				"default": "/lutim"
+			},
+			{
+				"name": "admin",
+				"type": "user",
+				"ask": {
+					"en": "Choose the Lutim administrator (must be an existing YunoHost user)",
+					"fr": "Choisissez un administrateur Lufi (doit être un utilisateur YunoHost)"
+				},
+				"example": "john"
+			},
+			{
+				"name": "is_public",
+				"ask": {
+					"en": "Uploading images is it public?",
+					"fr": "L'upload des images est-il public ?"
+				},
+				"choices": ["Yes", "No"],
+				"default": "No"
+			},
+			{
+				"name": "always_encrypt",
+				"ask": {
+					"en": "Force the encryption of images?",
+					"fr": "Forcer le chiffrement des images ?"
+				},
+				"choices": ["Yes", "No"],
+				"default": "Yes"
+			}
+		]
+	}
+}
