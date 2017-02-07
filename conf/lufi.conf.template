@@ -1,0 +1,160 @@
+# vim:set sw=4 ts=4 sts=4 ft=perl expandtab:
+{
+    ####################
+    # Hypnotoad settings
+    ####################
+    # see http://mojolicio.us/perldoc/Mojo/Server/Hypnotoad for a full list of settings
+    hypnotoad => {
+        # array of IP addresses and ports you want to listen to
+        listen => ['http://127.0.0.1:__PORT__'],
+        # if you use Lufi behind a reverse proxy like Nginx, you want ro set proxy to 1
+        # if you use Lufi directly, let it commented
+        #proxy  => 1,
+        
+    },
+
+    # put a way to contact you here and uncomment it
+    # MANDATORY
+     contact => 'webmaster@__DOMAIN__',
+
+    # array of random strings used to encrypt cookies
+    # optional, default is ['fdjsofjoihrei'], PLEASE, CHANGE IT
+    secrets => ['__SECRET__'],
+
+    # choose a theme. See the available themes in `themes` directory
+    # optional, default is 'default'
+    #theme         => 'default',
+
+    # length of the random URL
+    # optional, default is 8
+    #length            => 8,
+
+    # how many URLs will be provisioned in a batch ?
+    # optional, default is 5
+    #provis_step       => 5,
+
+    # max number of URLs to be provisioned
+    # optional, default is 100
+    #provisioning      => 100,
+
+    # length of the modify/delete token
+    # optional, default is 32
+    #token_length      => 32,
+
+    # max file size, in octets
+    # you can write it 100*1024*1024
+    # optional, no default
+    #max_file_size     => 104857600,
+
+    # if you want to have piwik statistics, provide a piwik image tracker
+    # only the image tracker is allowed, no javascript
+    # optional, no default
+    #piwik_img         => 'https://piwik.example.org/piwik.php?idsite=1&amp;rec=1',
+
+    # broadcast_message which will displayed on the index page
+    # optional, no default
+    #broadcast_message => 'Maintenance',
+
+    # default time limit for files
+    # valid values are 0, 1, 7, 30 and 365
+    # optional, default is 0 (no limit)
+    default_delay     => 365,
+
+    # number of days after which the images will be deleted, even if they were uploaded with "no delay" (or value superior to max_delay)
+    # a warning message will be displayed on homepage
+    # optional, default is 0 (no limit)
+    #max_delay         => 0,
+
+    # size thresholds: if you want to define max delays for different sizes of file
+    # the keys are size in Bytes, you can't have 10*1000*10000 as key
+    # if a file is smaller than the smallest configured size, it will have a expiration delay of max_delay (see above)
+    # optional, default is using max_delay (see above) for all sizes
+    #delay_for_size  => {
+    #    10000000   => 90, # between 10MB and 50MB => max is 90 days, less than 10MB => max is max_delay (see above)
+    #    50000000   => 60, # between 50MB ans 1GB  => max is 60 days
+    #    1000000000 => 2,  # more than 1GB         => max is 2 days
+    #},
+
+    # URL sub-directory in which you want Lufi to be accessible
+    # example: you want to have Lufi under https://example.org/lufi/
+    # => set prefix to '/lufi' or to '/lufi/', it doesn't matter
+    # optional, defaut is /
+    prefix => '__PATH__',
+
+    # array of authorized domains for API calls.
+    # if you want to authorize everyone to use the API: ['*']
+    # optional, no domains allowed by default
+    #allowed_domains   => ['http://1.example.com', 'http://2.example.com'],
+
+    # if set, the shortened URLs will use this domain
+    # optional
+    #fixed_domain => 'example.org',
+
+    # Mail configuration
+    # See https://metacpan.org/pod/Mojolicious::Plugin::Mail#EXAMPLES
+    # Optional, default to sendmail method with no arguments
+    #mail => {
+    #    # Valid values are 'sendmail' and 'smtp'
+    #    how => 'smtp',
+    #    howargs => ['smtp.example.org']
+    #},
+
+    # Email sender address
+    # Optional, default to no-reply@lufi.io
+    #mail_sender => 'no-reply@lufi.io',
+
+    # define a path to the SQLite database
+    # you can define it relative to lufi directory or set an absolute path
+    # remember that it has to be in a directory writable by Lufi user
+    # optional, default is lufi.db
+    #db_path           => 'lufi.db',
+
+    # define a path to the upload directory, where the uploaded files will be stored
+    # you can define it relative to lufi directory or set an absolute path
+    # remember that it has to be in a directory writable by Lufi user
+    # DO NOT CHANGE THIS IF FILES HAVE BEEN ALREADY UPLOADED: THEY WILL NOT BE DOWNLOADABLE ANYMORE
+    # optional, default is 'files'
+    #upload_dir           => 'files',
+
+    # set `ldap` if you want that only authenticated users can upload files
+    # please note that everybody can still download files
+    # optional, no default
+    #ldap => {
+    #    uri         => 'ldaps://ldap.example.org',
+    #    user_tree   => 'ou=users,dc=example,dc=org',
+    #    bind_dn     => ',ou=users,dc=example,dc=org',
+    #    bind_user   => 'uid=ldap_user',
+    #    bind_pwd    => 'secr3t',
+    #    user_filter => '!(uid=ldap_user)'
+    #},
+
+    # if you've set ldap above, the session will last `session_duration` seconds before
+    # the user needs to reauthenticate
+    # optional, default is 3600
+    #session_duration => 3600,
+
+    #########################
+    # Lufi cron jobs settings
+    #########################
+
+    # number of days senders' IP addresses are kept in database
+    # after that delay, they will be deleted from database (used with script/lufi cron cleanbdd)
+    # optional, default is 365
+    #keep_ip_during    => 365,
+
+    # max size of the files directory, in octets
+    # used by script/lufi cron watch to trigger an action
+    # optional, no default
+    max_total_size => 1024*1024*1024,
+
+    # default action when files directory is over max_total_size (used with script/lufi cron watch)
+    # valid values are 'warn', 'stop-upload' and 'delete'
+    # please, see readme
+    # optional, default is 'warn'
+    policy_when_full => 'stop-upload',
+
+    # images which are not viewed since delete_no_longer_viewed_files days will be deleted by the cron cleanfiles task
+    # if delete_no_longer_viewed_files is not set, the no longer viewed files will NOT be deleted
+    # optional, no default
+    #delete_no_longer_viewed_files => 90,
+};
