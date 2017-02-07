@@ -38,8 +38,8 @@
 					"en": "Choose a path for Lufi",
 					"fr": "Choisissez un chemin pour Lufi"
 				},
-				"example": "/lutim",
-				"default": "/lutim"
+				"example": "/lufi",
+				"default": "/lufi"
 			},
 			{
 				"name": "admin",
@@ -58,15 +58,6 @@
 				},
 				"choices": ["Yes", "No"],
 				"default": "No"
-			},
-			{
-				"name": "always_encrypt",
-				"ask": {
-					"en": "Force the encryption of images?",
-					"fr": "Forcer le chiffrement des images ?"
-				},
-				"choices": ["Yes", "No"],
-				"default": "Yes"
 			}
 		]
 	}
