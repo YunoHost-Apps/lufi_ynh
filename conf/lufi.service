@@ -1,0 +1,18 @@
+[Unit]
+Description=Image hosting and sharing service
+Documentation=https://git.framasoft.org/luc/lufi
+Requires=network.target
+After=network.target
+
+[Service]
+Type=forking
+User=www-data
+RemainAfterExit=yes
+WorkingDirectory=__FINALPATH__
+PIDFile=__FINALPATH__script/hypnotoad.pid
+ExecStart=/usr/bin/carton exec hypnotoad script/lufi >> /var/log/lufi/production.log 2>&1
+ExecStop=/usr/bin/carton exec hypnotoad -s script/lufi >> /var/log/lufi/production.log 2>&1
+ExecReload=/usr/bin/carton exec hypnotoad script/lufi >> /var/log/lufi/production.log 2>&1
+
+[Install]
+WantedBy=multi-user.target
