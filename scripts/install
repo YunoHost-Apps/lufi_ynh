@@ -45,7 +45,6 @@ ynh_app_setting_set $app admin $admin
 ynh_app_setting_set $app domain $domain
 ynh_app_setting_set $app is_public $is_public
 ynh_app_setting_set $app port $port
-ynh_app_setting_set $app always_encrypt $always_encrypt
 
 
 # Créer le repertoire de destination et stocke son emplacement.
