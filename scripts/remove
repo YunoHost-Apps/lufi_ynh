@@ -1,0 +1,52 @@
+#!/bin/bash
+
+source .fonctions	# Charge les fonctions génériques habituellement utilisées dans le script
+
+# Récupère les infos de l'application.
+app=$YNH_APP_INSTANCE_NAME
+
+# Source app helpers
+source /usr/share/yunohost/helpers
+
+domain=$(ynh_app_setting_get $app domain)
+
+# Arrêt du service
+if [ -e "/etc/init.d/lufi" ]; then
+	echo "Delete init.d script"
+	sudo service lufi stop
+	sudo rm "/etc/init.d/lufi"
+	sudo rm "/etc/default/lufi"
+	sudo update-rc.d -f lufi remove
+fi
+if [ -e "/etc/systemd/system/lufi.service" ]; then
+	echo "Delete systemd script"
+	sudo service lufi stop
+	sudo rm "/etc/systemd/system/lufi.service"
+	sudo systemctl disable lufi.service
+fi
+
+# Retire le service du monitoring de Yunohost.
+if sudo yunohost service status | grep -q lufi	# Test l'existence du service dans Yunohost
+then
+	echo "Remove lufi service"
+	sudo yunohost service remove lufi
+fi
+
+SECURE_REMOVE '/var/www/$app'	# Suppression du dossier de l'application
+
+REMOVE_NGINX_CONF	# Suppression de la configuration nginx
+
+# Retirer le cron
+if [ -e "/etc/cron.d/$app" ]; then
+	echo "Delete cron"
+	sudo rm "/etc/cron.d/$app"
+fi
+
+SECURE_REMOVE '/var/log/$app/'	# Suppression des log
+
+REMOVE_LOGROTATE_CONF	# Suppression de la configuration de logrotate
+
+# Régénère la configuration de SSOwat
+sudo yunohost app ssowatconf
+
+echo -e "\e[0m"	# Restore normal color
