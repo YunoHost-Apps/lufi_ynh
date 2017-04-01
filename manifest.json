@@ -13,8 +13,8 @@
 	"url": "https://git.framasoft.org/luc/lufi",
 	"license": "AGPL",
 	"maintainer": {
-		"name": "frju365",
-		"email": "win10@tutanota.com"
+		"name": "frju365, cyp",
+		"email": "win10@tutanota.com, cyp@rouquin.me"
 	},
 	"multi_instance": false,
 	"services": [
