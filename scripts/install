@@ -124,10 +124,6 @@ then
 fi
 CHECK_VAR "$arch_dir" "arch_dir empty"
 sudo sed -i "s@__ARCHDIR__@$arch_dir@g" "$final_path/script/lufi"
-# TODO: fix a bug service restart
-# Add contact
-sudo sed -i "/thumbnail_size    => 100,/a contact => 'webmaster@$domain'\," "${final_path}/lib/Lutim.pm"
-
 
 # Change variables in nginx configuration
 sudo sed -i "s@__PATH__@$path@g" /etc/nginx/conf.d/$domain.d/$app.conf

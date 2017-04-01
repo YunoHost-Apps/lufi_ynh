@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# Exit on command errors and treat unset variables as an error
+set -eu
+
+# Source app helpers
+source /usr/share/yunohost/helpers
+
+# Get multi-instances specific variables
+app=$YNH_APP_INSTANCE_NAME
+
+# Retrieve app settings
+domain=$(ynh_app_setting_get "$app" domain)
+
+# Copy the app files
+final_path="/var/www/${app}"
+ynh_backup "${final_path}" "sources" 1
+
+# Copy the nginx conf files
+ynh_backup "/etc/nginx/conf.d/${domain}.d/${app}.conf" "nginx.conf"
+# Copy the php-fpm conf files
+ynh_backup "/etc/php5/fpm/pool.d/${app}.conf" "php-fpm.conf"
+ynh_backup "/etc/php5/fpm/conf.d/20-${app}.ini" "php-fpm.ini"
+
+# Copy the lufi fonf file
+ynh_backup "${final_path}/lufi.conf" "lufi.conf"
+ynh_backup "/etc/default/lufi" "default_lufi"
+ynh_backup "/etc/systemd/system/lufi.service" "systemd_lufi.service"
+ynh_backup "/etc/cron.d/${app}" "cron_lufi"
+ynh_backup "/etc/logrotate.d/${app}" "logrotate_lufi"
