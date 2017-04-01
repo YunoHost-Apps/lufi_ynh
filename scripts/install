@@ -1,13 +1,17 @@
 #!/bin/bash
 
-source .fonctions	# Charge les fonctions génériques habituellement utilisées dans le script
+# Exit on command errors and treat unset variables as an error
+set -eu
+
+source .fonctions	# Loads the generic functions usually used in the script
+source /usr/share/yunohost/helpers # Source app helpers
 
 CLEAN_SETUP () {
-# Nettoyage des résidus d'installation non pris en charge par le script remove.
-# Pas de nettoyage supplémentaire nécessaire ici...
+	# Clean installation residues that are not supported by the remove script.
+	# Clean hosts
 	echo ""
 }
-TRAP_ON	# Active trap pour arrêter le script si une erreur est détectée.
+TRAP_ON	# Active trap to stop the script if an error is detected.
 
 # Retrieve arguments
 domain=$YNH_APP_ARG_DOMAIN
@@ -17,15 +21,11 @@ is_public=$YNH_APP_ARG_IS_PUBLIC
 
 app=$YNH_APP_INSTANCE_NAME
 
-# Source app helpers
-source /usr/share/yunohost/helpers
-
 script_dir=$PWD
 
 # Vérifie que les variables ne sont pas vides.
 CHECK_VAR "$app" "app name not set"
 CHECK_VAR "$script_dir" "script_dir not set"
-
 
 CHECK_USER "$admin"	# Vérifie la validité de l'user admin
 
@@ -38,7 +38,7 @@ CHECK_FINALPATH	# Vérifie que le dossier de destination n'est pas déjà utilis
 domain_regex=$(echo "$domain" | sed 's@-@.@g')
 CHECK_VAR "$domain_regex" "domain_regex empty"
 
-FIND_PORT 8095	# Cherche un port libre.
+FIND_PORT 8080	# Cherche un port libre.
 
 # Enregistre les infos dans la config YunoHost
 ynh_app_setting_set $app admin $admin
@@ -48,53 +48,42 @@ ynh_app_setting_set $app port $port
 
 
 # Créer le repertoire de destination et stocke son emplacement.
-sudo mkdir "$final_path"
+sudo mkdir "${final_path}"
 ynh_app_setting_set $app final_path $final_path
 
-SETUP_SOURCE "lufi.tar.gz"	# Télécharge la source, décompresse et copie dans $final_path
+SETUP_SOURCE	# Télécharge la source, décompresse et copie dans $final_path
 
 # Copie le fichier de config nginx
 sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
 
+if [ "$is_public" = "Yes" ];
+then
+	sudo sed -i "s@#--PRIVATE--@@g" /etc/nginx/conf.d/$domain.d/$app.conf
+fi
 
 # Installation de perlmagick, interface perl pour imagemagick et de carton, gestionnaire de dépendances perl
-sudo apt-get update
-sudo apt-get install carton perlmagick -qy
+ynh_package_update
+ynh_package_install carton
+ynh_package_install perlmagick
 
 ## Copie et configuration du fichier de conf.
-sudo cp ../conf/lufi.conf.template "$final_path/lufi.conf"
-sudo sed -i "s@__DOMAIN__@$domain@g" "$final_path/lufi.conf"
-sudo sed -i "s@__PATH__@$path@g" "$final_path/lufi.conf"
-sudo sed -i "s@__PORT__@$port@g" "$final_path/lufi.conf"
+sudo cp ../conf/lufi.conf.template "${final_path}/lufi.conf"
+sudo sed -i "s@__DOMAIN__@$domain@g" "${final_path}/lufi.conf"
+sudo sed -i "s@__PATH__@$path@g" "${final_path}/lufi.conf"
+sudo sed -i "s@__PORT__@$port@g" "${final_path}/lufi.conf"
 
-sudo sed -i "s@__ENCRYPT__@$always_encrypt@g" "$final_path/lufi.conf"
+#sudo sed -i "s@__ENCRYPT__@$always_encrypt@g" "${final_path}/lufi.conf"
 secret=$(dd if=/dev/urandom bs=1 count=200 2> /dev/null | tr -c -d 'A-Za-z0-9' | sed -n 's/\(.\{24\}\).*/\1/p')
 CHECK_VAR "$secret" "secret empty"
-sudo sed -i "s@__SECRET__@$secret@g" "$final_path/lufi.conf"
-STORE_MD5_CONFIG "lufi.conf" "$final_path/lufi.conf"	# Enregistre la somme de contrôle du fichier de config
+sudo sed -i "s@__SECRET__@$secret@g" "${final_path}/lufi.conf"
+STORE_MD5_CONFIG "lufi.conf" "${final_path}/lufi.conf"	# Enregistre la somme de contrôle du fichier de config
 
-
-codename=$(lsb_release -a 2>/dev/null | grep Codename | cut -f 2)
-CHECK_VAR "$codename" "codename empty"
-ynh_app_setting_set $app codename $codename
-if [ "$codename" = "wheezy" ]
-then	# On utilise le script init pour wheezy.
-	# Mise en place du script init
-	sudo cp ../conf/lufi.init /etc/init.d/lufi
-	sudo cp ../conf/lufi.default /etc/default/lufi
-	sudo chmod +x /etc/init.d/lufi
-	sudo chown root: /etc/init.d/lufi /etc/default/lufi
-	sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/default/lufi
-	## Démarrage auto du service
-	sudo update-rc.d lufi defaults
-else	# Et le script systemd à partir de jessie
-	# Mise en place du script systemd
-	sudo cp ../conf/lufi.service /etc/systemd/system/lufi.service
-	sudo chown root: /etc/systemd/system/lufi.service
-	sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/systemd/system/lufi.service
-	## Démarrage auto du service
-	sudo systemctl enable lufi.service
-fi
+# Mise en place du script systemd
+sudo cp ../conf/lufi.service /etc/systemd/system/lufi.service
+sudo chown root: /etc/systemd/system/lufi.service
+sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/systemd/system/lufi.service
+## Démarrage auto du service
+sudo systemctl enable lufi.service
 
 ## Mise en place des crons
 sudo cp ../conf/cron_lufi /etc/cron.d/$app
@@ -109,6 +98,7 @@ sudo cp ../conf/logrotate /etc/logrotate.d/$app
 sudo mkdir -p /var/log/$app/
 cd $final_path
 sudo carton install 2>&1 | sudo tee -a "/var/log/$app/setup_carton.log"
+# sudo carton exec hypnotoad script/lufi
 
 # Configure le path du dossier perl en fonction de l'architecture système
 arch_dir=$(ls -1 $final_path/local/lib/perl5/ | grep linux-gnu)
@@ -143,16 +133,22 @@ sudo ln -s /var/log/$app/production.log "$final_path/log/production.log"
 sudo chown -R www-data: $final_path
 
 # Start lufi
-sudo service lufi start
+sudo systemctl daemon-reload
+sudo systemctl start lufi.service
+sudo systemctl enable lufi.service
+
 # Set right permissions on new files created at first start
 sudo chown -R www-data: "$final_path"
-
 
 # Add lufi as a service
 sudo yunohost service add lufi -l $final_path/log/production.log
 
+if [ "$is_public" = "No" ];
+then
+	# Retire l'accès public
+	ynh_app_setting_delete $app unprotected_uris
+	sudo yunohost app ssowatconf
+fi
 
 # Recharge la configuration Nginx
 sudo service nginx reload
-# Régénère la configuration de SSOwat
-sudo yunohost app ssowatconf

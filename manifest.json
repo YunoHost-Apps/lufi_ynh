@@ -45,7 +45,7 @@
 				"name": "admin",
 				"type": "user",
 				"ask": {
-					"en": "Choose the Lutim administrator (must be an existing YunoHost user)",
+					"en": "Choose the Lufi administrator (must be an existing YunoHost user)",
 					"fr": "Choisissez un administrateur Lufi (doit être un utilisateur YunoHost)"
 				},
 				"example": "john"
