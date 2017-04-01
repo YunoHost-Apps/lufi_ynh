@@ -1,34 +1,42 @@
 #!/bin/bash
 
-CHECK_VAR () {	# Vérifie que la variable n'est pas vide.
-# $1 = Variable à vérifier
-# $2 = Texte à afficher en cas d'erreur
+ynh_version="2.4"
+
+YNH_VERSION () {	# Returns the version number of the Yunohost moulinette
+	ynh_version=$(sudo yunohost -v | grep "moulinette:" | cut -d' ' -f2 | cut -d'.' -f1,2)
+}
+
+CHECK_VAR () {	# Verifies that the variable is not empty.
+	# $1 = Variable to be checked
+	# $2 = Display text on error
 	test -n "$1" || (echo "$2" >&2 && false)
 }
 
-EXIT_PROPERLY () {	# Provoque l'arrêt du script en cas d'erreur. Et nettoye les résidus.
-	exit_code=$?
-	if [ "$exit_code" -eq 0 ]; then
-			exit 0	# Quitte sans erreur si le script se termine correctement.
-	fi
-	trap '' EXIT
-	set +eu
+EXIT_PROPERLY () {	# Causes the script to stop in the event of an error. And clean the residue.
+	trap '' ERR
 	echo -e "\e[91m \e[1m"	# Shell in light red bold
 	echo -e "!!\n  $app install's script has encountered an error. Installation was cancelled.\n!!" >&2
 
-	if type -t CLEAN_SETUP > /dev/null; then	# Vérifie l'existance de la fonction avant de l'exécuter.
-		CLEAN_SETUP	# Appel la fonction de nettoyage spécifique du script install.
+	if type -t CLEAN_SETUP > /dev/null; then	# Checks the existence of the function before executing it.
+		CLEAN_SETUP	# Call the specific cleanup function of the install script.
 	fi
 
-	# Compense le bug de ssowat qui ne supprime pas l'entrée de l'app en cas d'erreur d'installation.
+	# Compensates the ssowat bug that does not remove the app's input in case of installation error.
 	sudo sed -i "\@\"$domain$path/\":@d" /etc/ssowat/conf.json
+
+	if [ "$ynh_version" = "2.2" ]; then
+		/bin/bash $script_dir/remove
+	fi
 
 	ynh_die
 }
 
 TRAP_ON () {	# Activate signal capture
-	set -eu	# Exit if a command fail, and if a variable is used unset.
-	trap EXIT_PROPERLY EXIT	# Capturing exit signals on shell script
+	trap EXIT_PROPERLY ERR	# Capturing exit signals on error
+}
+
+TRAP_OFF () {	# Ignoring signal capture until TRAP_ON
+	trap '' ERR	# Ignoring exit signals
 }
 
 CHECK_USER () {	# Vérifie la validité de l'user admin
@@ -73,13 +81,13 @@ GENERATE_DB () {	# Créer une base de données et un utilisateur dédié au nom 
 }
 
 SETUP_SOURCE () {	# Télécharge la source, décompresse et copie dans $final_path
-# $1 = Nom de l'archive téléchargée.
-	wget -nv -i ../sources/source_url -O $1
+	src=$(cat ../sources/source_md5 | awk -F' ' {'print $2'})
+	sudo wget -nv -i ../sources/source_url -O $src
 	# Décompresse la source
-	if [ "$(echo ${1##*.})" == "gz" ]; then
-		tar -x -f $1
-	elif [ "$(echo ${1##*.})" == "zip" ]; then
-		unzip -q $1
+	if [ "$(echo ${src##*.})" == "gz" ]; then
+		tar -x -f $src
+	elif [ "$(echo ${src##*.})" == "zip" ]; then
+		unzip -q $src
 	else
 		false	# Format d'archive non pris en charge.
 	fi
