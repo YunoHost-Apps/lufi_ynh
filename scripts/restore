@@ -37,20 +37,9 @@ if [ -f "${lufi_conf}" ]; then
 	ynh_die "The LUFI CONF configuration already exists at '${lufi_conf}'. You should safely delete it before restoring this app."
 fi
 
-codename=$(lsb_release -a 2>/dev/null | grep Codename | cut -f 2)
-CHECK_VAR "$codename" "codename empty"
-ynh_app_setting_set $app codename $codename
-if [ "$codename" = "wheezy" ]
-then	# On utilise le script init pour wheezy.
-	lufi_default="/etc/default/lufi"
-	if [ -f "${lufi_default}" ]; then
-		ynh_die "The LUFI DEFAULT configuration already exists at '${lufi_default}'. You should safely delete it before restoring this app."
-	fi
-else # Et le script systemd à partir de jessie
-	lufi_systemd="/etc/systemd/system/lufi.service"
-	if [ -f "${lufi_default}" ]; then
-		ynh_die "The LUFI SYSTEMD configuration already exists at '${lufi_systemd}'. You should safely delete it before restoring this app."
-	fi
+lufi_systemd="/etc/systemd/system/lufi.service"
+if [ -f "${lufi_default}" ]; then
+	ynh_die "The LUFI SYSTEMD configuration already exists at '${lufi_systemd}'. You should safely delete it before restoring this app."
 fi
 
 lufi_cron="/etc/cron.d/${app}"
@@ -78,15 +67,8 @@ sudo cp -a ./php-fpm.ini "${phpfpm_ini}"
 # Restore lufi configuration files
 sudo cp -a ./lufi.conf "${lufi_conf}"
 
-codename=$(lsb_release -a 2>/dev/null | grep Codename | cut -f 2)
-CHECK_VAR "$codename" "codename empty"
-ynh_app_setting_set $app codename $codename
-if [ "$codename" = "wheezy" ]
-then	# On utilise le script init pour wheezy.
-	sudo cp -a ./default_lufi "${lufi_default}"
-else
-	sudo cp -a ./systemd_lufi.service "${lufi_systemd}"
-fi
+# Restore service
+sudo cp -a ./systemd_lufi.service "${lufi_systemd}"
 
 sudo cp -a ./cron_lufi "${lufi_cron}"
 sudo cp -a ./logrotate_lufi "${lufi_logrotate}"

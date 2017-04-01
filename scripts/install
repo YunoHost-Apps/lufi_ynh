@@ -78,27 +78,12 @@ CHECK_VAR "$secret" "secret empty"
 sudo sed -i "s@__SECRET__@$secret@g" "${final_path}/lufi.conf"
 STORE_MD5_CONFIG "lufi.conf" "${final_path}/lufi.conf"	# Enregistre la somme de contrôle du fichier de config
 
-codename=$(lsb_release -a 2>/dev/null | grep Codename | cut -f 2)
-CHECK_VAR "$codename" "codename empty"
-ynh_app_setting_set $app codename $codename
-if [ "$codename" = "wheezy" ]
-then	# On utilise le script init pour wheezy.
-	# Mise en place du script init
-	sudo cp ../conf/lufi.init /etc/init.d/lufi
-	sudo cp ../conf/lufi.default /etc/default/lufi
-	sudo chmod +x /etc/init.d/lufi
-	sudo chown root: /etc/init.d/lufi /etc/default/lufi
-	sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/default/lufi
-	## Démarrage auto du service
-	sudo update-rc.d lufi defaults
-else	# Et le script systemd à partir de jessie
-	# Mise en place du script systemd
-	sudo cp ../conf/lufi.service /etc/systemd/system/lufi.service
-	sudo chown root: /etc/systemd/system/lufi.service
-	sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/systemd/system/lufi.service
-	## Démarrage auto du service
-	sudo systemctl enable lufi.service
-fi
+# Mise en place du script systemd
+sudo cp ../conf/lufi.service /etc/systemd/system/lufi.service
+sudo chown root: /etc/systemd/system/lufi.service
+sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/systemd/system/lufi.service
+## Démarrage auto du service
+sudo systemctl enable lufi.service
 
 ## Mise en place des crons
 sudo cp ../conf/cron_lufi /etc/cron.d/$app
@@ -148,19 +133,9 @@ sudo ln -s /var/log/$app/production.log "$final_path/log/production.log"
 sudo chown -R www-data: $final_path
 
 # Start lufi
-codename=$(lsb_release -a 2>/dev/null | grep Codename | cut -f 2)
-CHECK_VAR "$codename" "codename empty"
-ynh_app_setting_set $app codename $codename
-if [ "$codename" = "wheezy" ]
-then	# On utilise le script init pour wheezy.
-	sudo /etc/init.d/lufi start
-	sudo update-rc.d lufi defaults
-	sudo service lufi start
-else
-	sudo systemctl daemon-reload
-	sudo systemctl start lufi.service
-	sudo systemctl enable lufi.service
-fi
+sudo systemctl daemon-reload
+sudo systemctl start lufi.service
+sudo systemctl enable lufi.service
 
 # Set right permissions on new files created at first start
 sudo chown -R www-data: "$final_path"

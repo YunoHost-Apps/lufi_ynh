@@ -12,13 +12,6 @@ app=$YNH_APP_INSTANCE_NAME
 domain=$(ynh_app_setting_get $app domain)
 
 # Arrêt du service
-if [ -e "/etc/init.d/lufi" ]; then
-	echo "Delete init.d script"
-	sudo service lufi stop
-	sudo rm "/etc/init.d/lufi"
-	sudo rm "/etc/default/lufi"
-	sudo update-rc.d -f lufi remove
-fi
 if [ -e "/etc/systemd/system/lufi.service" ]; then
 	echo "Delete systemd script"
 	sudo service lufi stop
