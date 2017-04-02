@@ -38,7 +38,7 @@ CHECK_FINALPATH	# Vérifie que le dossier de destination n'est pas déjà utilis
 domain_regex=$(echo "$domain" | sed 's@-@.@g')
 CHECK_VAR "$domain_regex" "domain_regex empty"
 
-FIND_PORT 8080	# Cherche un port libre.
+FIND_PORT 8095	# Cherche un port libre.
 
 # Enregistre les infos dans la config YunoHost
 ynh_app_setting_set $app admin $admin

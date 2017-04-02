@@ -40,7 +40,7 @@ SECURE_REMOVE '/var/log/$app/'	# Suppression des log
 
 REMOVE_LOGROTATE_CONF	# Suppression de la configuration de logrotate
 
-ynh_package_remove carton || echo "ShellInABox already uninstalled"
+ynh_package_remove carton || echo "Carton already uninstalled"
 ynh_package_remove perlmagick || echo "perlmagick already uninstalled"
 
 # Régénère la configuration de SSOwat
