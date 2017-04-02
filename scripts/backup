@@ -19,8 +19,9 @@ ynh_backup "${final_path}" "sources" 1
 # Copy the nginx conf files
 ynh_backup "/etc/nginx/conf.d/${domain}.d/${app}.conf" "nginx.conf"
 
-# Copy the lufi fonf file
+# Copy the lufi conf file
 ynh_backup "${final_path}/lufi.conf" "lufi.conf"
 ynh_backup "/etc/systemd/system/lufi.service" "systemd_lufi.service"
 ynh_backup "/etc/cron.d/${app}" "cron_lufi"
 ynh_backup "/etc/logrotate.d/${app}" "logrotate_lufi"
+ynh_backup "/var/log/${app}/production.log" "production.log"

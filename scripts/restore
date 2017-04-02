@@ -15,6 +15,11 @@ domain=$(ynh_app_setting_get $app domain)
 path=$(ynh_app_setting_get $app path)
 is_public=$(ynh_app_setting_get $app is_public)
 
+# Installation de perlmagick, interface perl pour imagemagick et de carton, gestionnaire de dépendances perl
+ynh_package_update
+ynh_package_install carton
+ynh_package_install perlmagick
+
 # Check domain/path availability
 sudo yunohost app checkurl "${domain}${path}" -a "${app}" \
     || ynh_die "Path not available: ${domain}${path}"
@@ -32,13 +37,13 @@ if [ -f "${nginx_conf}" ]; then
 fi
 
 # Check configuration files lufi
-lufi_conf="${final_path}/lufi.conf"
+lufi_conf="${final_path}/${app}.conf"
 if [ -f "${lufi_conf}" ]; then
 	ynh_die "The LUFI CONF configuration already exists at '${lufi_conf}'. You should safely delete it before restoring this app."
 fi
 
-lufi_systemd="/etc/systemd/system/lufi.service"
-if [ -f "${lufi_default}" ]; then
+lufi_systemd="/etc/systemd/system/${app}.service"
+if [ -f "${lufi_systemd}" ]; then
 	ynh_die "The LUFI SYSTEMD configuration already exists at '${lufi_systemd}'. You should safely delete it before restoring this app."
 fi
 
@@ -52,6 +57,11 @@ if [ -f "${lufi_logrotate}" ]; then
 	ynh_die "The LUFI LOGROTATE configuration already exists at '${lufi_logrotate}'. You should safely delete it before restoring this app."
 fi
 
+lufi_log="/var/log/${app}/production.log"
+if [ -f "${lufi_log}" ]; then
+	ynh_die "The LUFI LOG configuration already exists at '${lufi_log}'. You should safely delete it before restoring this app."
+fi
+
  # Restore sources & data
 sudo cp -a ./sources "${final_path}"
 
@@ -60,9 +70,6 @@ sudo chown -R www-data: "${final_path}"
 
 # Restore nginx configuration files
 sudo cp -a ./nginx.conf   "${nginx_conf}"
-# Restore php-fpm configuration files
-sudo cp -a ./php-fpm.conf "${phpfpm_conf}"
-sudo cp -a ./php-fpm.ini "${phpfpm_ini}"
 
 # Restore lufi configuration files
 sudo cp -a ./lufi.conf "${lufi_conf}"
@@ -73,6 +80,18 @@ sudo cp -a ./systemd_lufi.service "${lufi_systemd}"
 sudo cp -a ./cron_lufi "${lufi_cron}"
 sudo cp -a ./logrotate_lufi "${lufi_logrotate}"
 
+# Create log production
+sudo mkdir "/var/log/${app}/"
+sudo cp -a ./production.log "${lufi_log}"
+# Delete symbolic link and restore
+sudo rm -fr "${final_path}/log/production.log"
+sudo ln -s "/var/log/${app}/production.log" "${final_path}/log/production.log"
+
+# Reload lufi service
+sudo systemctl daemon-reload
+sudo systemctl start lufi.service
+sudo systemctl enable lufi.service
+
 # Set ssowat config
 if [ "$is_public" = "No" ];
 then
@@ -80,6 +99,5 @@ then
 fi
 
 # Reload services
-sudo systemctl reload php5-fpm
 sudo systemctl reload nginx
 sudo yunohost app ssowatconf
