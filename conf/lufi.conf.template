@@ -121,8 +121,8 @@
     ldap => {
         uri         => 'ldap://localhost:389',
         user_tree   => 'ou=users,dc=yunohost,dc=org',
-        bind_dn     => ',ou=users,dc=yunohost,dc=org',
-        bind_user   => 'uid=cn',
+        #bind_dn     => ',ou=users,dc=yunohost,dc=org',
+        #bind_user   => 'uid=cn',
         #bind_pwd    => 'secr3t',
         user_filter => '!(uid=ldap_user)'
     },
