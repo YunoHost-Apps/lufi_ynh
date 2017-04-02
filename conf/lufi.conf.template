@@ -118,14 +118,14 @@
     # set `ldap` if you want that only authenticated users can upload files
     # please note that everybody can still download files
     # optional, no default
-    #ldap => {
-    #    uri         => 'ldaps://ldap.example.org',
-    #    user_tree   => 'ou=users,dc=example,dc=org',
-    #    bind_dn     => ',ou=users,dc=example,dc=org',
-    #    bind_user   => 'uid=ldap_user',
-    #    bind_pwd    => 'secr3t',
-    #    user_filter => '!(uid=ldap_user)'
-    #},
+    ldap => {
+        uri         => 'ldap://localhost:389',
+        user_tree   => 'ou=users,dc=yunohost,dc=org',
+        bind_dn     => ',ou=users,dc=yunohost,dc=org',
+        bind_user   => 'uid=cn',
+        #bind_pwd    => 'secr3t',
+        user_filter => '!(uid=ldap_user)'
+    },
 
     # if you've set ldap above, the session will last `session_duration` seconds before
     # the user needs to reauthenticate
