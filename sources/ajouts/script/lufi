@@ -6,7 +6,6 @@ use warnings;
 use FindBin;
 BEGIN { unshift @INC, "$FindBin::Bin/../lib" }
 BEGIN { unshift @INC, "$FindBin::Bin/../local/lib/perl5" }
-BEGIN { unshift @INC, "$FindBin::Bin/../local/lib/perl5/__ARCHDIR__" }
 
 # Start command line interface for application
 require Mojolicious::Commands;
