@@ -15,10 +15,8 @@ domain=$(ynh_app_setting_get $app domain)
 path=$(ynh_app_setting_get $app path)
 is_public=$(ynh_app_setting_get $app is_public)
 
-# Installation de perlmagick, interface perl pour imagemagick et de carton, gestionnaire de dépendances perl
 ynh_package_update
 ynh_package_install carton
-ynh_package_install perlmagick
 
 # Check domain/path availability
 sudo yunohost app checkurl "${domain}${path}" -a "${app}" \

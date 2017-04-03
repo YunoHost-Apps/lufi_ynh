@@ -41,7 +41,6 @@ SECURE_REMOVE '/var/log/$app/'	# Delete log
 REMOVE_LOGROTATE_CONF	# Delete logrotate configuration
 
 ynh_package_remove carton || echo "Carton already uninstalled"
-ynh_package_remove perlmagick || echo "perlmagick already uninstalled"
 
 # Reload SSOwat configuration
 sudo yunohost app ssowatconf

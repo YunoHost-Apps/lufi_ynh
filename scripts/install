@@ -62,10 +62,8 @@ then
 	sudo sed -i "s@#--PRIVATE--@@g" /etc/nginx/conf.d/$domain.d/$app.conf
 fi
 
-# Installation de perlmagick, interface perl pour imagemagick et de carton, gestionnaire de dépendances perl
 ynh_package_update
 ynh_package_install carton
-ynh_package_install perlmagick
 
 ## Copy and fix variable into lufi config
 sudo cp ../conf/lufi.conf.template "${final_path}/lufi.conf"
