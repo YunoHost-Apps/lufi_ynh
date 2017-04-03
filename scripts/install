@@ -71,10 +71,10 @@ sudo sed -i "s@__DOMAIN__@$domain@g" "${final_path}/lufi.conf"
 sudo sed -i "s@__PATH__@$path@g" "${final_path}/lufi.conf"
 sudo sed -i "s@__PORT__@$port@g" "${final_path}/lufi.conf"
 
-secret=$(dd if=/dev/urandom bs=1 count=200 2> /dev/null | tr -c -d 'A-Za-z0-9' | sed -n 's/\(.\{24\}\).*/\1/p')
+secret=$(ynh_string_random 24)
 CHECK_VAR "$secret" "secret empty"
 sudo sed -i "s@__SECRET__@$secret@g" "${final_path}/lufi.conf"
-STORE_MD5_CONFIG "lufi.conf" "${final_path}/lufi.conf"	# Enregistre la somme de contrôle du fichier de config
+STORE_MD5_CONFIG "lufi.conf" "${final_path}/lufi.conf"
 
 # Install systemd script
 sudo cp ../conf/lufi.service /etc/systemd/system/lufi.service
