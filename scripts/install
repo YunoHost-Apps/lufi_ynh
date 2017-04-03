@@ -100,16 +100,6 @@ sudo mkdir -p /var/log/$app/
 cd $final_path
 sudo carton install 2>&1 | sudo tee -a "/var/log/$app/setup_carton.log"
 
-# Configure le path du dossier perl en fonction de l'architecture système
-arch_dir=$(ls -1 $final_path/local/lib/perl5/ | grep linux-gnu)
-if [ "$?" -ne 0 ]
-then
-    echo "Impossible de trouver le dossier relatif à l'architecture système." | sudo tee -a "/var/log/$app/setup_carton.log"
-	false
-fi
-CHECK_VAR "$arch_dir" "arch_dir empty"
-sudo sed -i "s@__ARCHDIR__@$arch_dir@g" "$final_path/script/lufi"
-
 # Change variables in nginx configuration
 sudo sed -i "s@__PATH__@$path@g" /etc/nginx/conf.d/$domain.d/$app.conf
 sudo sed -i "s@__PORT__@$port@g" /etc/nginx/conf.d/$domain.d/$app.conf
