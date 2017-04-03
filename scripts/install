@@ -46,6 +46,9 @@ ynh_app_setting_set $app domain $domain
 ynh_app_setting_set $app is_public $is_public
 ynh_app_setting_set $app port $port
 
+# Install build-essential
+ynh_package_update
+ynh_package_install build-essential
 
 # Copy files to the right place
 sudo mkdir "${final_path}"
@@ -61,9 +64,6 @@ if [ "$is_public" = "Yes" ];
 then
 	sudo sed -i "s@#--PRIVATE--@@g" /etc/nginx/conf.d/$domain.d/$app.conf
 fi
-
-ynh_package_update
-ynh_package_install carton
 
 ## Copy and fix variable into lufi config
 sudo cp ../conf/lufi.conf.template "${final_path}/lufi.conf"
@@ -91,6 +91,9 @@ sudo chmod +x $final_path/script/lufi
 # Install logrotate
 sed -i "s@__FINALPATH__@$final_path@g" ../conf/logrotate
 sudo cp ../conf/logrotate /etc/logrotate.d/$app
+
+# Install Carton
+sudo cpan Carton
 
 # Install lufi via carton
 sudo mkdir -p /var/log/$app/
