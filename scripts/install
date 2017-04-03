@@ -23,37 +23,38 @@ app=$YNH_APP_INSTANCE_NAME
 
 script_dir=$PWD
 
-# Vérifie que les variables ne sont pas vides.
+# Check variable is not empty
 CHECK_VAR "$app" "app name not set"
 CHECK_VAR "$script_dir" "script_dir not set"
 
-CHECK_USER "$admin"	# Vérifie la validité de l'user admin
+CHECK_USER "$admin"	# Check username
 
-CHECK_PATH	# Vérifie et corrige la syntaxe du path.
-CHECK_DOMAINPATH	# Vérifie la disponibilité du path et du domaine.
+CHECK_PATH	# Check and fix path syntax
+CHECK_DOMAINPATH	# Check and fix domain disponibility
 
-CHECK_FINALPATH	# Vérifie que le dossier de destination n'est pas déjà utilisé.
+CHECK_FINALPATH	# Check final path
 
-# Modifie le domaine pour qu'il passe dans une regex
+# Check domain with regex
 domain_regex=$(echo "$domain" | sed 's@-@.@g')
 CHECK_VAR "$domain_regex" "domain_regex empty"
 
-FIND_PORT 8095	# Cherche un port libre.
+FIND_PORT 8095	# Check port availability
 
-# Enregistre les infos dans la config YunoHost
+# Save app settings
 ynh_app_setting_set $app admin $admin
 ynh_app_setting_set $app domain $domain
 ynh_app_setting_set $app is_public $is_public
 ynh_app_setting_set $app port $port
 
 
-# Créer le repertoire de destination et stocke son emplacement.
+# Copy files to the right place
 sudo mkdir "${final_path}"
 ynh_app_setting_set $app final_path $final_path
 
-SETUP_SOURCE	# Télécharge la source, décompresse et copie dans $final_path
+# Get source
+SETUP_SOURCE
 
-# Copie le fichier de config nginx
+# Copy it to Nginx conf directory
 sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
 
 if [ "$is_public" = "Yes" ];
@@ -66,39 +67,37 @@ ynh_package_update
 ynh_package_install carton
 ynh_package_install perlmagick
 
-## Copie et configuration du fichier de conf.
+## Copy and fix variable into lufi config
 sudo cp ../conf/lufi.conf.template "${final_path}/lufi.conf"
 sudo sed -i "s@__DOMAIN__@$domain@g" "${final_path}/lufi.conf"
 sudo sed -i "s@__PATH__@$path@g" "${final_path}/lufi.conf"
 sudo sed -i "s@__PORT__@$port@g" "${final_path}/lufi.conf"
 
-#sudo sed -i "s@__ENCRYPT__@$always_encrypt@g" "${final_path}/lufi.conf"
 secret=$(dd if=/dev/urandom bs=1 count=200 2> /dev/null | tr -c -d 'A-Za-z0-9' | sed -n 's/\(.\{24\}\).*/\1/p')
 CHECK_VAR "$secret" "secret empty"
 sudo sed -i "s@__SECRET__@$secret@g" "${final_path}/lufi.conf"
 STORE_MD5_CONFIG "lufi.conf" "${final_path}/lufi.conf"	# Enregistre la somme de contrôle du fichier de config
 
-# Mise en place du script systemd
+# Install systemd script
 sudo cp ../conf/lufi.service /etc/systemd/system/lufi.service
 sudo chown root: /etc/systemd/system/lufi.service
 sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/systemd/system/lufi.service
-## Démarrage auto du service
+## Start service auto
 sudo systemctl enable lufi.service
 
-## Mise en place des crons
+## Install cron
 sudo cp ../conf/cron_lufi /etc/cron.d/$app
 sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/cron.d/$app
 sudo chmod +x $final_path/script/lufi
 
-# Configuration de logrotate
+# Install logrotate
 sed -i "s@__FINALPATH__@$final_path@g" ../conf/logrotate
 sudo cp ../conf/logrotate /etc/logrotate.d/$app
 
-# Installation de lufi via carton
+# Install lufi via carton
 sudo mkdir -p /var/log/$app/
 cd $final_path
 sudo carton install 2>&1 | sudo tee -a "/var/log/$app/setup_carton.log"
-# sudo carton exec hypnotoad script/lufi
 
 # Configure le path du dossier perl en fonction de l'architecture système
 arch_dir=$(ls -1 $final_path/local/lib/perl5/ | grep linux-gnu)
@@ -117,9 +116,9 @@ sudo sed -i "s@__PORT__@$port@g" /etc/nginx/conf.d/$domain.d/$app.conf
 # Make app public or private
 ynh_app_setting_set $app skipped_uris "/"
 if [ "$is_public" = "No" ];
-then	# Si l'app est privée, seul le visionnage des images reste public
+then
 	if [ "$path" == "/" ]; then
-	    path=""	# Si path correspond à la racine, supprime le / pour éviter une erreur de la regex.
+	    path=""
 	fi
 	ynh_app_setting_set $app protected_regex "$domain_regex$path/stats$","$domain_regex$path/manifest.webapp$","$domain_regex$path/$","$domain_regex$path/d/.*$","$domain_regex$path/m/.*$"
 fi
@@ -129,7 +128,7 @@ sudo touch /var/log/$app/production.log
 sudo chown www-data: /var/log/$app/production.log
 sudo ln -s /var/log/$app/production.log "$final_path/log/production.log"
 
-# Configure les droits d'accès au fichiers
+# Configure owner
 sudo chown -R www-data: $final_path
 
 # Start lufi
@@ -145,10 +144,10 @@ sudo yunohost service add lufi -l $final_path/log/production.log
 
 if [ "$is_public" = "No" ];
 then
-	# Retire l'accès public
+	# Delete public access
 	ynh_app_setting_delete $app unprotected_uris
 	sudo yunohost app ssowatconf
 fi
 
-# Recharge la configuration Nginx
+# Reload Nginx
 sudo service nginx reload

@@ -3,15 +3,15 @@
 # Exit on command errors and treat unset variables as an error
 set -u
 
-source .fonctions	# Charge les fonctions génériques habituellement utilisées dans le script
+source .fonctions	# Loads the generic functions usually used in the script
 source /usr/share/yunohost/helpers # Source app helpers
 
-# Récupère les infos de l'application.
+# Get multi-instances specific variables
 app=$YNH_APP_INSTANCE_NAME
 
 domain=$(ynh_app_setting_get $app domain)
 
-# Arrêt du service
+# Stop lufi service
 if [ -e "/etc/systemd/system/lufi.service" ]; then
 	echo "Delete systemd script"
 	sudo service lufi stop
@@ -19,31 +19,31 @@ if [ -e "/etc/systemd/system/lufi.service" ]; then
 	sudo systemctl disable lufi.service
 fi
 
-# Retire le service du monitoring de Yunohost.
+# Remove monitoring service Yunohost.
 if sudo yunohost service status | grep -q lufi	# Test l'existence du service dans Yunohost
 then
 	echo "Remove lufi service"
 	sudo yunohost service remove lufi
 fi
 
-SECURE_REMOVE '/var/www/$app'	# Suppression du dossier de l'application
+SECURE_REMOVE '/var/www/$app'	# Delete directory application
 
-REMOVE_NGINX_CONF	# Suppression de la configuration nginx
+REMOVE_NGINX_CONF	# Delete nginx configuration
 
-# Retirer le cron
+# Delete cron
 if [ -e "/etc/cron.d/$app" ]; then
 	echo "Delete cron"
 	sudo rm "/etc/cron.d/$app"
 fi
 
-SECURE_REMOVE '/var/log/$app/'	# Suppression des log
+SECURE_REMOVE '/var/log/$app/'	# Delete log
 
-REMOVE_LOGROTATE_CONF	# Suppression de la configuration de logrotate
+REMOVE_LOGROTATE_CONF	# Delete logrotate configuration
 
 ynh_package_remove carton || echo "Carton already uninstalled"
 ynh_package_remove perlmagick || echo "perlmagick already uninstalled"
 
-# Régénère la configuration de SSOwat
+# Reload SSOwat configuration
 sudo yunohost app ssowatconf
 
 echo -e "\e[0m"	# Restore normal color

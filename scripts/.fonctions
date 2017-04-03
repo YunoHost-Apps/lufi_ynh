@@ -39,25 +39,25 @@ TRAP_OFF () {	# Ignoring signal capture until TRAP_ON
 	trap '' ERR	# Ignoring exit signals
 }
 
-CHECK_USER () {	# Vérifie la validité de l'user admin
-# $1 = Variable de l'user admin.
+CHECK_USER () {	# Check the validity of the user admin
+	# $1 = User admin variable
 	ynh_user_exists "$1" || (echo "Wrong admin" >&2 && false)
 }
 
-CHECK_PATH () {	# Vérifie la présence du / en début de path. Et son absence à la fin.
-	if [ "${path:0:1}" != "/" ]; then    # Si le premier caractère n'est pas un /
-		path="/$path"    # Ajoute un / en début de path
+CHECK_PATH () {	# Checks / at the beginning of the path. And his absence at the end.
+	if [ "${path:0:1}" != "/" ]; then    # If the first character is not /
+		path="/$path"    # Add / at the beginning of path
 	fi
-	if [ "${path:${#path}-1}" == "/" ] && [ ${#path} -gt 1 ]; then    # Si le dernier caractère est un / et que ce n'est pas le seul caractère.
-		path="${path:0:${#path}-1}"	# Supprime le dernier caractère
+	if [ "${path:${#path}-1}" == "/" ] && [ ${#path} -gt 1 ]; then    # If the last character is a / and it is not the only character.
+		path="${path:0:${#path}-1}"	# Delete last character
 	fi
 }
 
-CHECK_DOMAINPATH () {	# Vérifie la disponibilité du path et du domaine.
+CHECK_DOMAINPATH () {	# Checks the availability of the path and domain.
 	sudo yunohost app checkurl $domain$path -a $app
 }
 
-CHECK_FINALPATH () {	# Vérifie que le dossier de destination n'est pas déjà utilisé.
+CHECK_FINALPATH () {	# Checks that the destination folder is not already in use.
 	final_path=/var/www/$app
 	if [ -e "$final_path" ]
 	then
@@ -66,34 +66,22 @@ CHECK_FINALPATH () {	# Vérifie que le dossier de destination n'est pas déjà u
 	fi
 }
 
-GENERATE_DB () {	# Créer une base de données et un utilisateur dédié au nom de l'app.
-# $1 = Nom de la base de donnée
-	db_user=$1
-	db_user=${db_user//-/_}	# mariadb ne supporte pas les - dans les noms de base de données. Ils sont donc remplacé par des _
-	# Génère un mot de passe aléatoire.
-# 	db_pwd=$(head -n20 /dev/urandom | tr -c -d 'A-Za-z0-9' | head -c20)
-	db_pwd=$(ynh_string_random)
-	CHECK_VAR "$db_pwd" "db_pwd empty"
-	# Utilise '$app' comme nom d'utilisateur et de base de donnée
-	# Initialise la base de donnée et stocke le mot de passe mysql.
-	ynh_mysql_create_db "$db_user" "$db_user" $db_pwd
-	ynh_app_setting_set $app mysqlpwd $db_pwd
-}
-
-SETUP_SOURCE () {	# Télécharge la source, décompresse et copie dans $final_path
+SETUP_SOURCE () {	# Download source, decompress and copu into $final_path
 	src=$(cat ../sources/source_md5 | awk -F' ' {'print $2'})
 	sudo wget -nv -i ../sources/source_url -O $src
-	# Décompresse la source
-	if [ "$(echo ${src##*.})" == "gz" ]; then
+	# Checks the checksum of the downloaded source.
+	# md5sum -c ../sources/source_md5 --status || ynh_die "Corrupt source"
+	# Decompress source
+	if [ "$(echo ${src##*.})" == "tgz" ]; then
 		tar -x -f $src
 	elif [ "$(echo ${src##*.})" == "zip" ]; then
 		unzip -q $src
 	else
-		false	# Format d'archive non pris en charge.
+		false	# Unsupported archive format.
 	fi
-	# Copie les fichiers sources
+	# Copy file source
 	sudo cp -a $(cat ../sources/source_dir)/. "$final_path"
-	# Copie les fichiers additionnels ou modifiés.
+	# Copy additional file and modified
 	if test -e "../sources/ajouts"; then
 		sudo cp -a ../sources/ajouts/. "$final_path"
 	fi
@@ -106,35 +94,22 @@ ADD_SYS_USER () {   # Créer un utilisateur système dédié à l'app
         fi
 }
 
-POOL_FPM () {	# Créer le fichier de configuration du pool php-fpm et le configure.
-	sed -i "s@__NAMETOCHANGE__@$app@g" ../conf/php-fpm.conf
-	sed -i "s@__FINALPATH__@$final_path@g" ../conf/php-fpm.conf
-	sed -i "s@__USER__@$app@g" ../conf/php-fpm.conf
-	finalphpconf=/etc/php5/fpm/pool.d/$app.conf
-	sudo cp ../conf/php-fpm.conf $finalphpconf
-	sudo chown root: $finalphpconf
-	finalphpini=/etc/php5/fpm/conf.d/20-$app.ini
-	sudo cp ../conf/php-fpm.ini $finalphpini
-	sudo chown root: $finalphpini
-	sudo service php5-fpm reload
-}
-
-STORE_MD5_CONFIG () {	# Enregistre la somme de contrôle du fichier de config
-# $1 = Nom du fichier de conf pour le stockage dans settings.yml
-# $2 = Nom complet et chemin du fichier de conf.
+STORE_MD5_CONFIG () {	# Saves the checksum of the config file
+	# $1 = Name of the conf file for storage in settings.yml
+	# $2 = Full name and path of the conf file.
 	ynh_app_setting_set $app $1_file_md5 $(sudo md5sum "$2" | cut -d' ' -f1)
 }
 
-CHECK_MD5_CONFIG () {	# Créé un backup du fichier de config si il a été modifié.
-# $1 = Nom du fichier de conf pour le stockage dans settings.yml
-# $2 = Nom complet et chemin du fichier de conf.
+CHECK_MD5_CONFIG () {	# Created a backup of the config file if it was changed.
+	# $1 = Name of the conf file for storage in settings.yml
+	# $2 = Full name and path of the conf file.onf.
 	if [ "$(ynh_app_setting_get $app $1_file_md5)" != $(sudo md5sum "$2" | cut -d' ' -f1) ]; then
 		sudo cp -a "$2" "$2.backup.$(date '+%d.%m.%y_%Hh%M,%Ss')"	# Si le fichier de config a été modifié, créer un backup.
 	fi
 }
 
-FIND_PORT () {	# Cherche un port libre.
-# $1 = Numéro de port pour débuter la recherche.
+FIND_PORT () {	# Search free port
+	# $1 = Port number to start the search.
 	port=$1
 	while ! sudo yunohost app checkport $port ; do
 		port=$((port+1))
@@ -145,7 +120,7 @@ FIND_PORT () {	# Cherche un port libre.
 
 ### REMOVE SCRIPT
 
-REMOVE_NGINX_CONF () {	# Suppression de la configuration nginx
+REMOVE_NGINX_CONF () {	# Delete nginx configuration
 	if [ -e "/etc/nginx/conf.d/$domain.d/$app.conf" ]; then	# Delete nginx config
 		echo "Delete nginx config"
 		sudo rm "/etc/nginx/conf.d/$domain.d/$app.conf"
@@ -153,39 +128,27 @@ REMOVE_NGINX_CONF () {	# Suppression de la configuration nginx
 	fi
 }
 
-REMOVE_FPM_CONF () {	# Suppression de la configuration du pool php-fpm
-	if [ -e "/etc/php5/fpm/pool.d/$app.conf" ]; then	# Delete fpm config
-		echo "Delete fpm config"
-		sudo rm "/etc/php5/fpm/pool.d/$app.conf"
-	fi
-	if [ -e "/etc/php5/fpm/conf.d/20-$app.ini" ]; then	# Delete php config
-		echo "Delete php config"
-		sudo rm "/etc/php5/fpm/conf.d/20-$app.ini"
-	fi
-	sudo service php5-fpm reload
-}
-
-REMOVE_LOGROTATE_CONF () {	# Suppression de la configuration de logrotate
+REMOVE_LOGROTATE_CONF () {	# Delete logrotate configuration
 	if [ -e "/etc/logrotate.d/$app" ]; then
 		echo "Delete logrotate config"
 		sudo rm "/etc/logrotate.d/$app"
 	fi
 }
 
-SECURE_REMOVE () {      # Suppression de dossier avec vérification des variables
-	chaine="$1"	# L'argument doit être donné entre quotes simple '', pour éviter d'interpréter les variables.
+SECURE_REMOVE () {      # Deleting a folder with variable verification
+	chaine="$1"	# The argument must be given between simple quotes '', to avoid interpreting the variables.
 	no_var=0
-	while (echo "$chaine" | grep -q '\$')	# Boucle tant qu'il y a des $ dans la chaine
+	while (echo "$chaine" | grep -q '\$')	# Loop as long as there are $ in the string
 	do
 		no_var=1
-		global_var=$(echo "$chaine" | cut -d '$' -f 2)	# Isole la première variable trouvée.
-		only_var=\$$(expr "$global_var" : '\([A-Za-z0-9_]*\)')	# Isole complètement la variable en ajoutant le $ au début et en gardant uniquement le nom de la variable. Se débarrasse surtout du / et d'un éventuel chemin derrière.
-		real_var=$(eval "echo ${only_var}")		# `eval "echo ${var}` permet d'interpréter une variable contenue dans une variable.
+		global_var=$(echo "$chaine" | cut -d '$' -f 2)	# Isole the first variable found.
+		only_var=\$$(expr "$global_var" : '\([A-Za-z0-9_]*\)')	# Isole completely the variable by adding the $ at the beginning and keeping only the name of the variable. Mostly gets rid of / and a possible path behind.
+		real_var=$(eval "echo ${only_var}")		# `eval "echo ${var}` Allows to interpret a variable contained in a variable.
 		if test -z "$real_var" || [ "$real_var" = "/" ]; then
 			echo "Variable $only_var is empty, suppression of $chaine cancelled." >&2
 			return 1
 		fi
-		chaine=$(echo "$chaine" | sed "s@$only_var@$real_var@")	# remplace la variable par sa valeur dans la chaine.
+		chaine=$(echo "$chaine" | sed "s@$only_var@$real_var@")	# Replaces variable with its value in the string.
 	done
 	if [ "$no_var" -eq 1 ]
 	then
@@ -200,19 +163,8 @@ SECURE_REMOVE () {      # Suppression de dossier avec vérification des variable
 	fi
 }
 
-REMOVE_BDD () {	# Suppression de la base de donnée et de l'utilisateur associé.
-# $1 = Nom de la base de donnée
-	# Utilise '$app' comme nom d'utilisateur et de base de donnée
-	db_user=$1
-	if mysqlshow -u root -p$(sudo cat $MYSQL_ROOT_PWD_FILE) | grep -q "^| $db_user"; then
-		echo "Delete db"
-		ynh_mysql_drop_db $db_user
-		ynh_mysql_drop_user $db_user
-	fi
-}
-
-REMOVE_SYS_USER () {   # Supprime l'utilisateur système dédié à l'app
-    if ynh_system_user_exists "$app"	# Test l'existence de l'utilisateur
+REMOVE_SYS_USER () {   # Delete user 
+    if ynh_system_user_exists "$app"	# Test user exist
     then
     	sudo userdel $app
     fi
