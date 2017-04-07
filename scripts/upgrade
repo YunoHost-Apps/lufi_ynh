@@ -80,13 +80,13 @@ fi
 #=================================================
 
 ## Copie et configuration du fichier de conf.
-CHECK_MD5_CONFIG "lutim.conf" "$final_path/lutim.conf"	# Créé un backup du fichier de config si il a été modifié.
-sudo cp ../conf/lutim.conf.template "$final_path/lutim.conf"
+CHECK_MD5_CONFIG "lufi.conf" "$final_path/lutim.conf"	# Créé un backup du fichier de config si il a été modifié.
+sudo cp ../conf/lufi.conf.template "$final_path/lutim.conf"
 sudo sed -i "s@__DOMAIN__@$domain@g" "$final_path/lutim.conf"
 sudo sed -i "s@__PATH__@$path_url@g" "$final_path/lutim.conf"
 sudo sed -i "s@__PORT__@$port@g" "$final_path/lutim.conf"
 sudo sed -i "s@__SECRET__@$secret@g" "${final_path}/lufi.conf"
-STORE_MD5_CONFIG "lutim.conf" "$final_path/lutim.conf"	# Réenregistre la somme de contrôle du fichier de config
+STORE_MD5_CONFIG "lufi.conf" "$final_path/lufi.conf"	# Réenregistre la somme de contrôle du fichier de config
 
 #=================================================
 # SETUP SYSTEMD
@@ -94,7 +94,7 @@ STORE_MD5_CONFIG "lutim.conf" "$final_path/lutim.conf"	# Réenregistre la somme 
 
 # Mise en place du script systemd
 sudo systemctl stop $app
-sudo cp ../conf/lutim.service /etc/systemd/system/$app.service
+sudo cp ../conf/lufi.service /etc/systemd/system/$app.service
 sudo chown root: /etc/systemd/system/$app.service
 sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/systemd/system/$app.service
 sudo sed -i "s@__APP__@$app@g" /etc/systemd/system/$app.service
@@ -105,7 +105,7 @@ sudo systemctl enable $app
 # SETUP CRON
 #=================================================
 
-sudo cp ../conf/cron_lutim /etc/cron.d/$app
+sudo cp ../conf/cron_lufi /etc/cron.d/$app
 sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/cron.d/$app
 
 #=================================================
