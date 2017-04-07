@@ -76,15 +76,15 @@ fi
 #=================================================
 # SPECIFIC UPGRADE
 #=================================================
-# SETUP LUTIM
+# SETUP LUFI
 #=================================================
 
 ## Copie et configuration du fichier de conf.
-CHECK_MD5_CONFIG "lufi.conf" "$final_path/lutim.conf"	# Créé un backup du fichier de config si il a été modifié.
-sudo cp ../conf/lufi.conf.template "$final_path/lutim.conf"
-sudo sed -i "s@__DOMAIN__@$domain@g" "$final_path/lutim.conf"
-sudo sed -i "s@__PATH__@$path_url@g" "$final_path/lutim.conf"
-sudo sed -i "s@__PORT__@$port@g" "$final_path/lutim.conf"
+CHECK_MD5_CONFIG "lufi.conf" "$final_path/lufi.conf"	# Créé un backup du fichier de config si il a été modifié.
+sudo cp ../conf/lufi.conf.template "$final_path/lufi.conf"
+sudo sed -i "s@__DOMAIN__@$domain@g" "$final_path/lufi.conf"
+sudo sed -i "s@__PATH__@$path_url@g" "$final_path/lufi.conf"
+sudo sed -i "s@__PORT__@$port@g" "$final_path/lufi.conf"
 sudo sed -i "s@__SECRET__@$secret@g" "${final_path}/lufi.conf"
 STORE_MD5_CONFIG "lufi.conf" "$final_path/lufi.conf"	# Réenregistre la somme de contrôle du fichier de config
 
@@ -109,7 +109,7 @@ sudo cp ../conf/cron_lufi /etc/cron.d/$app
 sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/cron.d/$app
 
 #=================================================
-# UPDATE LUTIM WITH CARTON
+# UPDATE LUFI WITH CARTON
 #=================================================
 
 pushd $final_path	# cd avec une stack pour revenir en arrière
@@ -123,7 +123,7 @@ popd	# Revient au dossier courant avant pushd
 sudo chown -R $app: $final_path
 
 #=================================================
-# RESTART LUTIM
+# RESTART LUFI
 #=================================================
 
 sudo systemctl restart lufi
