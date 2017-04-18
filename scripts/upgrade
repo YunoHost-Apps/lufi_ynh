@@ -1,43 +1,146 @@
 #!/bin/bash
 
-# Exit on command errors and treat unset variables as an error
 set -eu
 
-source .fonctions	# Loads the generic functions usually used in the script
-source /usr/share/yunohost/helpers # Source YunoHost helpers
+#=================================================
+# GENERIC STARTING
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
 
-# See comments in install script
+source .fonctions
+source /usr/share/yunohost/helpers
+
+#=================================================
+# LOAD SETTINGS
+#=================================================
+
 app=$YNH_APP_INSTANCE_NAME
 
-# Retrieve app settings
 domain=$(ynh_app_setting_get $app domain)
 path=$(ynh_app_setting_get $app path)
 is_public=$(ynh_app_setting_get $app is_public)
+port=$(ynh_app_setting_get $app port)
+final_path=$(ynh_app_setting_get $app final_path)
+secret=$(ynh_app_setting_get $app secret)
+
+#=================================================
+# FIX OLD THINGS
+#=================================================
+
+if [ "$is_public" = "Yes" ]; then
+	ynh_app_setting_set $app is_public 1	# Fixe is_public en booléen
+	is_public=1
+elif [ "$is_public" = "No" ]; then
+	ynh_app_setting_set $app is_public 0
+	is_public=0
+fi
+
+if [ "${#final_path}" -eq 0 ]
+then	# Si final_path n'est pas renseigné dans la config yunohost, cas d'ancien script, code final_path en dur
+	final_path=/var/www/$app
+fi
+
+#=================================================
+# BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
+#=================================================
+
+BACKUP_BEFORE_UPGRADE	# Backup the current version of the app
+ynh_clean_setup () {
+	BACKUP_FAIL_UPGRADE	# restore it if the upgrade fails
+}
+ynh_abort_if_errors	# Active trap pour arrêter le script si une erreur est détectée.
+
 
 CHECK_PATH	# Checks and corrects the syntax of the path.
-
-final_path=/var/www/$app
 
 # Get source
 SETUP_SOURCE
 
+#=================================================
+# NGINX CONFIGURATION
+#=================================================
+
+# Et copie le fichier de config nginx
+sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
 # Modify Nginx configuration file and copy it to Nginx conf directory
-sudo sed -i "s@__PATHTOCHANGE__@$path@g" /etc/nginx/conf.d/$domain.d/$app.conf
-sudo sed -i "s@__FINALPATH__@$final_path@g" /etc/nginx/conf.d/$domain.d/$app.conf
-sudo sed -i "s@__NAMETOCHANGE__@$app@g" /etc/nginx/conf.d/$domain.d/$app.conf
+sudo sed -i "s@__PATH__@$path@g" /etc/nginx/conf.d/$domain.d/$app.conf
+sudo sed -i "s@__PORT__@$port@g" /etc/nginx/conf.d/$domain.d/$app.conf
+
 
 if [ "$is_public" = "Yes" ];
 then
 	sudo sed -i "s@#--PRIVATE--@@g" /etc/nginx/conf.d/$domain.d/$app.conf
 fi
 
-# Setup SSOwat
-ynh_app_setting_set "$app" is_public "$is_public"
-if [ "$is_public" = "Yes" ];
-then
-  ynh_app_setting_set "$app" unprotected_uris "/"
+#=================================================
+# SPECIFIC UPGRADE
+#=================================================
+# SETUP LUFI
+#=================================================
+
+## Copie et configuration du fichier de conf.
+CHECK_MD5_CONFIG "lufi.conf" "$final_path/lufi.conf"	# Créé un backup du fichier de config si il a été modifié.
+sudo cp ../conf/lufi.conf.template "$final_path/lufi.conf"
+sudo sed -i "s@__DOMAIN__@$domain@g" "$final_path/lufi.conf"
+sudo sed -i "s@__PATH__@$path_url@g" "$final_path/lufi.conf"
+sudo sed -i "s@__PORT__@$port@g" "$final_path/lufi.conf"
+sudo sed -i "s@__SECRET__@$secret@g" "${final_path}/lufi.conf"
+STORE_MD5_CONFIG "lufi.conf" "$final_path/lufi.conf"	# Réenregistre la somme de contrôle du fichier de config
+
+#=================================================
+# SETUP SYSTEMD
+#=================================================
+
+# Mise en place du script systemd
+sudo systemctl stop $app
+sudo cp ../conf/lufi.service /etc/systemd/system/$app.service
+sudo chown root: /etc/systemd/system/$app.service
+sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/systemd/system/$app.service
+sudo sed -i "s@__APP__@$app@g" /etc/systemd/system/$app.service
+## Démarrage auto du service
+sudo systemctl enable $app
+
+#=================================================
+# SETUP CRON
+#=================================================
+
+sudo cp ../conf/cron_lufi /etc/cron.d/$app
+sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/cron.d/$app
+
+#=================================================
+# UPDATE LUFI WITH CARTON
+#=================================================
+
+pushd $final_path	# cd avec une stack pour revenir en arrière
+sudo carton install 2>&1 | sudo tee -a "/var/log/$app/setup_carton.log"
+popd	# Revient au dossier courant avant pushd
+
+#=================================================
+# SECURING FILES AND DIRECTORIES
+#=================================================
+
+sudo chown -R $app: $final_path
+
+#=================================================
+# RESTART LUFI
+#=================================================
+
+sudo systemctl restart lufi
+
+#=================================================
+# SETUP SSOWAT
+#=================================================
+
+ynh_app_setting_set $app skipped_uris "/"
+if [ $is_public -eq 0 ]
+then	
+	ynh_app_setting_set "$app" unprotected_uris "/"
 fi
 
-# Reload Nginx
+#=================================================
+# RELOAD NGINX
+#=================================================
+
 sudo systemctl reload nginx
 sudo yunohost app ssowatconf
