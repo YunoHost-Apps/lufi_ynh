@@ -93,7 +93,7 @@ sed -i "s@__FINALPATH__@$final_path@g" ../conf/logrotate
 sudo cp ../conf/logrotate /etc/logrotate.d/$app
 
 # Install Carton
-sudo cpan Carton
+echo yes | sudo cpan Carton
 
 # Install lufi via carton
 sudo mkdir -p /var/log/$app/
