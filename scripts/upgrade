@@ -41,17 +41,6 @@ then	# Si final_path n'est pas renseigné dans la config yunohost, cas d'ancien 
 	final_path=/var/www/$app
 fi
 
-#=================================================
-# BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
-#=================================================
-
-BACKUP_BEFORE_UPGRADE	# Backup the current version of the app
-ynh_clean_setup () {
-	BACKUP_FAIL_UPGRADE	# restore it if the upgrade fails
-}
-ynh_abort_if_errors	# Active trap pour arrêter le script si une erreur est détectée.
-
-
 CHECK_PATH	# Checks and corrects the syntax of the path.
 
 # Get source
@@ -120,13 +109,13 @@ popd	# Revient au dossier courant avant pushd
 # SECURING FILES AND DIRECTORIES
 #=================================================
 
-sudo chown -R root: $final_path
+sudo chown -R www-data: $final_path
 
 #=================================================
 # RESTART LUFI
 #=================================================
 
-sudo systemctl restart lufi
+sudo systemctl restart lufi.service
 
 #=================================================
 # SETUP SSOWAT
