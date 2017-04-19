@@ -120,7 +120,7 @@ popd	# Revient au dossier courant avant pushd
 # SECURING FILES AND DIRECTORIES
 #=================================================
 
-sudo chown -R $app: $final_path
+sudo chown -R root: $final_path
 
 #=================================================
 # RESTART LUFI
