@@ -83,7 +83,7 @@ fi
 CHECK_MD5_CONFIG "lufi.conf" "$final_path/lufi.conf"	# Créé un backup du fichier de config si il a été modifié.
 sudo cp ../conf/lufi.conf.template "$final_path/lufi.conf"
 sudo sed -i "s@__DOMAIN__@$domain@g" "$final_path/lufi.conf"
-sudo sed -i "s@__PATH__@$path_url@g" "$final_path/lufi.conf"
+sudo sed -i "s@__PATH__@$path@g" "$final_path/lufi.conf"
 sudo sed -i "s@__PORT__@$port@g" "$final_path/lufi.conf"
 sudo sed -i "s@__SECRET__@$secret@g" "${final_path}/lufi.conf"
 STORE_MD5_CONFIG "lufi.conf" "$final_path/lufi.conf"	# Réenregistre la somme de contrôle du fichier de config
@@ -113,7 +113,7 @@ sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/cron.d/$app
 #=================================================
 
 pushd $final_path	# cd avec une stack pour revenir en arrière
-sudo carton install 2>&1 | sudo tee -a "/var/log/$app/setup_carton.log"
+echo yes | sudo carton install 2>&1 | sudo tee -a "/var/log/$app/setup_carton.log"
 popd	# Revient au dossier courant avant pushd
 
 #=================================================
