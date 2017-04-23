@@ -1,7 +1,7 @@
 # Lufi for YunoHost
 
 [![Latest Version](https://img.shields.io/badge/version-_--_-green.svg?style=flat)](https://github.com/YunoHost-Apps/lufi_ynh/releases)
-[![Status](https://img.shields.io/badge/status-testing-yellow.svg?style=flat)](https://github.com/YunoHost-Apps/lufi_ynh/milestones)
+[![Status](https://img.shields.io/badge/status-working-yellow.svg?style=flat)](https://github.com/YunoHost-Apps/lufi_ynh/milestones)
 [![Dependencies](https://img.shields.io/badge/dependencies-includes-lightgrey.svg?style=flat)](https://github.com/YunoHost-Apps/lufi_ynh#dependencies)
 [![GitHub license](https://img.shields.io/badge/license-GPLv3-blue.svg?style=flat)](https://raw.githubusercontent.com/YunoHost-Apps/lufi_ynh/master/LICENSE)
 [![Yunohost version](https://img.shields.io/badge/yunohost-2.4.2_tested-orange.svg?style=flat)](https://github.com/YunoHost/yunohost)
@@ -9,7 +9,7 @@
 
 ## Lufi c'est quoi ?
 
-Il stocke et vous permet de les télécharger.
+Il stocke vos fichiers et vous permet de les télécharger.
 
 Est-ce tout? Non. Tous les fichiers sont cryptés par le navigateur! Non chiffré. Ça ne marche pas. L'administrateur de l'instance Lufi ne pourra pas voir quel est votre administrateur réseau ou votre FAI.
 
