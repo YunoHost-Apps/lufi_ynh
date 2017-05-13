@@ -38,7 +38,7 @@ CHECK_FINALPATH	# Check final path
 domain_regex=$(echo "$domain" | sed 's@-@.@g')
 CHECK_VAR "$domain_regex" "domain_regex empty"
 
-FIND_PORT 8095	# Check port availability
+port=$(ynh_find_port 8096)	# Check port availability
 
 # Save app settings
 ynh_app_setting_set $app admin $admin

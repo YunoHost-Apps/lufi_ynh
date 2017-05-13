@@ -108,25 +108,6 @@ CHECK_MD5_CONFIG () {	# Created a backup of the config file if it was changed.
 	fi
 }
 
-FIND_PORT () {	# Search free port
-	if [ YNH_VERSION = "2.5" ]; then
-		# $1 = Port number to start the search.
-		port=$1
-		while ! sudo yunohost app checkport $port ; do
-			port=$((port+1))
-		done
-		CHECK_VAR "$port" "port empty"
-	else
-		# $1 = Port number to start the search.
-		port=$1
-		if [ "$(sudo yunohost tools port-available $port)" = "True" ]; then
-			port=$((port+1))
-		fi
-		CHECK_VAR "$port" "port empty"
-	fi
-}
-
-
 ### REMOVE SCRIPT
 
 REMOVE_NGINX_CONF () {	# Delete nginx configuration
@@ -177,6 +158,22 @@ REMOVE_SYS_USER () {   # Delete user
     then
     	sudo userdel $app
     fi
+}
+
+# Find a free port and return it
+#
+# example: port=$(ynh_find_port 8080)
+#
+# usage: ynh_find_port begin_port
+# | arg: begin_port - port to start to search
+ynh_find_port () {
+	port=$1
+	test -n "$port" || ynh_die "The argument of ynh_find_port must be a valid port."
+	while netcat -z 127.0.0.1 $port       # Check if the port is free
+	do
+		port=$((port+1))	# Else, pass to next port
+	done
+	echo $port
 }
 
 #=================================================
