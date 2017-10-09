@@ -6,8 +6,8 @@
 		"yunohost": ">= 2.4"
 	},
 	"description": {
-		"en": "Self hosting images and sharing anonymous application",
-		"fr": "Application d'hébergement et de partage d'images anonyme"
+		"en": "Self hosting files and sharing anonymous application",
+		"fr": "Application d'hébergement et de partage de fichiers anonyme"
 	},
 	"version": "0.6 dev",
 	"url": "https://git.framasoft.org/luc/lufi",
@@ -53,8 +53,8 @@
 			{
 				"name": "is_public",
 				"ask": {
-					"en": "Uploading images is it public?",
-					"fr": "L'upload des images est-il public ?"
+					"en": "Uploading files is it public?",
+					"fr": "L'upload de fichiers est-il public ?"
 				},
 				"choices": ["Yes", "No"],
 				"default": "No"
