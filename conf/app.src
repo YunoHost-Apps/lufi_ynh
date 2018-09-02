@@ -1,0 +1,6 @@
+SOURCE_URL=https://framagit.org/luc/lufi/-/archive/7efebff4bfa3722796a80a783fb332d6e50d41de/lufi-7efebff4bfa3722796a80a783fb332d6e50d41de.tar.gz
+SOURCE_SUM=cf69c08ae7aa2e696b5c275fc7d3bedf74946361e0114f819266c43ce33fac72
+SOURCE_SUM_PRG=sha256sum
+SOURCE_FORMAT=zip
+SOURCE_IN_SUBDIR=true
+SOURCE_FILENAME=
