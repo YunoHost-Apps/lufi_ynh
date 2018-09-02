@@ -50,15 +50,15 @@
 				},
 				"example": "john"
 			},
-			{
-				"name": "is_public",
-				"ask": {
-					"en": "Uploading files is it public?",
-					"fr": "L'upload de fichiers est-il public ?"
-				},
-				"choices": ["Yes", "No"],
-				"default": "No"
-			}
+        		{
+                		"name": "is_public",
+                		"type": "boolean",
+                		"ask": {
+                    			"en": "Is it a public application?",
+                    			"fr": "Est-ce une application publique ?"
+                		},
+                		"default": true
+            		}
 		]
 	}
 }
