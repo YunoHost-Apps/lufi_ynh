@@ -1,53 +1,95 @@
-#!/bin/bash
+#=================================================
+# GENERIC START
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
 
-# Exit on command errors and treat unset variables as an error
-set -u
+source _common.sh
+source /usr/share/yunohost/helpers
 
-if [ ! -e .fonctions ]; then
-	# Get file fonction if not been to the current directory
-	sudo cp ../settings/scripts/.fonctions ./.fonctions
-	sudo chmod a+rx .fonctions
-fi
-source .fonctions	# Loads the generic functions usually used in the script
-source /usr/share/yunohost/helpers # Source app helpers
+#=================================================
+# LOAD SETTINGS
+#=================================================
 
-# Get multi-instances specific variables
 app=$YNH_APP_INSTANCE_NAME
 
 domain=$(ynh_app_setting_get $app domain)
 
-# Stop lufi service
-if [ -e "/etc/systemd/system/lufi.service" ]; then
-	echo "Delete systemd script"
-	sudo service lufi stop
-	sudo rm "/etc/systemd/system/lufi.service"
-	sudo systemctl disable lufi.service
-fi
+#=================================================
+# STANDARD REMOVE
+#=================================================
+# STOP AND REMOVE SERVICE
+#=================================================
 
-# Remove monitoring service Yunohost.
-if sudo yunohost service status | grep -q lufi	# Test l'existence du service dans Yunohost
+# Remove the dedicated systemd config
+ynh_remove_systemd_config
+
+#=================================================
+# REMOVE SERVICE FROM ADMIN PANEL
+#=================================================
+
+# Remove a service from the admin panel, added by `yunohost service add`
+if yunohost service status | grep -q $app
 then
-	echo "Remove lufi service"
-	sudo yunohost service remove lufi
+	echo "Remove $app service"
+	yunohost service remove $app
 fi
 
-SECURE_REMOVE '/var/www/$app'	# Delete directory application
+#=================================================
+# REMOVE DEPENDENCIES
+#=================================================
 
-REMOVE_NGINX_CONF	# Delete nginx configuration
+# Remove metapackage and its dependencies
+ynh_remove_app_dependencies
 
-# Delete cron
-if [ -e "/etc/cron.d/$app" ]; then
-	echo "Delete cron"
-	sudo rm "/etc/cron.d/$app"
+#=================================================
+# REMOVE APP MAIN DIR
+#=================================================
+
+# Remove the app directory securely
+ynh_secure_remove "$final_path"
+
+#=================================================
+# REMOVE NGINX CONFIGURATION
+#=================================================
+
+# Remove the dedicated nginx config
+ynh_remove_nginx_config
+
+#=================================================
+# REMOVE LOGROTATE CONFIGURATION
+#=================================================
+
+# Remove the app-specific logrotate config
+ynh_remove_logrotate
+
+#=================================================
+# CLOSE A PORT
+#=================================================
+
+if yunohost firewall list | grep -q "\- $port$"
+then
+	echo "Close port $port" >&2
+	yunohost firewall disallow TCP $port 2>&1
 fi
 
-SECURE_REMOVE '/var/log/$app/'	# Delete log
+#=================================================
+# SPECIFIC REMOVE
+#=================================================
+# REMOVE THE CRON FILE
+#=================================================
 
-REMOVE_LOGROTATE_CONF	# Delete logrotate configuration
+# Remove a cron file
+ynh_secure_remove "/etc/cron.d/$app"
 
-ynh_package_remove build-essential || echo "build-essential already uninstalled"
+# Remove the log files
+ynh_secure_remove "/var/log/$app/"
 
-# Reload SSOwat configuration
-sudo yunohost app ssowatconf
+#=================================================
+# GENERIC FINALIZATION
+#=================================================
+# REMOVE DEDICATED USER
+#=================================================
 
-echo -e "\e[0m"	# Restore normal color
+# Delete a system user
+ynh_system_user_delete $app
