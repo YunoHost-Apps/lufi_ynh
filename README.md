@@ -19,11 +19,11 @@ Source: [Documentation de Lufi](https://framagit.org/luc/lufi/wikis/home)
 
 ### Installation
 
-`$ sudo yunohost app install https://github.com/YunoHost-Apps/lufi_ynh.git`
+`$ sudo yunohost app install https://github.com/YunoHost-Apps/lufi_ynh --debug`
 
 ### Mise à jour
 
-`$ sudo yunohost app upgrade --verbose lufi -u https://github.com/YunoHost-Apps/lufi_ynh.git`
+`$ sudo yunohost app upgrade lufi -u https://github.com/YunoHost-Apps/lufi_ynh --debug`
 
 ## What is Lufi?
 
@@ -37,8 +37,8 @@ Source: [Lufi documentation](https://framagit.org/luc/lufi/wikis/home)
 
 ### Install
 
-`$ sudo yunohost app install https://github.com/YunoHost-Apps/lufi_ynh.git`
+`$ sudo yunohost app install https://github.com/YunoHost-Apps/lufi_ynh --debug`
 
 ### Update
 
-`$ sudo yunohost app upgrade --verbose lufi -u https://github.com/YunoHost-Apps/lufi_ynh.git`
+`$ sudo yunohost app upgrade lufi -u https://github.com/YunoHost-Apps/lufi_ynh --debug`
