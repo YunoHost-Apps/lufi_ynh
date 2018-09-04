@@ -195,7 +195,7 @@ then
 	ynh_app_setting_set $app unprotected_uris "/"
 else
 	if [ "$path_url" == "/" ]; then
-	    path=""
+	    path_url=""
 	fi
 	ynh_app_setting_set $app protected_regex "$domain_regex$path/stats$","$domain_regex$path/manifest.webapp$","$domain_regex$path/$","$domain_regex$path/d/.*$","$domain_regex$path/m/.*$"
 fi
