@@ -25,7 +25,7 @@ ynh_abort_if_errors
 #=================================================
 
 domain=$YNH_APP_ARG_DOMAIN
-path=$YNH_APP_ARG_PATH
+path_url=$YNH_APP_ARG_PATH
 admin=$YNH_APP_ARG_ADMIN
 is_public=$YNH_APP_ARG_IS_PUBLIC
 
@@ -111,7 +111,7 @@ ynh_system_user_create $app
 
 sudo cp ../conf/lufi.conf.template "${final_path}/lufi.conf"
 ynh_replace_string "__DOMAIN__" "$domain" "${final_path}/lufi.conf"
-ynh_replace_string "__PATH__" "$path" "${final_path}/lufi.conf"
+ynh_replace_string "__PATH__" "$path_url" "${final_path}/lufi.conf"
 ynh_replace_string "__PORT__" "$port" "${final_path}/lufi.conf"
 ynh_replace_string "__SECRET__" "$secret" "${final_path}/lufi.conf"
 
@@ -194,7 +194,7 @@ then
 	# unprotected_uris allows SSO credentials to be passed anyway.
 	ynh_app_setting_set $app unprotected_uris "/"
 else
-	if [ "$path" == "/" ]; then
+	if [ "$path_url" == "/" ]; then
 	    path=""
 	fi
 	ynh_app_setting_set $app protected_regex "$domain_regex$path/stats$","$domain_regex$path/manifest.webapp$","$domain_regex$path/$","$domain_regex$path/d/.*$","$domain_regex$path/m/.*$"
