@@ -3,13 +3,13 @@
 	"id": "lufi",
 	"packaging_format": 1,
 	"requirements": {
-		"yunohost": ">= 2.4"
+		"yunohost": ">= 3.2"
 	},
 	"description": {
 		"en": "Self hosting files and sharing anonymous application",
 		"fr": "Application d'hébergement et de partage de fichiers anonyme"
 	},
-	"version": "0.6 dev",
+	"version": "0.03.5",
 	"url": "https://git.framasoft.org/luc/lufi",
 	"license": "AGPL",
 	"maintainer": {
@@ -21,7 +21,7 @@
 		"nginx"
 	],
 	"arguments": {
-		"install" : [
+		"install": [
 			{
 				"name": "domain",
 				"type": "domain",
@@ -42,23 +42,24 @@
 				"default": "/lufi"
 			},
 			{
-				"name": "admin",
-				"type": "user",
+				"name": "max_file_size",
+				"type": "int",
 				"ask": {
-					"en": "Choose the Lufi administrator (must be an existing YunoHost user)",
-					"fr": "Choisissez un administrateur Lufi (doit être un utilisateur YunoHost)"
+					"en": "Choose a max file size, in Mo",
+					"fr": "Choisissez une taille de fichier maximum chemin, en Mo"
 				},
-				"example": "john"
+				"example": "100",
+				"default": 100
 			},
-        		{
-                		"name": "is_public",
-                		"type": "boolean",
-                		"ask": {
-                    			"en": "Is it a public application?",
-                    			"fr": "Est-ce une application publique ?"
-                		},
-                		"default": true
-            		}
+			{
+				"name": "is_public",
+				"type": "boolean",
+				"ask": {
+					"en": "Is it a public application?",
+					"fr": "Est-ce une application publique ?"
+				},
+				"default": true
+			}
 		]
 	}
 }
