@@ -11,12 +11,12 @@
 	},
 	"version": "0.03.5",
 	"url": "https://git.framasoft.org/luc/lufi",
-	"license": "AGPL",
+	"license": "AGPL-3.0-or-later",
 	"maintainer": {
 		"name": "frju365, cyp",
 		"email": "win10@tutanota.com, cyp@rouquin.me"
 	},
-	"multi_instance": false,
+	"multi_instance": true,
 	"services": [
 		"nginx"
 	],
@@ -43,13 +43,13 @@
 			},
 			{
 				"name": "max_file_size",
-				"type": "int",
+				"type": "string",
 				"ask": {
-					"en": "Choose a max file size, in Mo",
-					"fr": "Choisissez une taille de fichier maximum chemin, en Mo"
+					"en": "Choose a max file size, in Mo (0 = no limit)",
+					"fr": "Choisissez une taille de fichier maximum chemin, en Mo (0 = pas de limite)"
 				},
 				"example": "100",
-				"default": 100
+				"default": "100"
 			},
 			{
 				"name": "is_public",
