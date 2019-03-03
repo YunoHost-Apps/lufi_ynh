@@ -103,13 +103,13 @@ ynh_print_info "Restoring the systemd configuration..."
 ynh_restore_file "/etc/systemd/system/$app.service"
 systemctl enable $app.service
 ynh_systemd_action -n $app -a start -l "Creating process id file" -p "$final_path/log/production.log"
+ln -sf "$final_path/log/production.log" "/var/log/$app/production.log"
 
 #=================================================
 # ADVERTISE SERVICE IN ADMIN PANEL
 #=================================================
 
-yunohost service add $app --log "/var/log/$app.log" --log "/var/www/$app/log/production.log"
-ln -sf "$final_path/log/production.log" "/var/log/$app/production.log"
+yunohost service add $app --log "$final_path/log/production.log"
 
 #=================================================
 # RESTORE THE LOGROTATE CONFIGURATION
