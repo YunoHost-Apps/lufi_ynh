@@ -1,28 +1,31 @@
 #!/bin/bash
 
-set -eu
-
 #=================================================
-# GENERIC STARTING
+# GENERIC START
 #=================================================
 # IMPORT GENERIC HELPERS
 #=================================================
 
-source .fonctions
+source _common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
 # LOAD SETTINGS
 #=================================================
+ynh_print_info "Loading installation settings..."
 
 app=$YNH_APP_INSTANCE_NAME
 
 domain=$(ynh_app_setting_get $app domain)
-path=$(ynh_app_setting_get $app path)
+path_url=$(ynh_app_setting_get $app path)
 is_public=$(ynh_app_setting_get $app is_public)
 port=$(ynh_app_setting_get $app port)
 final_path=$(ynh_app_setting_get $app final_path)
 secret=$(ynh_app_setting_get $app secret)
+db_name=$(ynh_app_setting_get $app db_name)
+db_user=$db_name
+db_pwd=$(ynh_app_setting_get $app psqlpwd)
+max_file_size=$(ynh_app_setting_get $app max_file_size)
 
 #=================================================
 # FIX OLD THINGS
@@ -41,95 +44,163 @@ then	# Si final_path n'est pas renseigné dans la config yunohost, cas d'ancien 
 	final_path=/var/www/$app
 fi
 
-CHECK_PATH	# Checks and corrects the syntax of the path.
+if [ -z "$db_pwd" ]; then
+	# Create postgresql database
+	ynh_psql_test_if_first_run
+	db_name=$(ynh_sanitize_dbid "$app")
+	db_user=$db_name
+	ynh_app_setting_set "$app" db_name "$db_name"
+	# Initialize database and store postgres password for upgrade
+	ynh_psql_setup_db "$db_name" "$db_user"
+	db_pwd=$(ynh_app_setting_get $app psqlpwd) # Password created in ynh_psql_setup_db function
+fi
 
-# Get source
-SETUP_SOURCE
+if [ -z "$max_file_size" ]; then
+	max_file_size=100 # 100 Mo
+fi
+
+#=================================================
+# BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
+#=================================================
+ynh_print_info "Backing up the app before upgrading (may take a while)..."
+
+# Backup the current version of the app
+ynh_backup_before_upgrade
+ynh_clean_setup () {
+	ynh_clean_check_starting
+	# restore it if the upgrade fails
+	ynh_restore_upgradebackup
+}
+# Exit if an error occurs during the execution of the script
+ynh_abort_if_errors
+
+#=================================================
+# STANDARD UPGRADE STEPS
+#=================================================
+# DOWNLOAD, CHECK AND UNPACK SOURCE
+#=================================================
+ynh_print_info "Upgrading source files..."
+
+ynh_install_app_dependencies build-essential libssl-dev libio-socket-ssl-perl liblwp-protocol-https-perl libpq-dev cpanminus
+
+ynh_setup_source "$final_path"
 
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
+ynh_print_info "Upgrading nginx web server configuration..."
 
-# Et copie le fichier de config nginx
-sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
-# Modify Nginx configuration file and copy it to Nginx conf directory
-sudo sed -i "s@__PATH__@$path@g" /etc/nginx/conf.d/$domain.d/$app.conf
-sudo sed -i "s@__PORT__@$port@g" /etc/nginx/conf.d/$domain.d/$app.conf
+# Create a dedicated nginx config
+ynh_add_nginx_config max_file_size
 
+#=================================================
+# CREATE DEDICATED USER
+#=================================================
+ynh_print_info "Making sure dedicated system user exists..."
 
-if [ "$is_public" = "Yes" ];
-then
-	sudo sed -i "s@#--PRIVATE--@@g" /etc/nginx/conf.d/$domain.d/$app.conf
-fi
+# Create a dedicated user (if not existing)
+ynh_system_user_create $app
 
 #=================================================
 # SPECIFIC UPGRADE
 #=================================================
 # SETUP LUFI
 #=================================================
+ynh_print_info "Configuring lufi..."
 
-## Copie et configuration du fichier de conf.
-CHECK_MD5_CONFIG "lufi.conf" "$final_path/lufi.conf"	# Créé un backup du fichier de config si il a été modifié.
-sudo cp ../conf/lufi.conf.template "$final_path/lufi.conf"
-sudo sed -i "s@__DOMAIN__@$domain@g" "$final_path/lufi.conf"
-sudo sed -i "s@__PATH__@$path@g" "$final_path/lufi.conf"
-sudo sed -i "s@__PORT__@$port@g" "$final_path/lufi.conf"
-sudo sed -i "s@__SECRET__@$secret@g" "${final_path}/lufi.conf"
-STORE_MD5_CONFIG "lufi.conf" "$final_path/lufi.conf"	# Réenregistre la somme de contrôle du fichier de config
+cp ../conf/lufi.conf.template "${final_path}/lufi.conf"
+ynh_replace_string "__DOMAIN__" "$domain" "${final_path}/lufi.conf"
+ynh_replace_string "__PATH__" "$path_url" "${final_path}/lufi.conf"
+ynh_replace_string "__PORT__" "$port" "${final_path}/lufi.conf"
+ynh_replace_string "__DB_NAME__" "$db_name"  "${final_path}/lufi.conf"
+ynh_replace_string "__DB_USER__" "$db_user"  "${final_path}/lufi.conf"
+ynh_replace_string "__DB_PWD__" "$db_pwd" "${final_path}/lufi.conf"
+ynh_replace_string "__MAX_FILE_SIZE__" "$max_file_size" "${final_path}/lufi.conf"
 
-#=================================================
-# SETUP SYSTEMD
-#=================================================
-
-# Mise en place du script systemd
-sudo systemctl stop $app
-sudo cp ../conf/lufi.service /etc/systemd/system/$app.service
-sudo chown root: /etc/systemd/system/$app.service
-sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/systemd/system/$app.service
-sudo sed -i "s@__APP__@$app@g" /etc/systemd/system/$app.service
-## Démarrage auto du service
-sudo systemctl enable $app
+ynh_replace_string "__SECRET__" "$secret" "${final_path}/lufi.conf"
+if [ $is_public -eq 0 ];
+then
+	ynh_replace_string "__IS_PUBLIC__" "" "${final_path}/lufi.conf"
+else
+	ynh_replace_string "__IS_PUBLIC__" "#" "${final_path}/lufi.conf"
+fi
+ynh_store_file_checksum "${final_path}/lufi.conf"
 
 #=================================================
 # SETUP CRON
 #=================================================
 
-sudo cp ../conf/cron_lufi /etc/cron.d/$app
-sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/cron.d/$app
-
-#=================================================
-# UPDATE LUFI WITH CARTON
-#=================================================
-
-pushd $final_path	# cd avec une stack pour revenir en arrière
-echo yes | sudo carton install 2>&1 | sudo tee -a "/var/log/$app/setup_carton.log"
-popd	# Revient au dossier courant avant pushd
+cp ../conf/cron_lufi /etc/cron.d/$app
+ynh_replace_string "__FINALPATH__" "$final_path/" "/etc/cron.d/$app"
+chmod +x $final_path/script/lufi
 
 #=================================================
 # SECURING FILES AND DIRECTORIES
 #=================================================
 
-sudo chown -R www-data: $final_path
+chown -R $app:$app "$final_path"
+
+#=================================================
+# SETUP SYSTEMD
+#=================================================
+ynh_print_info "Upgrading systemd configuration..."
+
+# Create a dedicated systemd config
+ynh_add_systemd_config
+
+#=================================================
+# Install lufi's dependencies via carton
+#=================================================
+
+pushd $final_path
+carton install --deployment --without=sqlite --without=mysql
+popd
+
+#=================================================
+# SETUP LOGROTATE
+#=================================================
+ynh_print_info "Upgrading logrotate configuration..."
+
+# Use logrotate to manage app-specific logfile(s)
+ynh_use_logrotate --non-append
+
+#=================================================
+# ADVERTISE SERVICE IN ADMIN PANEL
+#=================================================
+
+yunohost service add $app --log "/var/log/$app.log"
 
 #=================================================
 # RESTART LUFI
 #=================================================
 
-sudo systemctl restart lufi.service
+ynh_systemd_action -n $app -a reload -l "Creating process id file" -p "$final_path/log/production.log"
+ln -sf "$final_path/log/production.log" "/var/log/$app/production.log"
 
 #=================================================
 # SETUP SSOWAT
 #=================================================
+ynh_print_info "Upgrading SSOwat configuration..."
 
-ynh_app_setting_set $app skipped_uris "/"
-if [ $is_public -eq 0 ]
-then	
-	ynh_app_setting_set "$app" unprotected_uris "/"
+# Make app public or private
+ynh_app_setting_set $app unprotected_uris "/"
+if [ $is_public -eq 0 ];
+then
+	ynh_app_setting_set $app protected_regex "/stats$","/manifest.webapp$","/$","/d/.*$","/m/.*$"
+else
+	ynh_app_setting_delete $app protected_regex
 fi
 
 #=================================================
 # RELOAD NGINX
 #=================================================
+ynh_print_info "Reloading nginx web server..."
 
-sudo systemctl reload nginx
-sudo yunohost app ssowatconf
+systemctl reload nginx
+yunohost app ssowatconf
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+
+ynh_print_info "Upgrade of $app completed"

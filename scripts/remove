@@ -12,20 +12,18 @@ source /usr/share/yunohost/helpers
 #=================================================
 # LOAD SETTINGS
 #=================================================
+ynh_print_info "Loading installation settings..."
 
 app=$YNH_APP_INSTANCE_NAME
 
+final_path=$(ynh_app_setting_get $app final_path)
 domain=$(ynh_app_setting_get $app domain)
+port=$(ynh_app_setting_get $app port)
+db_name=$(ynh_app_setting_get $app db_name)
+db_user=$db_name
 
 #=================================================
 # STANDARD REMOVE
-#=================================================
-# STOP AND REMOVE SERVICE
-#=================================================
-
-# Remove the dedicated systemd config
-ynh_remove_systemd_config
-
 #=================================================
 # REMOVE SERVICE FROM ADMIN PANEL
 #=================================================
@@ -38,15 +36,17 @@ then
 fi
 
 #=================================================
-# REMOVE DEPENDENCIES
+# STOP AND REMOVE SERVICE
 #=================================================
+ynh_print_info "Stopping and removing the systemd service"
 
-# Remove metapackage and its dependencies
-ynh_remove_app_dependencies
+# Remove the dedicated systemd config
+ynh_remove_systemd_config
 
 #=================================================
 # REMOVE APP MAIN DIR
 #=================================================
+ynh_print_info "Removing app main directory"
 
 # Remove the app directory securely
 ynh_secure_remove "$final_path"
@@ -54,13 +54,21 @@ ynh_secure_remove "$final_path"
 #=================================================
 # REMOVE NGINX CONFIGURATION
 #=================================================
+ynh_print_info "Removing nginx web server configuration"
 
 # Remove the dedicated nginx config
 ynh_remove_nginx_config
 
 #=================================================
+# DELETE LOG
+#=================================================
+
+ynh_secure_remove "/var/log/$app/"
+
+#=================================================
 # REMOVE LOGROTATE CONFIGURATION
 #=================================================
+ynh_print_info "Removing logrotate configuration"
 
 # Remove the app-specific logrotate config
 ynh_remove_logrotate
@@ -71,9 +79,34 @@ ynh_remove_logrotate
 
 if yunohost firewall list | grep -q "\- $port$"
 then
-	echo "Close port $port" >&2
+	echo "Close port $port"
 	yunohost firewall disallow TCP $port 2>&1
 fi
+
+#=================================================
+# REMOVE DEPENDENCIES
+#=================================================
+ynh_print_info "Removing dependencies"
+
+# Remove metapackage and its dependencies
+ynh_remove_app_dependencies
+
+#=================================================
+# REMOVE THE POSTGRESQL DATABASE
+#=================================================
+ynh_print_info "Removing the PostgreSQL database"
+
+ynh_psql_remove_db $db_name $db_user
+
+#=================================================
+# GENERIC FINALIZATION
+#=================================================
+# REMOVE DEDICATED USER
+#=================================================
+ynh_print_info "Removing the dedicated system user"
+
+# Delete a system user
+ynh_system_user_delete $app
 
 #=================================================
 # SPECIFIC REMOVE
@@ -84,14 +117,8 @@ fi
 # Remove a cron file
 ynh_secure_remove "/etc/cron.d/$app"
 
-# Remove the log files
-ynh_secure_remove "/var/log/$app/"
-
 #=================================================
-# GENERIC FINALIZATION
-#=================================================
-# REMOVE DEDICATED USER
+# END OF SCRIPT
 #=================================================
 
-# Delete a system user
-ynh_system_user_delete $app
+ynh_print_info "Removal of $app completed"
