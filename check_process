@@ -5,6 +5,7 @@
 		path="/path"	(PATH)
 		is_public="Yes" (PUBLIC|public=Yes|private=No)
 		max_file_size=100
+		admin="john" (USER)
 	; Checks
 		pkg_linter=1
 		setup_sub_dir=1
