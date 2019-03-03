@@ -5,15 +5,15 @@ Requires=network.target
 After=network.target
 
 [Service]
-Type=forking
+Type=simple
 User=__APP__
 Group=__APP__
 RemainAfterExit=yes
 WorkingDirectory=__FINALPATH__
 PIDFile=__FINALPATH__script/hypnotoad.pid
-ExecStart=/usr/local/bin/carton exec hypnotoad script/lufi >> /var/log/lufi/production.log 2>&1
-ExecStop=/usr/local/bin/carton exec hypnotoad -s script/lufi >> /var/log/lufi/production.log 2>&1
-ExecReload=/usr/local/bin/carton exec hypnotoad script/lufi >> /var/log/lufi/production.log 2>&1
+ExecStart=/usr/local/bin/carton exec hypnotoad script/lufi
+ExecStop=/usr/local/bin/carton exec hypnotoad -s script/lufi
+ExecReload=/usr/local/bin/carton exec hypnotoad script/lufi
 
 [Install]
 WantedBy=multi-user.target
