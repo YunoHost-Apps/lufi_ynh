@@ -128,6 +128,23 @@ ynh_store_file_checksum "${final_path}/lufi.conf"
 #=================================================
 # GENERIC FINALISATION
 #=================================================
+# UPDATE SSOWAT
+#=================================================
+ynh_print_info "Reconfigure SSOwat"
+
+ynh_app_setting_set $app unprotected_uris "/"
+if [ $is_public -eq 0 ]
+then
+	if [ "$path_url" == "/" ]; then
+	    # If the path is /, clear it to prevent any error with the regex.
+	    path_url=""
+	fi
+	# Modify the domain to be used in a regex
+	domain_regex=$(echo "$domain" | sed 's@-@.@g')
+	ynh_app_setting_set $app protected_regex "$domain_regex$path_url/stats$","$domain_regex$path_url/manifest.webapp$","$domain_regex$path_url/$","$domain_regex$path_url/d/.*$","$domain_regex$path_url/m/.*$"
+fi
+
+#=================================================
 # RESTART LUFI
 #=================================================
 
