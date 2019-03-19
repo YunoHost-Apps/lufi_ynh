@@ -32,6 +32,7 @@ domain=$(ynh_app_setting_get $app domain)
 path_url=$(ynh_app_setting_get $app path)
 final_path=$(ynh_app_setting_get $app final_path)
 db_name=$(ynh_app_setting_get $app db_name)
+db_manager=$(ynh_app_setting_get $app db_manager)
 
 #=================================================
 # CHECK IF THE APP CAN BE RESTORED
@@ -79,12 +80,15 @@ ynh_system_user_create $app
 #=================================================
 # RESTORE THE POSTGRESQL DATABASE
 #=================================================
-ynh_print_info "Restoring the PostregSQL database..."
 
-db_pwd=$(ynh_app_setting_get $app psqlpwd)
-ynh_psql_test_if_first_run
-ynh_psql_setup_db $db_name $db_name $db_pwd
-ynh_psql_connect_as $db_name $db_pwd $db_name < ./db.sql
+if [ $db_manager = "postgresql" ]; then
+	ynh_print_info "Restoring the PostregSQL database..."
+
+	db_pwd=$(ynh_app_setting_get $app psqlpwd)
+	ynh_psql_test_if_first_run
+	ynh_psql_setup_db $db_name $db_name $db_pwd
+	ynh_psql_connect_as $db_name $db_pwd $db_name < ./db.sql
+fi
 
 #=================================================
 # RESTORE USER RIGHTS
