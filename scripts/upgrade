@@ -45,7 +45,13 @@ then	# Si final_path n'est pas renseigné dans la config yunohost, cas d'ancien 
 	final_path=/var/www/$app
 fi
 
-if [ -z "$db_pwd" ]; then
+
+# If db_manager is empty, use sqlite for a backward compatibility
+if [ -z "$db_manager" ]; then
+	db_manager="sqlite"
+fi
+
+if [ -z "$db_pwd" && "$db_manager" = "postgresql"]; then
 	# Create postgresql database
 	ynh_psql_test_if_first_run
 	db_name=$(ynh_sanitize_dbid "$app")
@@ -58,11 +64,6 @@ fi
 
 if [ -z "$max_file_size" ]; then
 	max_file_size=100 # 100 Mo
-fi
-
-# If db_manager is empty, use sqlite for a backward compatibility
-if [ -z "$db_manager" ]; then
-	db_manager="sqlite"
 fi
 
 #=================================================
