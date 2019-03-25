@@ -1,44 +1,72 @@
 # Lufi for YunoHost
 
-[![Latest Version](https://img.shields.io/badge/version-_--_-green.svg?style=flat)](https://github.com/YunoHost-Apps/lufi_ynh/releases)
-[![Status](https://img.shields.io/badge/status-working-yellow.svg?style=flat)](https://github.com/YunoHost-Apps/lufi_ynh/milestones)
-[![Dependencies](https://img.shields.io/badge/dependencies-includes-lightgrey.svg?style=flat)](https://github.com/YunoHost-Apps/lufi_ynh#dependencies)
-[![GitHub license](https://img.shields.io/badge/license-GPLv3-blue.svg?style=flat)](https://raw.githubusercontent.com/YunoHost-Apps/lufi_ynh/master/LICENSE)
-[![Yunohost version](https://img.shields.io/badge/yunohost-2.4.2_tested-orange.svg?style=flat)](https://github.com/YunoHost/yunohost)
-[![GitHub issues](https://img.shields.io/github/issues/YunoHost-Apps/lufi_ynh.svg?style=flat)](https://github.com/YunoHost-Apps/lufi_ynh/issues)
+[![Integration level](https://dash.yunohost.org/integration/lufi.svg)](https://dash.yunohost.org/appci/app/lufi)  
+[![Install lufi with YunoHost](https://install-app.yunohost.org/install-with-yunohost.png)](https://install-app.yunohost.org/?app=lufi)
 
-## Lufi c'est quoi ?
+*[Lire ce readme en français.](./README_fr.md)*
 
-Il stocke vos fichiers et vous permet de les télécharger.
+> *This package allow you to install lufi quickly and simply on a YunoHost server.  
+If you don't have YunoHost, please see [here](https://yunohost.org/#/install) to know how to install and enjoy it.*
 
-Est-ce tout? Non. Tous les fichiers sont cryptés par le navigateur! Non chiffré. Ça ne marche pas. L'administrateur de l'instance Lufi ne pourra pas voir quel est votre administrateur réseau ou votre FAI.
-
-La clé de cryptage est une ancre (voir Fragment Identifier), ce qui signifie que cette partie n'est traitée que par le client et n'atteint pas le serveur. :-)
-
-Source: [Documentation de Lufi](https://framagit.org/luc/lufi/wikis/home)
-
-### Installation
-
-`$ sudo yunohost app install https://github.com/YunoHost-Apps/lufi_ynh.git`
-
-### Mise à jour
-
-`$ sudo yunohost app upgrade --verbose lufi -u https://github.com/YunoHost-Apps/lufi_ynh.git`
-
-## What is Lufi?
-
+## Overview
 It stores files and allows you to download them.
 
-Is that all? No. All the files are encrypted by the browser! It means that your files never leave your computer unencrypted. The administrator of the Lufi instance you use will not be able to see what is in your file, neither will your network administrator, or your ISP.
+Is that all? No. All the files are encrypted **by the browser**! It means that your files **never** leave your computer unencrypted.
+The administrator of the Lufi instance you use will not be able to see what is in your file, neither will your network administrator, or your ISP.
 
-The encryption key part of the URL is a anchor (Cf. Fragment Identifier), that means this part is only processed client-side and does not reach the server. :-)
+The encryption key part of the URL is a anchor (Cf. [Fragment Identifier](https://en.wikipedia.org/wiki/Fragment_identifier)), that means this part is only processed client-side and does not reach the server. :-)
 
-Source: [Lufi documentation](https://framagit.org/luc/lufi/wikis/home)
+**Shipped version:** 0.03.5
 
-### Install
+## Screenshots
 
-`$ sudo yunohost app install https://github.com/YunoHost-Apps/lufi_ynh.git`
+![](https://framalibre.org/sites/default/files/screenshot_lufi_1.png)
 
-### Update
+## Demo
 
-`$ sudo yunohost app upgrade --verbose lufi -u https://github.com/YunoHost-Apps/lufi_ynh.git`
+* [Official demo](https://demo.lufi.io/)
+
+## Configuration
+
+How to configure this app: a plain file with SSH.
+
+## Documentation
+
+ * Official documentation: https://framagit.org/luc/lufi/wikis/home
+
+## YunoHost specific features
+
+#### Multi-users support
+
+Are LDAP and HTTP auth supported? **Yes**
+Can the app be used by multiple users? **Yes**
+
+#### Supported architectures
+
+* x86-64b - [![Build Status](https://ci-apps.yunohost.org/ci/logs/lufi%20%28Community%29.svg)](https://ci-apps.yunohost.org/ci/apps/lufi/)
+* ARMv8-A - [![Build Status](https://ci-apps-arm.yunohost.org/ci/logs/lufi%20%28Community%29.svg)](https://ci-apps-arm.yunohost.org/ci/apps/lufi/)
+* Jessie x86-64b - [![Build Status](https://ci-stretch.nohost.me/ci/logs/lufi%20%28Community%29.svg)](https://ci-stretch.nohost.me/ci/apps/lufi/)
+
+## Links
+
+ * Report a bug: https://github.com/YunoHost-Apps/lufi_ynh/issues
+ * App website: https://framagit.org/fiat-tux/hat-softwares/lufi
+ * YunoHost website: https://yunohost.org/
+
+---
+
+Developers info
+----------------
+
+**Only if you want to use a testing branch for coding, instead of merging directly into master.**
+Please do your pull request to the [testing branch](https://github.com/YunoHost-Apps/lufi_ynh/tree/testing).
+
+To try the testing branch, please proceed like that.
+```
+sudo yunohost app install https://github.com/YunoHost-Apps/lufi_ynh/tree/testing --debug
+or
+sudo yunohost app upgrade lufi -u https://github.com/YunoHost-Apps/lufi_ynh/tree/testing --debug
+```
+
+**More information on the documentation page:**  
+https://yunohost.org/packaging_apps

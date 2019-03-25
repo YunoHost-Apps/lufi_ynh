@@ -14,7 +14,8 @@ source /usr/share/yunohost/helpers
 #=================================================
 
 ynh_clean_setup () {
-	### Remove this function if there's nothing to clean before calling the remove script.
+	ynh_clean_check_starting
+	
 	true
 }
 # Exit if an error occurs during the execution of the script
@@ -26,25 +27,29 @@ ynh_abort_if_errors
 
 domain=$YNH_APP_ARG_DOMAIN
 path_url=$YNH_APP_ARG_PATH
-admin=$YNH_APP_ARG_ADMIN
 is_public=$YNH_APP_ARG_IS_PUBLIC
+max_file_size=$YNH_APP_ARG_MAX_FILE_SIZE
 
 app=$YNH_APP_INSTANCE_NAME
-secret=$(ynh_string_random 24)
-
-script_dir=$PWD
 
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
 #=================================================
+ynh_print_info "Validating installation parameters..."
 
 final_path=/var/www/$app
 test ! -e "$final_path" || ynh_die "This path already contains a folder"
 
-domain_regex=$(echo "$domain" | sed 's@-@.@g')
-
 # Normalize the url path syntax
 path_url=$(ynh_normalize_url_path $path_url)
+
+# Check if max_file_size is a number
+if ! [[ $max_file_size =~ "^[\-0-9]+$" ]] && [ $max_file_size -lt 0 ]; then
+   ynh_die "Max file must be a number positive or zero"
+fi
+
+# Use postgresql by default
+db_manager="postgresql"
 
 # Check web path availability
 ynh_webpath_available $domain $path_url
@@ -52,35 +57,56 @@ ynh_webpath_available $domain $path_url
 ynh_webpath_register $app $domain $path_url
 
 #=================================================
+# FIND AND OPEN A PORT
+#=================================================
+ynh_print_info "Configuring firewall..."
+
+# Find a free port
+port=$(ynh_find_port 8095)
+# Open this port
+yunohost firewall allow --no-upnp TCP $port 2>&1
+
+#=================================================
 # STORE SETTINGS FROM MANIFEST
 #=================================================
+ynh_print_info "Storing installation settings..."
 
-ynh_app_setting_set $app admin $admin
 ynh_app_setting_set $app domain $domain
 ynh_app_setting_set $app is_public $is_public
-ynh_app_setting_set $app secret $secret
+ynh_app_setting_set $app port $port
+ynh_app_setting_set $app path $path_url
+ynh_app_setting_set $app max_file_size $max_file_size
+ynh_app_setting_set $app db_manager $db_manager
 
 #=================================================
 # STANDARD MODIFICATIONS
 #=================================================
-# FIND AND OPEN A PORT
-#=================================================
-
-# Find a free port
-port=$(ynh_find_port 8096)
-# Open this port
-yunohost firewall allow --no-upnp TCP $port 2>&1
-ynh_app_setting_set $app port $port
-
-#=================================================
 # INSTALL DEPENDENCIES
 #=================================================
+ynh_print_info "Installing dependencies..."
 
-ynh_install_app_dependencies build-essential cpanminus
+ynh_install_app_dependencies build-essential libssl-dev libio-socket-ssl-perl liblwp-protocol-https-perl libpq-dev postgresql cpanminus
+# Install Carton
+echo yes | cpanm Carton
+
+#=================================================
+# CREATE A POSTGRESQL DATABASE
+#=================================================
+ynh_print_info "Creating a PostgreSQL database..."
+
+# Create postgresql database
+ynh_psql_test_if_first_run
+db_name=$(ynh_sanitize_dbid "$app")
+db_user=$db_name
+ynh_app_setting_set "$app" db_name "$db_name"
+# Initialize database and store postgres password for upgrade
+ynh_psql_setup_db "$db_name" "$db_user"
+db_pwd=$(ynh_app_setting_get $app psqlpwd) # Password created in ynh_psql_setup_db function
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
+ynh_print_info "Setting up source files..."
 
 ynh_app_setting_set $app final_path $final_path
 # Download, check integrity, uncompress and patch the source from app.src
@@ -89,17 +115,15 @@ ynh_setup_source "$final_path"
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
+ynh_print_info "Configuring nginx web server..."
 
 # Create a dedicated nginx config
-ynh_add_nginx_config
-if [ "$is_public" = true ];
-then
-	sudo sed -i "s@#--PRIVATE--@@g" /etc/nginx/conf.d/$domain.d/$app.conf
-fi
+ynh_add_nginx_config max_file_size
 
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
+ynh_print_info "Configuring system user..."
 
 # Create a system user
 ynh_system_user_create $app
@@ -107,49 +131,34 @@ ynh_system_user_create $app
 #=================================================
 # Copy and fix variable into lufi config
 #=================================================
+ynh_print_info "Configuring lufi..."
 
-sudo cp ../conf/lufi.conf.template "${final_path}/lufi.conf"
+cp ../conf/lufi.conf.template "${final_path}/lufi.conf"
 ynh_replace_string "__DOMAIN__" "$domain" "${final_path}/lufi.conf"
 ynh_replace_string "__PATH__" "$path_url" "${final_path}/lufi.conf"
 ynh_replace_string "__PORT__" "$port" "${final_path}/lufi.conf"
+ynh_replace_string "__DB_NAME__" "$db_name"  "${final_path}/lufi.conf"
+ynh_replace_string "__DB_USER__" "$db_user"  "${final_path}/lufi.conf"
+ynh_replace_string "__DB_PWD__" "$db_pwd" "${final_path}/lufi.conf"
+ynh_replace_string "__MAX_FILE_SIZE__" "$max_file_size" "${final_path}/lufi.conf"
+ynh_replace_string "__DB_MANAGER__" "$db_manager" "${final_path}/lufi.conf"
+if [ $max_file_size -eq 0 ]; then # Comment the limitation line if no limit
+	ynh_replace_string "max_file_size" "#max_file_size" "${final_path}/lufi.conf"
+fi
+
+secret=$(ynh_string_random 24)
+ynh_app_setting_set $app secret $secret
 ynh_replace_string "__SECRET__" "$secret" "${final_path}/lufi.conf"
-
-#=================================================
-# Set right permissions on new files created at first start
-#=================================================
-
-sudo chown -R $app:$app "$final_path"
-
-#=================================================
-# Install Carton
-#=================================================
-
-echo yes | sudo cpanm Carton
-
-#=================================================
-# Install lufi via carton
-#=================================================
-
-mkdir -p /var/log/$app/
-pushd $final_path
-carton install 2>&1 | sudo tee -a "/var/log/$app/setup_carton.log"
-popd
-
-#=================================================
-# STORE THE CONFIG FILE CHECKSUM
-#=================================================
-
+if [ $is_public -eq 0 ];
+then
+	ynh_replace_string "__IS_PUBLIC__" "" "${final_path}/lufi.conf"
+else
+	ynh_replace_string "__IS_PUBLIC__" "#" "${final_path}/lufi.conf"
+fi
 ynh_store_file_checksum "${final_path}/lufi.conf"
 
 #=================================================
-# SETUP SYSTEMD
-#=================================================
-
-# Create a dedicated systemd config
-ynh_add_systemd_config
-
-#=================================================
-## Install cron
+# SETUP CRON
 #=================================================
 
 cp ../conf/cron_lufi /etc/cron.d/$app
@@ -157,22 +166,26 @@ ynh_replace_string "__FINALPATH__" "$final_path/" "/etc/cron.d/$app"
 chmod +x $final_path/script/lufi
 
 #=================================================
-# Making log symbolic link to /var/log
+# SETUP SYSTEMD
 #=================================================
+ynh_print_info "Configuring a systemd service..."
 
-touch /var/log/$app/production.log 
-chown www-data: /var/log/$app/production.log
-ln -s /var/log/$app/production.log "$final_path/log/production.log"
+# Create a dedicated systemd config
+ynh_add_systemd_config
 
 #=================================================
-# Start lufi
+# Install lufi's dependencies via carton
 #=================================================
+ynh_print_info "Installing lufi..."
 
-sudo systemctl start $app.service
+pushd $final_path
+carton install --deployment --without=sqlite  --without=mysql
+popd
 
 #=================================================
 # SETUP LOGROTATE
 #=================================================
+ynh_print_info "Configuring log rotation..."
 
 # Use logrotate to manage application logfile(s)
 ynh_use_logrotate
@@ -181,26 +194,50 @@ ynh_use_logrotate
 # ADVERTISE SERVICE IN ADMIN PANEL
 #=================================================
 
-yunohost service add NAME_INIT.D --log "/var/log/FILE.log"
+yunohost service add $app --log "$final_path/log/production.log"
 
 #=================================================
 # SETUP SSOWAT
 #=================================================
+ynh_print_info "Configuring SSOwat..."
 
-# Make app public if necessary
-if [ $is_public -eq 1 ]
+ynh_app_setting_set $app unprotected_uris "/"
+if [ $is_public -eq 0 ]
 then
-	# unprotected_uris allows SSO credentials to be passed anyway.
-	ynh_app_setting_set $app unprotected_uris "/"
-else
 	if [ "$path_url" == "/" ]; then
+	    # If the path is /, clear it to prevent any error with the regex.
 	    path_url=""
 	fi
-	ynh_app_setting_set $app protected_regex "$domain_regex$path/stats$","$domain_regex$path/manifest.webapp$","$domain_regex$path/$","$domain_regex$path/d/.*$","$domain_regex$path/m/.*$"
+	# Modify the domain to be used in a regex
+	domain_regex=$(echo "$domain" | sed 's@-@.@g')
+	ynh_app_setting_set $app protected_regex "$domain_regex$path_url/stats$","$domain_regex$path_url/manifest.webapp$","$domain_regex$path_url/$","$domain_regex$path_url/d/.*$","$domain_regex$path_url/m/.*$"
 fi
+
+#=================================================
+# Configure owner
+#=================================================
+
+chown -R $app:$app "$final_path"
+
+#=================================================
+# Start lufi
+#=================================================
+
+systemctl enable $app.service
+ynh_systemd_action -n $app -a start -l "Creating process id file" -p "$final_path/log/production.log"
+ln -sf "$final_path/log/production.log" "/var/log/$app/production.log"
 
 #=================================================
 # RELOAD NGINX
 #=================================================
+ynh_print_info "Reloading nginx web server..."
 
+# Reload Nginx
 systemctl reload nginx
+yunohost app ssowatconf
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+
+ynh_print_info "Installation of $app completed"
