@@ -26,7 +26,6 @@ db_name=$(ynh_app_setting_get $app db_name)
 db_user=$db_name
 db_pwd=$(ynh_app_setting_get $app psqlpwd)
 max_file_size=$(ynh_app_setting_get $app max_file_size)
-db_manager=$(ynh_app_setting_get $app db_manager)
 
 #=================================================
 # FIX OLD THINGS
@@ -58,11 +57,6 @@ fi
 
 if [ -z "$max_file_size" ]; then
 	max_file_size=100 # 100 Mo
-fi
-
-# If db_manager is empty, use sqlite for a backward compatibility
-if [ -z "$db_manager" ]; then
-	db_manager="sqlite"
 fi
 
 #=================================================
@@ -122,7 +116,6 @@ ynh_replace_string "__DB_NAME__" "$db_name"  "${final_path}/lufi.conf"
 ynh_replace_string "__DB_USER__" "$db_user"  "${final_path}/lufi.conf"
 ynh_replace_string "__DB_PWD__" "$db_pwd" "${final_path}/lufi.conf"
 ynh_replace_string "__MAX_FILE_SIZE__" "$max_file_size" "${final_path}/lufi.conf"
-ynh_replace_string "__DB_MANAGER__" "$db_manager" "${final_path}/lufi.conf"
 if [ $max_file_size -eq 0 ]; then # Comment the limitation line if no limit
 	ynh_replace_string "max_file_size" "#max_file_size" "${final_path}/lufi.conf"
 fi
@@ -148,7 +141,7 @@ chmod +x $final_path/script/lufi
 # SECURING FILES AND DIRECTORIES
 #=================================================
 
-chown -R $app: "$final_path"
+chown -R $app:$app "$final_path"
 
 #=================================================
 # SETUP SYSTEMD
@@ -163,11 +156,7 @@ ynh_add_systemd_config
 #=================================================
 
 pushd $final_path
-if [ $db_manager = "postgresql" ]; then
-	carton install --deployment --without=sqlite --without=mysql
-else
-	carton install --deployment --without=postgresql --without=mysql
-fi
+carton install --deployment --without=sqlite --without=mysql
 popd
 
 #=================================================
@@ -182,21 +171,14 @@ ynh_use_logrotate --non-append
 # ADVERTISE SERVICE IN ADMIN PANEL
 #=================================================
 
-# if /var/log/$app/production.log is a symbolic link, then move it to $final_path/log/production.log
-if [ ! -L "/var/log/$app/production.log" ]
-then
-	mv "/var/log/$app/production.log" "$final_path/log/production.log"
-	chown -R $app: "$final_path/log/production.log"
-fi
-
 yunohost service add $app --log "$final_path/log/production.log"
 
 #=================================================
 # RESTART LUFI
 #=================================================
 
+ynh_systemd_action -n $app -a reload -l "Creating process id file" -p "$final_path/log/production.log"
 ln -sf "$final_path/log/production.log" "/var/log/$app/production.log"
-ynh_systemd_action -n $app -a restart -l "Creating process id file" -p "$final_path/log/production.log"
 
 #=================================================
 # SETUP SSOWAT

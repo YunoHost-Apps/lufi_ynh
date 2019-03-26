@@ -48,9 +48,6 @@ if ! [[ $max_file_size =~ "^[\-0-9]+$" ]] && [ $max_file_size -lt 0 ]; then
    ynh_die "Max file must be a number positive or zero"
 fi
 
-# Use postgresql by default
-db_manager="postgresql"
-
 # Check web path availability
 ynh_webpath_available $domain $path_url
 # Register (book) web path
@@ -76,7 +73,6 @@ ynh_app_setting_set $app is_public $is_public
 ynh_app_setting_set $app port $port
 ynh_app_setting_set $app path $path_url
 ynh_app_setting_set $app max_file_size $max_file_size
-ynh_app_setting_set $app db_manager $db_manager
 
 #=================================================
 # STANDARD MODIFICATIONS
@@ -141,7 +137,6 @@ ynh_replace_string "__DB_NAME__" "$db_name"  "${final_path}/lufi.conf"
 ynh_replace_string "__DB_USER__" "$db_user"  "${final_path}/lufi.conf"
 ynh_replace_string "__DB_PWD__" "$db_pwd" "${final_path}/lufi.conf"
 ynh_replace_string "__MAX_FILE_SIZE__" "$max_file_size" "${final_path}/lufi.conf"
-ynh_replace_string "__DB_MANAGER__" "$db_manager" "${final_path}/lufi.conf"
 if [ $max_file_size -eq 0 ]; then # Comment the limitation line if no limit
 	ynh_replace_string "max_file_size" "#max_file_size" "${final_path}/lufi.conf"
 fi

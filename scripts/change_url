@@ -37,7 +37,6 @@ db_pwd=$(ynh_app_setting_get $app psqlpwd)
 db_user=$db_name
 secret=$(ynh_app_setting_get $app secret)
 max_file_size=$(ynh_app_setting_get $app max_file_size)
-db_manager=$(ynh_app_setting_get $app db_manager)
 
 #=================================================
 # CHECK THE SYNTAX OF THE PATHS
@@ -113,7 +112,6 @@ ynh_replace_string "__DB_NAME__" "$db_name"  "${final_path}/lufi.conf"
 ynh_replace_string "__DB_USER__" "$db_user"  "${final_path}/lufi.conf"
 ynh_replace_string "__DB_PWD__" "$db_pwd" "${final_path}/lufi.conf"
 ynh_replace_string "__MAX_FILE_SIZE__" "$max_file_size" "${final_path}/lufi.conf"
-ynh_replace_string "__DB_MANAGER__" "$db_manager" "${final_path}/lufi.conf"
 if [ $max_file_size -eq 0 ]; then # Comment the limitation line if no limit
 	ynh_replace_string "max_file_size" "#max_file_size" "${final_path}/lufi.conf"
 fi
