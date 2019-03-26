@@ -53,6 +53,8 @@ if [ -z "$db_pwd" ]; then
 	# Initialize database and store postgres password for upgrade
 	ynh_psql_setup_db "$db_name" "$db_user"
 	db_pwd=$(ynh_app_setting_get $app psqlpwd) # Password created in ynh_psql_setup_db function
+
+	need_migration_from_sqlite_to_psql=1
 fi
 
 if [ -z "$max_file_size" ]; then
@@ -141,7 +143,7 @@ chmod +x $final_path/script/lufi
 # SECURING FILES AND DIRECTORIES
 #=================================================
 
-chown -R $app:$app "$final_path"
+chown -R $app: "$final_path"
 
 #=================================================
 # SETUP SYSTEMD
@@ -156,7 +158,12 @@ ynh_add_systemd_config
 #=================================================
 
 pushd $final_path
-carton install --deployment --without=sqlite --without=mysql
+# Migrate from SQLite to PostgreSQL
+if [ $need_migration_from_sqlite_to_psql -eq 1 ]; then
+	carton exec script/lufi sqliteToOtherDB
+fi
+
+carton install --deployment --without=sqlite --without=mysql --without=htpasswd --without=test
 popd
 
 #=================================================
@@ -176,6 +183,13 @@ yunohost service add $app --log "$final_path/log/production.log"
 #=================================================
 # RESTART LUFI
 #=================================================
+
+# if /var/log/$app/production.log is a symbolic link, then move it to $final_path/log/production.log
+if [ ! -L "/var/log/$app/production.log" ]
+then
+	mv "/var/log/$app/production.log" "$final_path/log/production.log"
+	chown -R $app: "$final_path/log/production.log"
+fi
 
 ynh_systemd_action -n $app -a reload -l "Creating process id file" -p "$final_path/log/production.log"
 ln -sf "$final_path/log/production.log" "/var/log/$app/production.log"

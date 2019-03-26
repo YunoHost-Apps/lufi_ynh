@@ -174,7 +174,7 @@ ynh_add_systemd_config
 ynh_print_info "Installing lufi..."
 
 pushd $final_path
-carton install --deployment --without=sqlite  --without=mysql
+carton install --deployment --without=sqlite  --without=mysql --without=htpasswd --without=test
 popd
 
 #=================================================
