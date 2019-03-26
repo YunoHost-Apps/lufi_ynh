@@ -63,7 +63,7 @@ ynh_remove_nginx_config
 # DELETE LOG
 #=================================================
 
-ynh_secure_remove "/var/log/$app/"
+ynh_secure_remove "/var/log/$app"
 
 #=================================================
 # REMOVE LOGROTATE CONFIGURATION
