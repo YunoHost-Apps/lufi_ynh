@@ -3,7 +3,7 @@
 # Start (or other actions) a service,  print a log in case of failure and optionnaly wait until the service is completely started
 #
 # usage: ynh_systemd_action [-n service_name] [-a action] [ [-l "line to match"] [-p log_path] [-t timeout] [-e length] ]
-# | arg: -n, --service_name= - Name of the service to reload. Default : $app
+# | arg: -n, --service_name= - Name of the service to start. Default : $app
 # | arg: -a, --action=       - Action to perform with systemctl. Default: start
 # | arg: -l, --line_match=   - Line to match - The line to find in the log to attest the service have finished to boot.
 #                              If not defined it don't wait until the service is completely started.
@@ -44,16 +44,22 @@ ynh_systemd_action() {
             local pid_tail=$!
         else
             # Read the specified log file
-            tail -F -n0 "$log_path" > "$templog" &
+            tail -F -n0 "$log_path" > "$templog" 2>&1 &
             # Get the PID of the tail command
             local pid_tail=$!
         fi
     fi
 
-    echo "${action^} the service $service_name" >&2
+    ynh_print_info --message="${action^} the service $service_name"
+
+    # Use reload-or-restart instead of reload. So it wouldn't fail if the service isn't running.
+    if [ "$action" == "reload" ]; then
+        action="reload-or-restart"
+    fi
+
     systemctl $action $service_name \
         || ( journalctl --no-pager --lines=$length -u $service_name >&2 \
-        ; test -e "$log_path" && echo "--" && tail --lines=$length "$log_path" >&2 \
+        ; test -e "$log_path" && echo "--" >&2 && tail --lines=$length "$log_path" >&2 \
         ; false )
 
     # Start the timeout and try to find line_match
@@ -65,21 +71,27 @@ ynh_systemd_action() {
             # Read the log until the sentence is found, that means the app finished to start. Or run until the timeout
             if grep --quiet "$line_match" "$templog"
             then
-                echo "The service $service_name has correctly started." >&2
+                ynh_print_info --message="The service $service_name has correctly started."
                 break
             fi
-            echo -n "." >&2
+            if [ $i -eq 3 ]; then
+                echo -n "Please wait, the service $service_name is ${action}ing" >&2
+            fi
+            if [ $i -ge 3 ]; then
+                echo -n "." >&2
+            fi
             sleep 1
         done
+        if [ $i -ge 3 ]; then
+            echo "" >&2
+        fi
         if [ $i -eq $timeout ]
         then
-            echo "The service $service_name didn't fully started before the timeout." >&2
-            echo "Please find here an extract of the end of the log of the service $service_name:"
+            ynh_print_warn --message="The service $service_name didn't fully started before the timeout."
+            ynh_print_warn --message="Please find here an extract of the end of the log of the service $service_name:"
             journalctl --no-pager --lines=$length -u $service_name >&2
-            test -e "$log_path" && echo "--" && tail --lines=$length "$log_path" >&2
+            test -e "$log_path" && echo "--" >&2 && tail --lines=$length "$log_path" >&2
         fi
-
-        echo ""
         ynh_clean_check_starting
     fi
 }
