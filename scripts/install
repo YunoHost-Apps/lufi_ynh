@@ -81,7 +81,7 @@ ynh_app_setting_set $app max_file_size $max_file_size
 #=================================================
 ynh_print_info "Installing dependencies..."
 
-ynh_install_app_dependencies build-essential libssl-dev libio-socket-ssl-perl liblwp-protocol-https-perl libpq-dev postgresql cpanminus
+ynh_install_app_dependencies $pkg_dependencies
 # Install Carton
 echo yes | cpanm Carton
 

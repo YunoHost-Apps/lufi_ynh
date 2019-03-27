@@ -1,5 +1,16 @@
 #!/bin/bash
 
+#=================================================
+# COMMON VARIABLES
+#=================================================
+
+# dependencies used by the app
+pkg_dependencies="build-essential libssl-dev libio-socket-ssl-perl liblwp-protocol-https-perl libpq-dev postgresql cpanminus"
+
+#=================================================
+# FUTURE OFFICIAL HELPERS
+#=================================================
+
 # Start (or other actions) a service,  print a log in case of failure and optionnaly wait until the service is completely started
 #
 # usage: ynh_systemd_action [-n service_name] [-a action] [ [-l "line to match"] [-p log_path] [-t timeout] [-e length] ]

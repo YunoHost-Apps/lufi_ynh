@@ -85,7 +85,7 @@ ynh_abort_if_errors
 #=================================================
 ynh_print_info "Upgrading source files..."
 
-ynh_install_app_dependencies build-essential libssl-dev libio-socket-ssl-perl liblwp-protocol-https-perl libpq-dev postgresql cpanminus
+ynh_install_app_dependencies $pkg_dependencies
 
 ynh_setup_source "$final_path"
 
