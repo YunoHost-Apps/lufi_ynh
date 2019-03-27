@@ -84,19 +84,19 @@ then
 fi
 
 #=================================================
+# REMOVE THE POSTGRESQL DATABASE
+#=================================================
+ynh_print_info "Removing the PostgreSQL database"
+
+ynh_psql_remove_db $db_name $db_user
+
+#=================================================
 # REMOVE DEPENDENCIES
 #=================================================
 ynh_print_info "Removing dependencies"
 
 # Remove metapackage and its dependencies
 ynh_remove_app_dependencies
-
-#=================================================
-# REMOVE THE POSTGRESQL DATABASE
-#=================================================
-ynh_print_info "Removing the PostgreSQL database"
-
-ynh_psql_remove_db $db_name $db_user
 
 #=================================================
 # GENERIC FINALIZATION
