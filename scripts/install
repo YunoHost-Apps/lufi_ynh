@@ -220,7 +220,6 @@ chown -R $app:$app "$final_path"
 
 systemctl enable $app.service
 ynh_systemd_action -n $app -a start -l "Creating process id file" -p "$final_path/log/production.log"
-ln -sf "$final_path/log/production.log" "/var/log/$app/production.log"
 
 #=================================================
 # RELOAD NGINX

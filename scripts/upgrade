@@ -194,15 +194,7 @@ yunohost service add $app --log "$final_path/log/production.log"
 # RESTART LUFI
 #=================================================
 
-# if /var/log/$app/production.log is a symbolic link, then move it to $final_path/log/production.log
-if [ ! -L "/var/log/$app/production.log" ]
-then
-	mv "/var/log/$app/production.log" "$final_path/log/production.log"
-	chown -R $app: "$final_path/log/production.log"
-fi
-
 ynh_systemd_action -n $app -a reload -l "Creating process id file" -p "$final_path/log/production.log"
-ln -sf "$final_path/log/production.log" "/var/log/$app/production.log"
 
 #=================================================
 # SETUP SSOWAT
