@@ -3,25 +3,25 @@
 	"id": "lufi",
 	"packaging_format": 1,
 	"requirements": {
-		"yunohost": ">= 2.7.2"
+		"yunohost": ">= 3.2.2"
 	},
 	"description": {
 		"en": "Self hosting files and sharing anonymous application",
 		"fr": "Application d'hébergement et de partage de fichiers anonyme"
 	},
-	"version": "0.9.2-1",
+	"version": "0.03.5~ynh1",
 	"url": "https://git.framasoft.org/luc/lufi",
-	"license": "AGPL",
+	"license": "AGPL-3.0-or-later",
 	"maintainer": {
 		"name": "frju365, cyp",
 		"email": "win10@tutanota.com, cyp@rouquin.me"
 	},
-	"multi_instance": false,
+	"multi_instance": true,
 	"services": [
 		"nginx"
 	],
 	"arguments": {
-		"install" : [
+		"install": [
 			{
 				"name": "domain",
 				"type": "domain",
@@ -42,22 +42,23 @@
 				"default": "/lufi"
 			},
 			{
-				"name": "admin",
-				"type": "user",
+				"name": "max_file_size",
+				"type": "string",
 				"ask": {
-					"en": "Choose the Lufi administrator (must be an existing YunoHost user)",
-					"fr": "Choisissez un administrateur Lufi (doit être un utilisateur YunoHost)"
+					"en": "Choose a max file size, in Mo (0 = no limit)",
+					"fr": "Choisissez une taille de fichier maximum chemin, en Mo (0 = pas de limite)"
 				},
-				"example": "john"
+				"example": "100",
+				"default": "100"
 			},
 			{
 				"name": "is_public",
+				"type": "boolean",
 				"ask": {
-					"en": "Uploading files is it public?",
-					"fr": "L'upload de fichiers est-il public ?"
+					"en": "Is it a public application?",
+					"fr": "Est-ce une application publique ?"
 				},
-				"choices": ["Yes", "No"],
-				"default": "No"
+				"default": true
 			}
 		]
 	}

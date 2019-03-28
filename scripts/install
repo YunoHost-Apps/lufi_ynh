@@ -1,145 +1,237 @@
 #!/bin/bash
 
-# Exit on command errors and treat unset variables as an error
-set -eu
+#=================================================
+# GENERIC START
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
 
-source .fonctions	# Loads the generic functions usually used in the script
-source /usr/share/yunohost/helpers # Source app helpers
+source _common.sh
+source /usr/share/yunohost/helpers
 
-CLEAN_SETUP () {
-	# Clean installation residues that are not supported by the remove script.
-	# Clean hosts
-	echo ""
+#=================================================
+# MANAGE SCRIPT FAILURE
+#=================================================
+
+ynh_clean_setup () {
+	ynh_clean_check_starting
+	
+	true
 }
-TRAP_ON	# Active trap to stop the script if an error is detected.
+# Exit if an error occurs during the execution of the script
+ynh_abort_if_errors
 
-# Retrieve arguments
+#=================================================
+# RETRIEVE ARGUMENTS FROM THE MANIFEST
+#=================================================
+
 domain=$YNH_APP_ARG_DOMAIN
-path=$YNH_APP_ARG_PATH
-admin=$YNH_APP_ARG_ADMIN
+path_url=$YNH_APP_ARG_PATH
 is_public=$YNH_APP_ARG_IS_PUBLIC
+max_file_size=$YNH_APP_ARG_MAX_FILE_SIZE
 
 app=$YNH_APP_INSTANCE_NAME
 
-script_dir=$PWD
+#=================================================
+# CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
+#=================================================
+ynh_print_info "Validating installation parameters..."
 
-# Check variable is not empty
-CHECK_VAR "$app" "app name not set"
-CHECK_VAR "$script_dir" "script_dir not set"
+final_path=/var/www/$app
+test ! -e "$final_path" || ynh_die "This path already contains a folder"
 
-CHECK_USER "$admin"	# Check username
+# Normalize the url path syntax
+path_url=$(ynh_normalize_url_path $path_url)
 
-CHECK_PATH	# Check and fix path syntax
-CHECK_DOMAINPATH	# Check and fix domain disponibility
+# Check if max_file_size is a number
+if ! [[ $max_file_size =~ "^[\-0-9]+$" ]] && [ $max_file_size -lt 0 ]; then
+   ynh_die "Max file must be a number positive or zero"
+fi
 
-CHECK_FINALPATH	# Check final path
+# Check web path availability
+ynh_webpath_available $domain $path_url
+# Register (book) web path
+ynh_webpath_register $app $domain $path_url
 
-# Check domain with regex
-domain_regex=$(echo "$domain" | sed 's@-@.@g')
-CHECK_VAR "$domain_regex" "domain_regex empty"
+#=================================================
+# FIND AND OPEN A PORT
+#=================================================
+ynh_print_info "Configuring firewall..."
 
-port=$(ynh_find_port 8096)	# Check port availability
+# Find a free port
+port=$(ynh_find_port 8095)
+# Open this port
+yunohost firewall allow --no-upnp TCP $port 2>&1
 
-# Save app settings
-ynh_app_setting_set $app admin $admin
+#=================================================
+# STORE SETTINGS FROM MANIFEST
+#=================================================
+ynh_print_info "Storing installation settings..."
+
 ynh_app_setting_set $app domain $domain
 ynh_app_setting_set $app is_public $is_public
 ynh_app_setting_set $app port $port
+ynh_app_setting_set $app path $path_url
+ynh_app_setting_set $app max_file_size $max_file_size
 
-# Install build-essential
-ynh_package_update
-ynh_package_install build-essential
+#=================================================
+# STANDARD MODIFICATIONS
+#=================================================
+# INSTALL DEPENDENCIES
+#=================================================
+ynh_print_info "Installing dependencies..."
 
-# Copy files to the right place
-sudo mkdir "${final_path}"
+ynh_install_app_dependencies $pkg_dependencies
+# Install Carton
+echo yes | cpanm Carton
+
+#=================================================
+# CREATE A POSTGRESQL DATABASE
+#=================================================
+ynh_print_info "Creating a PostgreSQL database..."
+
+# Create postgresql database
+ynh_psql_test_if_first_run
+db_name=$(ynh_sanitize_dbid "$app")
+db_user=$db_name
+ynh_app_setting_set "$app" db_name "$db_name"
+# Initialize database and store postgres password for upgrade
+ynh_psql_setup_db "$db_name" "$db_user"
+db_pwd=$(ynh_app_setting_get $app psqlpwd) # Password created in ynh_psql_setup_db function
+
+#=================================================
+# DOWNLOAD, CHECK AND UNPACK SOURCE
+#=================================================
+ynh_print_info "Setting up source files..."
+
 ynh_app_setting_set $app final_path $final_path
+# Download, check integrity, uncompress and patch the source from app.src
+ynh_setup_source "$final_path"
 
-# Get source
-SETUP_SOURCE
+#=================================================
+# NGINX CONFIGURATION
+#=================================================
+ynh_print_info "Configuring nginx web server..."
 
-# Copy it to Nginx conf directory
-sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
+# Create a dedicated nginx config
+ynh_add_nginx_config max_file_size
 
-if [ "$is_public" = "Yes" ];
-then
-	sudo sed -i "s@#--PRIVATE--@@g" /etc/nginx/conf.d/$domain.d/$app.conf
+#=================================================
+# CREATE DEDICATED USER
+#=================================================
+ynh_print_info "Configuring system user..."
+
+# Create a system user
+ynh_system_user_create $app
+
+#=================================================
+# Copy and fix variable into lufi config
+#=================================================
+ynh_print_info "Configuring lufi..."
+
+cp ../conf/lufi.conf.template "${final_path}/lufi.conf"
+ynh_replace_string "__DOMAIN__" "$domain" "${final_path}/lufi.conf"
+ynh_replace_string "__PATH__" "$path_url" "${final_path}/lufi.conf"
+ynh_replace_string "__PORT__" "$port" "${final_path}/lufi.conf"
+ynh_replace_string "__DB_NAME__" "$db_name"  "${final_path}/lufi.conf"
+ynh_replace_string "__DB_USER__" "$db_user"  "${final_path}/lufi.conf"
+ynh_replace_string "__DB_PWD__" "$db_pwd" "${final_path}/lufi.conf"
+ynh_replace_string "__MAX_FILE_SIZE__" "$max_file_size" "${final_path}/lufi.conf"
+if [ $max_file_size -eq 0 ]; then # Comment the limitation line if no limit
+	ynh_replace_string "max_file_size" "#max_file_size" "${final_path}/lufi.conf"
 fi
-
-## Copy and fix variable into lufi config
-sudo cp ../conf/lufi.conf.template "${final_path}/lufi.conf"
-sudo sed -i "s@__DOMAIN__@$domain@g" "${final_path}/lufi.conf"
-sudo sed -i "s@__PATH__@$path@g" "${final_path}/lufi.conf"
-sudo sed -i "s@__PORT__@$port@g" "${final_path}/lufi.conf"
 
 secret=$(ynh_string_random 24)
-CHECK_VAR "$secret" "secret empty"
-sudo sed -i "s@__SECRET__@$secret@g" "${final_path}/lufi.conf"
-STORE_MD5_CONFIG "lufi.conf" "${final_path}/lufi.conf"
-
-# Install systemd script
-sudo cp ../conf/lufi.service /etc/systemd/system/lufi.service
-sudo chown root: /etc/systemd/system/lufi.service
-sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/systemd/system/lufi.service
-## Start service auto
-sudo systemctl enable lufi.service
-
-## Install cron
-sudo cp ../conf/cron_lufi /etc/cron.d/$app
-sudo sed -i "s@__FINALPATH__@$final_path/@g" /etc/cron.d/$app
-sudo chmod +x $final_path/script/lufi
-
-# Install logrotate
-sed -i "s@__FINALPATH__@$final_path@g" ../conf/logrotate
-sudo cp ../conf/logrotate /etc/logrotate.d/$app
-
-# Install Carton
-sudo apt-get install cpanminus -y
-echo yes | sudo cpanm Carton
-
-# Install lufi via carton
-sudo mkdir -p /var/log/$app/
-cd $final_path
-sudo carton install 2>&1 | sudo tee -a "/var/log/$app/setup_carton.log"
-
-# Change variables in nginx configuration
-sudo sed -i "s@__PATH__@$path@g" /etc/nginx/conf.d/$domain.d/$app.conf
-sudo sed -i "s@__PORT__@$port@g" /etc/nginx/conf.d/$domain.d/$app.conf
-
-# Make app public or private
-ynh_app_setting_set $app skipped_uris "/"
-if [ "$is_public" = "No" ];
+ynh_app_setting_set $app secret $secret
+ynh_replace_string "__SECRET__" "$secret" "${final_path}/lufi.conf"
+if [ $is_public -eq 0 ];
 then
-	if [ "$path" == "/" ]; then
-	    path=""
+	ynh_replace_string "__IS_PUBLIC__" "" "${final_path}/lufi.conf"
+else
+	ynh_replace_string "__IS_PUBLIC__" "#" "${final_path}/lufi.conf"
+fi
+ynh_store_file_checksum "${final_path}/lufi.conf"
+
+#=================================================
+# SETUP CRON
+#=================================================
+
+cp ../conf/cron_lufi /etc/cron.d/$app
+ynh_replace_string "__FINALPATH__" "$final_path/" "/etc/cron.d/$app"
+chmod +x $final_path/script/lufi
+
+#=================================================
+# SETUP SYSTEMD
+#=================================================
+ynh_print_info "Configuring a systemd service..."
+
+# Create a dedicated systemd config
+ynh_add_systemd_config
+
+#=================================================
+# Install lufi's dependencies via carton
+#=================================================
+ynh_print_info "Installing lufi..."
+
+pushd $final_path
+carton install --deployment --without=sqlite  --without=mysql --without=htpasswd --without=test
+popd
+
+#=================================================
+# SETUP LOGROTATE
+#=================================================
+ynh_print_info "Configuring log rotation..."
+
+# Use logrotate to manage application logfile(s)
+ynh_use_logrotate
+
+#=================================================
+# ADVERTISE SERVICE IN ADMIN PANEL
+#=================================================
+
+yunohost service add $app --log "$final_path/log/production.log"
+
+#=================================================
+# SETUP SSOWAT
+#=================================================
+ynh_print_info "Configuring SSOwat..."
+
+ynh_app_setting_set $app unprotected_uris "/"
+if [ $is_public -eq 0 ]
+then
+	if [ "$path_url" == "/" ]; then
+	    # If the path is /, clear it to prevent any error with the regex.
+	    path_url=""
 	fi
-	ynh_app_setting_set $app protected_regex "$domain_regex$path/stats$","$domain_regex$path/manifest.webapp$","$domain_regex$path/$","$domain_regex$path/d/.*$","$domain_regex$path/m/.*$"
+	# Modify the domain to be used in a regex
+	domain_regex=$(echo "$domain" | sed 's@-@.@g')
+	ynh_app_setting_set $app protected_regex "$domain_regex$path_url/stats$","$domain_regex$path_url/manifest.webapp$","$domain_regex$path_url/$","$domain_regex$path_url/d/.*$","$domain_regex$path_url/m/.*$"
 fi
 
-# Making log symbolic link to /var/log
-sudo touch /var/log/$app/production.log 
-sudo chown www-data: /var/log/$app/production.log
-sudo ln -s /var/log/$app/production.log "$final_path/log/production.log"
-
+#=================================================
 # Configure owner
-sudo chown -R www-data: $final_path
+#=================================================
 
+chown -R $app:$app "$final_path"
+
+#=================================================
 # Start lufi
-sudo systemctl daemon-reload
-sudo systemctl start lufi.service
-sudo systemctl enable lufi.service
+#=================================================
 
-# Set right permissions on new files created at first start
-sudo chown -R www-data: "$final_path"
+systemctl enable $app.service
+ynh_systemd_action -n $app -a start -l "Creating process id file" -p "$final_path/log/production.log"
 
-# Add lufi as a service
-sudo yunohost service add lufi -l $final_path/log/production.log
-
-if [ "$is_public" = "No" ];
-then
-	# Delete public access
-	ynh_app_setting_delete $app unprotected_uris
-	sudo yunohost app ssowatconf
-fi
+#=================================================
+# RELOAD NGINX
+#=================================================
+ynh_print_info "Reloading nginx web server..."
 
 # Reload Nginx
-sudo service nginx reload
+systemctl reload nginx
+yunohost app ssowatconf
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+
+ynh_print_info "Installation of $app completed"

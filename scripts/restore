@@ -1,101 +1,139 @@
 #!/bin/bash
-# This restore script is adapted to Yunohost >=2.4
 
-# Exit on command errors and treat unset variables as an error
-set -eu
+#=================================================
+# GENERIC START
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
 
-# Source app helpers
+source ../settings/scripts/_common.sh
 source /usr/share/yunohost/helpers
 
-# The parameter $app is the id of the app instance ex: ynhexample__2
+#=================================================
+# MANAGE SCRIPT FAILURE
+#=================================================
+
+ynh_clean_setup () {
+	ynh_clean_check_starting
+	
+	true
+}
+# Exit if an error occurs during the execution of the script
+ynh_abort_if_errors
+
+#=================================================
+# LOAD SETTINGS
+#=================================================
+ynh_print_info "Loading settings..."
+
 app=$YNH_APP_INSTANCE_NAME
 
-# Get old parameter of the app
 domain=$(ynh_app_setting_get $app domain)
-path=$(ynh_app_setting_get $app path)
-is_public=$(ynh_app_setting_get $app is_public)
+path_url=$(ynh_app_setting_get $app path)
+final_path=$(ynh_app_setting_get $app final_path)
+db_name=$(ynh_app_setting_get $app db_name)
 
-ynh_package_update
-ynh_package_install carton
+#=================================================
+# CHECK IF THE APP CAN BE RESTORED
+#=================================================
+ynh_print_info "Validating restoration parameters..."
 
-# Check domain/path availability
-sudo yunohost app checkurl "${domain}${path}" -a "${app}" \
-    || ynh_die "Path not available: ${domain}${path}"
+ynh_webpath_available $domain $path_url \
+	|| ynh_die "Path not available: ${domain}${path_url}"
+test ! -d $final_path \
+	|| ynh_die "There is already a directory: $final_path "
 
-# Check $final_path
-final_path="/var/www/${app}"
-if [ -d "${final_path}" ]; then
-	ynh_die "There is already a directory: ${final_path}"
-fi
+#=================================================
+# STANDARD RESTORATION STEPS
+#=================================================
+# REINSTALL DEPENDENCIES
+#=================================================
+ynh_print_info "Reinstalling dependencies..."
 
-# Check configuration files nginx
-nginx_conf="/etc/nginx/conf.d/${domain}.d/${app}.conf"
-if [ -f "${nginx_conf}" ]; then
-	ynh_die "The NGINX configuration already exists at '${nginx_conf}'. You should safely delete it before restoring this app."
-fi
+# Define and install dependencies
+ynh_install_app_dependencies $pkg_dependencies
+# Install Carton
+echo yes | cpanm Carton
 
-# Check configuration files lufi
-lufi_conf="${final_path}/${app}.conf"
-if [ -f "${lufi_conf}" ]; then
-	ynh_die "The LUFI CONF configuration already exists at '${lufi_conf}'. You should safely delete it before restoring this app."
-fi
+#=================================================
+# RESTORE THE NGINX CONFIGURATION
+#=================================================
 
-lufi_systemd="/etc/systemd/system/${app}.service"
-if [ -f "${lufi_systemd}" ]; then
-	ynh_die "The LUFI SYSTEMD configuration already exists at '${lufi_systemd}'. You should safely delete it before restoring this app."
-fi
+ynh_restore_file "/etc/nginx/conf.d/$domain.d/$app.conf"
 
-lufi_cron="/etc/cron.d/${app}"
-if [ -f "${lufi_cron}" ]; then
-	ynh_die "The LUFI CRONTAB configuration already exists at '${lufi_cron}'. You should safely delete it before restoring this app."
-fi
+#=================================================
+# RESTORE THE APP MAIN DIR
+#=================================================
+ynh_print_info "Restoring the app main directory..."
 
-lufi_logrotate="/etc/logrotate.d/${app}"
-if [ -f "${lufi_logrotate}" ]; then
-	ynh_die "The LUFI LOGROTATE configuration already exists at '${lufi_logrotate}'. You should safely delete it before restoring this app."
-fi
+ynh_restore_file "$final_path"
 
-lufi_log="/var/log/${app}/production.log"
-if [ -f "${lufi_log}" ]; then
-	ynh_die "The LUFI LOG configuration already exists at '${lufi_log}'. You should safely delete it before restoring this app."
-fi
+#=================================================
+# RECREATE THE DEDICATED USER
+#=================================================
+ynh_print_info "Recreating the dedicated system user..."
 
- # Restore sources & data
-sudo cp -a ./sources "${final_path}"
+# Create the dedicated user (if not existing)
+ynh_system_user_create $app
 
-# Set permissions
-sudo chown -R www-data: "${final_path}"
+#=================================================
+# RESTORE THE POSTGRESQL DATABASE
+#=================================================
+ynh_print_info "Restoring the PostregSQL database..."
 
-# Restore nginx configuration files
-sudo cp -a ./nginx.conf   "${nginx_conf}"
+db_pwd=$(ynh_app_setting_get $app psqlpwd)
+ynh_psql_test_if_first_run
+ynh_psql_setup_db $db_name $db_name $db_pwd
+ynh_psql_connect_as $db_name $db_pwd $db_name < ./db.sql
 
-# Restore lufi configuration files
-sudo cp -a ./lufi.conf "${lufi_conf}"
+#=================================================
+# RESTORE USER RIGHTS
+#=================================================
 
-# Restore service
-sudo cp -a ./systemd_lufi.service "${lufi_systemd}"
+# Restore permissions on app files
+chown -R $app:$app "$final_path"
 
-sudo cp -a ./cron_lufi "${lufi_cron}"
-sudo cp -a ./logrotate_lufi "${lufi_logrotate}"
+#=================================================
+# SPECIFIC RESTORATION
+#=================================================
+# RESTORE SYSTEMD
+#=================================================
+ynh_print_info "Restoring the systemd configuration..."
 
-# Create log production
-sudo mkdir "/var/log/${app}/"
-sudo cp -a ./production.log "${lufi_log}"
-# Delete symbolic link and restore
-sudo rm -fr "${final_path}/log/production.log"
-sudo ln -s "/var/log/${app}/production.log" "${final_path}/log/production.log"
+ynh_restore_file "/etc/systemd/system/$app.service"
+systemctl enable $app.service
+ynh_systemd_action -n $app -a start -l "Creating process id file" -p "$final_path/log/production.log"
 
-# Reload lufi service
-sudo systemctl daemon-reload
-sudo systemctl start lufi.service
-sudo systemctl enable lufi.service
+#=================================================
+# ADVERTISE SERVICE IN ADMIN PANEL
+#=================================================
 
-# Set ssowat config
-if [ "$is_public" = "No" ];
-then
-	ynh_app_setting_delete $app skipped_uris
-fi
+yunohost service add $app --log "$final_path/log/production.log"
 
-# Reload services
-sudo systemctl reload nginx
-sudo yunohost app ssowatconf
+#=================================================
+# RESTORE THE LOGROTATE CONFIGURATION
+#=================================================
+
+ynh_restore_file "/etc/logrotate.d/$app"
+
+#=================================================
+# RESTORE THE CRON CONFIGURATION
+#=================================================
+
+ynh_restore_file "/etc/cron.d/$app"
+
+#=================================================
+# GENERIC FINALIZATION
+#=================================================
+# RELOAD NGINX
+#=================================================
+ynh_print_info "Reloading nginx web server..."
+
+systemctl reload nginx
+yunohost app ssowatconf
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+
+ynh_print_info "Restoration completed for $app"

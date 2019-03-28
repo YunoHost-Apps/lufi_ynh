@@ -1,0 +1,19 @@
+[Unit]
+Description=Image hosting and sharing service
+Documentation=https://framagit.org/luc/lufi/wikis/home
+Requires=network.target
+After=network.target
+
+[Service]
+Type=simple
+User=__APP__
+Group=__APP__
+RemainAfterExit=yes
+WorkingDirectory=__FINALPATH__
+PIDFile=__FINALPATH__script/hypnotoad.pid
+ExecStart=/usr/local/bin/carton exec hypnotoad script/lufi
+ExecStop=/usr/local/bin/carton exec hypnotoad -s script/lufi
+ExecReload=/usr/local/bin/carton exec hypnotoad script/lufi
+
+[Install]
+WantedBy=multi-user.target
