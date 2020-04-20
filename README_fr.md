@@ -1,11 +1,11 @@
 # Lufi pour YunoHost
 
 [![Integration level](https://dash.yunohost.org/integration/lufi.svg)](https://dash.yunohost.org/appci/app/lufi)  
-[![Install lufi with YunoHost](https://install-app.yunohost.org/install-with-yunohost.png)](https://install-app.yunohost.org/?app=lufi)
+[![Install Lufi with YunoHost](https://install-app.yunohost.org/install-with-yunohost.png)](https://install-app.yunohost.org/?app=lufi)
 
 *[Read this readme in english.](./README.md)* 
 
-> *Ce package vous permet d'installer lufi rapidement et simplement sur un serveur Yunohost.  
+> *Ce package vous permet d'installer Lufi rapidement et simplement sur un serveur Yunohost.  
 Si vous n'avez pas YunoHost, regardez [ici](https://yunohost.org/#/install) pour savoir comment l'installer et en profiter.*
 
 ## Vue d'ensemble
@@ -15,7 +15,7 @@ Est-ce tout? Non. Tous les fichiers sont cryptés par le navigateur! Non chiffr�
 
 La clé de cryptage est une ancre (voir [Fragment Identifier](https://en.wikipedia.org/wiki/Fragment_identifier)), ce qui signifie que cette partie n'est traitée que par le client et n'atteint pas le serveur. :-)
 
-**Version incluse:** 0.03.5
+**Version incluse:** 0.04.6
 
 ## Captures d'écran
 
@@ -40,16 +40,17 @@ Comment configurer cette application: un fichier brut en SSH.
 L'authentification LDAP et HTTP est-elle prise en charge? **Oui**
 L'application peut-elle être utilisée par plusieurs utilisateurs? **Oui**
 
-#### Supported architectures
+#### Architectures supportées
 
 * x86-64b - [![Build Status](https://ci-apps.yunohost.org/ci/logs/lufi%20%28Community%29.svg)](https://ci-apps.yunohost.org/ci/apps/lufi/)
 * ARMv8-A - [![Build Status](https://ci-apps-arm.yunohost.org/ci/logs/lufi%20%28Community%29.svg)](https://ci-apps-arm.yunohost.org/ci/apps/lufi/)
-* Jessie x86-64b - [![Build Status](https://ci-stretch.nohost.me/ci/logs/lufi%20%28Community%29.svg)](https://ci-stretch.nohost.me/ci/apps/lufi/)
 
-## Links
+
+## Liens
 
  * Signaler un bug: https://github.com/YunoHost-Apps/lufi_ynh/issues
  * Site de l'application: https://framagit.org/fiat-tux/hat-softwares/lufi
+ * Dépôt de l'application principale: https://framagit.org/fiat-tux/hat-softwares/lufi
  * Site web YunoHost: https://yunohost.org/
 
 ---
