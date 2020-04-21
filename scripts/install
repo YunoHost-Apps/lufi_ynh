@@ -210,7 +210,7 @@ yunohost service add $app --log "$final_path/log/production.log"
 ynh_print_info --message="Starting a systemd service..."
 
 systemctl enable $app.service
-ynh_systemd_action -service_name=$app --action="start" --line_match="Creating process id file" --log_path="$final_path/log/production.log"
+ynh_systemd_action --service_name=$app --action="start" --line_match="Creating process id file" --log_path="$final_path/log/production.log"
 
 #=================================================
 # SETUP SSOWAT
