@@ -4,7 +4,7 @@
 		domain="domain.tld"	(DOMAIN)
 		path="/path"	(PATH)
 		max_file_size=100
-		is_public=1	(PUBLIC|public=1|private=0)
+		is_public="Yes" (PUBLIC|public=Yes|private=No)
 		admin="john" (USER)
 	; Checks
 		pkg_linter=1
