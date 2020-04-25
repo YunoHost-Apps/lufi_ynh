@@ -137,7 +137,7 @@ if [ $need_migration_from_sqlite_to_psql -eq 1 ]; then
 	db_user=$db_name
 	ynh_app_setting_set --app=$app --key=db_name --value=$db_name
 	# Initialize database and store postgres password for upgrade
-	ynh_psql_setup_db --db_user=user --db_name=name
+	ynh_psql_setup_db --db_user=$db_user --db_name=$db_name
 	db_pwd=$(ynh_app_setting_get --app=$app --key=psqlpwd) # Password created in ynh_psql_setup_db function
 fi
 
