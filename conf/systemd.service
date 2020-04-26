@@ -8,7 +8,6 @@ After=network.target
 Type=forking
 User=__APP__
 Group=__APP__
-RemainAfterExit=yes
 WorkingDirectory=__FINALPATH__
 PIDFile=__FINALPATH__script/hypnotoad.pid
 ExecStart=/usr/local/bin/carton exec hypnotoad script/lufi
