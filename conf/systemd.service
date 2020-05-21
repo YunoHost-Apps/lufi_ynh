@@ -5,12 +5,11 @@ Requires=network.target
 After=network.target
 
 [Service]
-Type=simple
+Type=forking
 User=__APP__
 Group=__APP__
-RemainAfterExit=yes
 WorkingDirectory=__FINALPATH__
-PIDFile=__FINALPATH__script/hypnotoad.pid
+PIDFile=__FINALPATH__/script/hypnotoad.pid
 ExecStart=/usr/local/bin/carton exec hypnotoad script/lufi
 ExecStop=/usr/local/bin/carton exec hypnotoad -s script/lufi
 ExecReload=/usr/local/bin/carton exec hypnotoad script/lufi
