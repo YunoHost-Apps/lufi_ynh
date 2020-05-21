@@ -1,11 +1,11 @@
 # Génération des statistiques. Tous les jours, à 5h.
-0 5 * * * www-data cd "__FINALPATH__" && /usr/local/bin/carton exec script/lufi cron stats
+0 5 * * * __USER__ cd "__FINALPATH__" && /usr/local/bin/carton exec script/lufi cron stats
 
 # Suppression des adresses IP obsolètes. Tous les jours, à 6h.
-0 6 * * * www-data cd "__FINALPATH__" && /usr/local/bin/carton exec script/lufi cron cleanbdd
+0 6 * * * __USER__ cd "__FINALPATH__" && /usr/local/bin/carton exec script/lufi cron cleanbdd
 
 # Suppression des images dont le délai a expiré. Tous les jours, à 6h.
-0 6 * * * www-data cd "__FINALPATH__" && /usr/local/bin/carton exec script/lufi cron cleanfiles
+0 6 * * * __USER__ cd "__FINALPATH__" && /usr/local/bin/carton exec script/lufi cron cleanfiles
 
 # Vérification de l'occupation du dossier des images. Tous les jours, à 7h.
-0 7 * * * www-data cd "__FINALPATH__" && /usr/local/bin/carton exec script/lufi cron watch
+0 7 * * * __USER__ cd "__FINALPATH__" && /usr/local/bin/carton exec script/lufi cron watch
