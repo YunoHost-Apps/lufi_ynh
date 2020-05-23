@@ -14,6 +14,7 @@
 		setup_private=1
 		setup_public=1
 		upgrade=1
+		# 0.01
 		upgrade=1        from_commit=1d53901957efcf8861b10efc8d3f081cadd2ba9e
 		# 0.03.5
 		upgrade=1        from_commit=6e05053ee90370e659d16abd9dcd9220e9e497f5
@@ -26,3 +27,8 @@
 ;;; Levels
 	# If the level 5 (Package linter) is forced to 1. Please add justifications here.
 	Level 5=auto
+;;; Upgrade options
+	; commit=1d53901957efcf8861b10efc8d3f081cadd2ba9e
+		name=0.01
+	; commit=6e05053ee90370e659d16abd9dcd9220e9e497f5
+		name=0.03.5
