@@ -51,6 +51,7 @@ fi
 if [ "${#final_path}" -eq 0 ]
 then	# Si final_path n'est pas renseigné dans la config yunohost, cas d'ancien script, code final_path en dur
 	final_path=/var/www/$app
+	ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 fi
 
 if [ -z "$db_pwd" ]; then
@@ -62,6 +63,7 @@ fi
 
 if [ -z "$max_file_size" ]; then
 	max_file_size=100 # 100 Mo
+	ynh_app_setting_set --app=$app --key=max_file_size --value=$max_file_size
 fi
 
 #=================================================
@@ -170,16 +172,9 @@ fi
 ynh_store_file_checksum --file="$config"
 
 #=================================================
-# SETUP CRON
+# INSTALL LUFI'S DEPENDENCIES VIA CARTON
 #=================================================
-
-cp ../conf/cron_lufi /etc/cron.d/$app
-ynh_replace_string --match_string="__FINALPATH__" --replace_string="$final_path/" --target_file="/etc/cron.d/$app"
-chmod +x $final_path/script/lufi
-
-#=================================================
-# Install lufi's dependencies via carton
-#=================================================
+ynh_print_info --message="Installing lufi..."
 
 pushd $final_path
 # Migrate from SQLite to PostgreSQL
@@ -194,6 +189,9 @@ if [ $need_migration_from_sqlite_to_psql -eq 1 ]; then
 		chown -R $app: "$final_path/log/production.log"
 	fi
 
+	# Restart with news parameters
+	ynh_systemd_action -n $app -a restart -l "Creating process id file" -p "$final_path/log/production.log"
+
 	carton exec script/lufi sqliteToOtherDB
 fi
 
@@ -201,10 +199,19 @@ carton install --deployment --without=sqlite --without=mysql --without=htpasswd 
 popd
 
 #=================================================
+# SETUP CRON
+#=================================================
+ynh_print_info --message="Setuping cron..."
+
+cp ../conf/cron_lufi /etc/cron.d/$app
+ynh_replace_string --match_string="__FINALPATH__" --replace_string="$final_path/" --target_file="/etc/cron.d/$app"
+chmod +x $final_path/script/lufi
+
+#=================================================
 # ADVERTISE SERVICE IN ADMIN PANEL
 #=================================================
 
-yunohost service add $app --log "$final_path/log/production.log"
+yunohost service add $app --description "lufi service" --log "$final_path/log/production.log"
 
 #=================================================
 # SETUP LOGROTATE
@@ -254,7 +261,7 @@ fi
 #=================================================
 ynh_print_info --message="Starting a systemd service..."
 
-ynh_systemd_action --service_name=$app --action="start" --log_path="$final_path/log/production.log" --line_match="Creating process id file"
+ynh_systemd_action --service_name=$app --action="restart" --log_path="$final_path/log/production.log" --line_match="Creating process id file"
 
 #=================================================
 # RELOAD NGINX

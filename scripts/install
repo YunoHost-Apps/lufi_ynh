@@ -75,8 +75,13 @@ ynh_print_info --message="Configuring firewall..."
 # Find an available port
 port=$(ynh_find_port --port=8095)
 ynh_app_setting_set --app=$app --key=port --value=$port
-# Open this port
-ynh_exec_warn_less yunohost firewall allow --no-upnp TCP $port
+
+# Optional: Expose this port publicly
+# (N.B. : you only need to do this if the app actually needs to expose the port publicly.
+# If you do this and the app doesn't actually need you are CREATING SECURITY HOLES IN THE SERVER !)
+
+# Open the port
+# ynh_exec_warn_less yunohost firewall allow --no-upnp TCP $port
 
 #=================================================
 # INSTALL DEPENDENCIES
@@ -84,6 +89,7 @@ ynh_exec_warn_less yunohost firewall allow --no-upnp TCP $port
 ynh_print_info --message="Installing dependencies..."
 
 ynh_install_app_dependencies $pkg_dependencies
+
 # Install Carton
 echo yes | cpanm Carton
 
@@ -155,7 +161,7 @@ fi
 ynh_store_file_checksum "$config"
 
 #=================================================
-# Install lufi's dependencies via carton
+# INSTALL LUFI'S DEPENDENCIES VIA CARTON
 #=================================================
 ynh_print_info --message="Installing lufi..."
 
@@ -166,6 +172,7 @@ popd
 #=================================================
 # SETUP CRON
 #=================================================
+ynh_print_info --message="Setuping a cron..."
 
 cp ../conf/cron_lufi /etc/cron.d/$app
 ynh_replace_string --match_string="__FINALPATH__" --replace_string="$final_path/" --target_file="/etc/cron.d/$app"
@@ -202,7 +209,7 @@ ynh_use_logrotate
 #=================================================
 ynh_print_info --message="Integrating service in YunoHost..."
 
-yunohost service add $app --log "$final_path/log/production.log"
+yunohost service add $app --description "lufi service" --log "$final_path/log/production.log"
 
 #=================================================
 # START SYSTEMD SERVICE
