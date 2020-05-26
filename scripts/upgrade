@@ -190,7 +190,7 @@ if [ $need_migration_from_sqlite_to_psql -eq 1 ]; then
 	fi
 
 	# Restart with news parameters
-	ynh_systemd_action -n $app -a restart -l "Creating process id file" -p "$final_path/log/production.log"
+	ynh_systemd_action --service_name=$app --action="restart" --log_path="$final_path/log/production.log" --line_match="Creating process id file"
 
 	carton exec script/lufi sqliteToOtherDB
 fi
