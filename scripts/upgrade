@@ -205,6 +205,7 @@ ynh_print_info --message="Setuping cron..."
 
 cp ../conf/cron_lufi /etc/cron.d/$app
 ynh_replace_string --match_string="__FINALPATH__" --replace_string="$final_path/" --target_file="/etc/cron.d/$app"
+ynh_replace_string --match_string="__USER__" --replace_string"$app" --target_file="/etc/cron.d/$app"
 chmod +x $final_path/script/lufi
 
 #=================================================
