@@ -15,7 +15,7 @@ Est-ce tout? Non. Tous les fichiers sont cryptés par le navigateur! Non chiffr�
 
 La clé de cryptage est une ancre (voir [Fragment Identifier](https://en.wikipedia.org/wiki/Fragment_identifier)), ce qui signifie que cette partie n'est traitée que par le client et n'atteint pas le serveur. :-)
 
-**Version incluse:** 0.04.6
+**Version incluse:** 0.03.5
 
 ## Captures d'écran
 
