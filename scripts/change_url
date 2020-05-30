@@ -12,7 +12,6 @@ source /usr/share/yunohost/helpers
 #=================================================
 # RETRIEVE ARGUMENTS
 #=================================================
-ynh_print_info --message="Retrieve arguments from the manifest"
 
 old_domain=$YNH_APP_OLD_DOMAIN
 old_path=$YNH_APP_OLD_PATH
@@ -25,12 +24,12 @@ app=$YNH_APP_INSTANCE_NAME
 #=================================================
 # LOAD SETTINGS
 #=================================================
-ynh_print_info --message="Loading installation settings..."
+ynh_script_progression --message="Loading installation settings..."
 
 # Needed for helper "ynh_add_nginx_config"
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 
-# Needed for lufi conf
+# Add settings here as needed by your application
 port=$(ynh_app_setting_get --app=$app --key=port)
 is_public=$(ynh_app_setting_get --app=$app --key=is_public)
 db_name=$(ynh_app_setting_get --app=$app --key=db_name)
@@ -42,7 +41,7 @@ max_file_size=$(ynh_app_setting_get --app=$app --key=max_file_size)
 #=================================================
 # BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
 #=================================================
-ynh_print_info --message="Backing up the app before changing its url (may take a while)..."
+ynh_script_progression --message="Backing up the app before changing its url (may take a while)..."
 
 # Backup the current version of the app
 ynh_backup_before_upgrade
@@ -77,14 +76,14 @@ fi
 #=================================================
 # STOP SYSTEMD SERVICE
 #=================================================
-ynh_print_info --message="Stopping a systemd service..."
+ynh_script_progression --message="Stopping a systemd service..."
 
 ynh_systemd_action --service_name=$app --action="stop" --log_path="$final_path/log/production.log"
 
 #=================================================
 # MODIFY URL IN NGINX CONF
 #=================================================
-ynh_print_info --message="Updating nginx web server configuration..."
+ynh_script_progression --message="Updating nginx web server configuration..."
 
 nginx_conf_path=/etc/nginx/conf.d/$old_domain.d/$app.conf
 
@@ -113,9 +112,9 @@ fi
 #=================================================
 # SPECIFIC MODIFICATIONS
 #=================================================
-# SETUP LUFI
+# CONFIGURE LUFI
 #=================================================
-ynh_print_info --message="Configuring lufi..."
+ynh_script_progression --message="Configuring lufi..."
 
 domain="$new_domain"
 path_url="$new_path"
@@ -145,7 +144,7 @@ ynh_store_file_checksum --file="$config"
 #=================================================
 # UPDATE SSOWAT
 #=================================================
-ynh_print_info --message="Reconfigure SSOwat"
+ynh_script_progression --message="Reconfigure SSOwat"
 
 ynh_app_setting_set $app unprotected_uris "/"
 if [ $is_public -eq 0 ]
@@ -164,14 +163,14 @@ fi
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
-ynh_print_info --message="Starting a systemd service..."
+ynh_script_progression --message="Starting a systemd service..."
 
 ynh_systemd_action --service_name=$app --action="start" --log_path="$final_path/log/production.log" --line_match="Creating process id file"
 
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_print_info --message="Reloading nginx web server..."
+ynh_script_progression --message="Reloading nginx web server..."
 
 ynh_systemd_action --service_name=nginx --action=reload
 
@@ -179,4 +178,4 @@ ynh_systemd_action --service_name=nginx --action=reload
 # END OF SCRIPT
 #=================================================
 
-ynh_print_info --message="Change of URL completed for $app"
+ynh_script_progression --message="Change of URL completed for $app"

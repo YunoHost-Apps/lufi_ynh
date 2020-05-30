@@ -12,7 +12,7 @@ source /usr/share/yunohost/helpers
 #=================================================
 # LOAD SETTINGS
 #=================================================
-ynh_print_info --message="Loading installation settings..."
+ynh_script_progression --message="Loading installation settings..."
 
 app=$YNH_APP_INSTANCE_NAME
 
@@ -30,14 +30,14 @@ max_file_size=$(ynh_app_setting_get --app=$app --key=max_file_size)
 #=================================================
 # CHECK VERSION
 #=================================================
-ynh_print_info --message="Checking version..."
+ynh_script_progression --message="Checking version..."
 
 upgrade_type=$(ynh_check_app_version_changed)
 
 #=================================================
 # ENSURE DOWNWARD COMPATIBILITY
 #=================================================
-ynh_print_info --message="Ensuring downward compatibility..."
+ynh_script_progression --message="Ensuring downward compatibility..."
 
 # Fix is_public as a boolean value
 if [ "$is_public" = "Yes" ]; then
@@ -48,8 +48,8 @@ elif [ "$is_public" = "No" ]; then
 	is_public=0
 fi
 
-if [ "${#final_path}" -eq 0 ]
-then	# Si final_path n'est pas renseigné dans la config yunohost, cas d'ancien script, code final_path en dur
+# If final_path doesn't exist, create it
+if [ -z "$final_path" ]; then
 	final_path=/var/www/$app
 	ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 fi
@@ -69,7 +69,7 @@ fi
 #=================================================
 # BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
 #=================================================
-ynh_print_info --message="Backing up the app before upgrading (may take a while)..."
+ynh_script_progression --message="Backing up the app before upgrading (may take a while)..."
 
 # Backup the current version of the app
 ynh_backup_before_upgrade
@@ -86,7 +86,7 @@ ynh_abort_if_errors
 #=================================================
 # STOP SYSTEMD SERVICE
 #=================================================
-ynh_print_info --message="Stopping a systemd service..."
+ynh_script_progression --message="Stopping a systemd service..."
 
 ynh_systemd_action --service_name=$app --action="stop" --log_path="$final_path/log/production.log"
 
@@ -96,7 +96,7 @@ ynh_systemd_action --service_name=$app --action="stop" --log_path="$final_path/l
 
 if [ "$upgrade_type" == "UPGRADE_APP" ]
 then
-	ynh_print_info --message="Upgrading source files..."
+	ynh_script_progression --message="Upgrading source files..."
 
 	# Download, check integrity, uncompress and patch the source from app.src
 	ynh_setup_source --dest_dir="$final_path"
@@ -105,7 +105,7 @@ fi
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
-ynh_print_info --message="Upgrading nginx web server configuration..."
+ynh_script_progression --message="Upgrading nginx web server configuration..."
 
 # Create a dedicated nginx config
 ynh_add_nginx_config max_file_size
@@ -113,14 +113,14 @@ ynh_add_nginx_config max_file_size
 #=================================================
 # UPGRADE DEPENDENCIES
 #=================================================
-ynh_print_info --message="Upgrading dependencies..."
+ynh_script_progression --message="Upgrading dependencies..."
 
 ynh_install_app_dependencies $pkg_dependencies
 
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
-ynh_print_info --message="Making sure dedicated system user exists..."
+ynh_script_progression --message="Making sure dedicated system user exists..."
 
 # Create a dedicated user (if not existing)
 ynh_system_user_create --username=$app
@@ -146,7 +146,7 @@ fi
 #=================================================
 # SETUP LUFI
 #=================================================
-ynh_print_info --message="Configuring lufi..."
+ynh_script_progression --message="Configuring lufi..."
 
 config=${final_path}/lufi.conf
 ynh_backup_if_checksum_is_different --file="$config"
@@ -161,20 +161,21 @@ ynh_replace_string --match_string="__MAX_FILE_SIZE__" --replace_string="$max_fil
 if [ $max_file_size -eq 0 ]; then # Comment the limitation line if no limit
 	ynh_replace_string --match_string="max_file_size" --replace_string="#max_file_size" --target_file="$config"
 fi
-
 ynh_replace_string --match_string="__SECRET__" --replace_string="$secret" --target_file="$config"
+
 if [ $is_public -eq 0 ];
 then
 	ynh_replace_string --match_string="__IS_PUBLIC__" --replace_string="" --target_file="$config"
 else
 	ynh_replace_string --match_string="__IS_PUBLIC__" --replace_string="#" --target_file="$config"
 fi
+
 ynh_store_file_checksum --file="$config"
 
 #=================================================
-# INSTALL LUFI'S DEPENDENCIES VIA CARTON
+# BUILD LUFI
 #=================================================
-ynh_print_info --message="Installing lufi..."
+ynh_script_progression --message="Building Lufi..."
 
 pushd $final_path
 # Migrate from SQLite to PostgreSQL
@@ -201,7 +202,7 @@ popd
 #=================================================
 # SETUP CRON
 #=================================================
-ynh_print_info --message="Setuping cron..."
+ynh_script_progression --message="Setuping cron..."
 
 cp ../conf/cron_lufi /etc/cron.d/$app
 ynh_replace_string --match_string="__FINALPATH__" --replace_string="$final_path/" --target_file="/etc/cron.d/$app"
@@ -211,13 +212,14 @@ chmod +x $final_path/script/lufi
 #=================================================
 # ADVERTISE SERVICE IN ADMIN PANEL
 #=================================================
+ynh_script_progression --message="Storing the config file checksum..."
 
 yunohost service add $app --description "lufi service" --log "$final_path/log/production.log"
 
 #=================================================
 # SETUP LOGROTATE
 #=================================================
-ynh_print_info --message="Upgrading logrotate configuration..."
+ynh_script_progression --message="Upgrading logrotate configuration..."
 
 # Use logrotate to manage app-specific logfile(s)
 ynh_use_logrotate --non-append
@@ -225,7 +227,7 @@ ynh_use_logrotate --non-append
 #=================================================
 # SETUP SYSTEMD
 #=================================================
-ynh_print_info --message="Upgrading systemd configuration..."
+ynh_script_progression --message="Upgrading systemd configuration..."
 
 # Create a dedicated systemd config
 ynh_add_systemd_config
@@ -235,7 +237,7 @@ ynh_add_systemd_config
 #=================================================
 # SECURING FILES AND DIRECTORIES
 #=================================================
-ynh_print_info --message="Securing files and directories..."
+ynh_script_progression --message="Securing files and directories..."
 
 # Set permissions on app files
 chown -R $app: $final_path
@@ -243,7 +245,7 @@ chown -R $app: $final_path
 #=================================================
 # SETUP SSOWAT
 #=================================================
-ynh_print_info --message="Upgrading SSOwat configuration..."
+ynh_script_progression --message="Upgrading SSOwat configuration..."
 
 ynh_app_setting_set --app=$app --key=unprotected_uris --value="/"
 if [ $is_public -eq 0 ]
@@ -260,14 +262,14 @@ fi
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
-ynh_print_info --message="Starting a systemd service..."
+ynh_script_progression --message="Starting a systemd service..."
 
 ynh_systemd_action --service_name=$app --action="restart" --log_path="$final_path/log/production.log" --line_match="Creating process id file"
 
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_print_info --message="Reloading nginx web server..."
+ynh_script_progression --message="Reloading nginx web server..."
 
 ynh_systemd_action --service_name=nginx --action=reload
 
@@ -275,4 +277,4 @@ ynh_systemd_action --service_name=nginx --action=reload
 # END OF SCRIPT
 #=================================================
 
-ynh_print_info --message="Upgrade of $app completed"
+ynh_script_progression --message="Upgrade of $app completed"

@@ -13,7 +13,6 @@ source /usr/share/yunohost/helpers
 #=================================================
 # MANAGE SCRIPT FAILURE
 #=================================================
-ynh_print_info --message="Managing script failure..."
 
 ynh_clean_setup () {
 	ynh_clean_check_starting
@@ -24,7 +23,7 @@ ynh_abort_if_errors
 #=================================================
 # LOAD SETTINGS
 #=================================================
-ynh_print_info --message="Loading settings..."
+ynh_script_progression --message="Loading settings..."
 
 app=$YNH_APP_INSTANCE_NAME
 
@@ -37,7 +36,7 @@ db_user=$db_name
 #=================================================
 # CHECK IF THE APP CAN BE RESTORED
 #=================================================
-ynh_print_info --message="Validating restoration parameters..."
+ynh_script_progression --message="Validating restoration parameters..."
 
 ynh_webpath_available --domain=$domain --path_url=$path_url \
 	|| ynh_die --message="Path not available: ${domain}${path_url}"
@@ -49,21 +48,21 @@ test ! -d $final_path \
 #=================================================
 # RESTORE THE NGINX CONFIGURATION
 #=================================================
-ynh_print_info --message="Restoring the nginx configuration..."
+ynh_script_progression --message="Restoring the nginx configuration..."
 
 ynh_restore_file --origin_path="/etc/nginx/conf.d/$domain.d/$app.conf"
 
 #=================================================
 # RESTORE THE APP MAIN DIR
 #=================================================
-ynh_print_info --message="Restoring the app main directory..."
+ynh_script_progression --message="Restoring the app main directory..."
 
 ynh_restore_file --origin_path="$final_path"
 
 #=================================================
 # RECREATE THE DEDICATED USER
 #=================================================
-ynh_print_info --message="Recreating the dedicated system user..."
+ynh_script_progression --message="Recreating the dedicated system user..."
 
 # Create the dedicated user (if not existing)
 ynh_system_user_create --username=$app
@@ -71,7 +70,7 @@ ynh_system_user_create --username=$app
 #=================================================
 # RESTORE USER RIGHTS
 #=================================================
-ynh_print_info --message="Restoring user rights..."
+ynh_script_progression --message="Restoring user rights..."
 
 # Restore permissions on app files
 chown -R $app:$app $final_path
@@ -81,7 +80,7 @@ chown -R $app:$app $final_path
 #=================================================
 # REINSTALL DEPENDENCIES
 #=================================================
-ynh_print_info --message="Reinstalling dependencies..."
+ynh_script_progression --message="Reinstalling dependencies..."
 
 # Define and install dependencies
 ynh_install_app_dependencies $pkg_dependencies
@@ -92,17 +91,17 @@ echo yes | cpanm Carton
 #=================================================
 # RESTORE THE POSTGRESQL DATABASE
 #=================================================
-ynh_print_info --message="Restoring the PostregSQL database..."
+ynh_script_progression --message="Restoring the PostregSQL database..."
 
-db_pwd=$(ynh_app_setting_get --app=$app --key=psqlpwd)
 ynh_psql_test_if_first_run
+db_pwd=$(ynh_app_setting_get --app=$app --key=psqlpwd)
 ynh_psql_setup_db --db_user=$db_user --db_name=$db_name --db_pwd=$db_pwd
 ynh_psql_connect_as --user=$db_user --password=$db_pwd --database=$db_name < ./db.sql
 
 #=================================================
 # RESTORE SYSTEMD
 #=================================================
-ynh_print_info --message="Restoring the systemd configuration..."
+ynh_script_progression --message="Restoring the systemd configuration..."
 
 ynh_restore_file --origin_path="/etc/systemd/system/$app.service"
 systemctl enable $app.service
@@ -110,28 +109,28 @@ systemctl enable $app.service
 #=================================================
 # INTEGRATE SERVICE IN YUNOHOST
 #=================================================
-ynh_print_info --message="Integrating service in YunoHost..."
+ynh_script_progression --message="Integrating service in YunoHost..."
 
 yunohost service add $app --description "lufi service" --log "$final_path/log/production.log"
 
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
-ynh_print_info --message="Starting a systemd service..."
+ynh_script_progression --message="Starting a systemd service..."
 
 ynh_systemd_action --service_name=$app --action="start" --log_path="$final_path/log/production.log" --line_match="Creating process id file"
 
 #=================================================
 # RESTORE THE CRON FILE
 #=================================================
-ynh_print_info --message="Restoring the cron file..."
+ynh_script_progression --message="Restoring the cron file..."
 
 ynh_restore_file --origin_path="/etc/cron.d/$app"
 
 #=================================================
 # RESTORE THE LOGROTATE CONFIGURATION
 #=================================================
-ynh_print_info --message="Restoring the logrotate configuration..."
+ynh_script_progression --message="Restoring the logrotate configuration..."
 
 ynh_restore_file --origin_path="/etc/logrotate.d/$app"
 
@@ -140,7 +139,7 @@ ynh_restore_file --origin_path="/etc/logrotate.d/$app"
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_print_info --message="Reloading nginx web server..."
+ynh_script_progression --message="Reloading nginx web server..."
 
 ynh_systemd_action --service_name=nginx --action=reload
 
@@ -148,4 +147,4 @@ ynh_systemd_action --service_name=nginx --action=reload
 # END OF SCRIPT
 #=================================================
 
-ynh_print_info --message="Restoration completed for $app"
+ynh_script_progression --message="Restoration completed for $app"
