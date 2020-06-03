@@ -32,6 +32,7 @@ path_url=$(ynh_app_setting_get --app=$app --key=path)
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 db_name=$(ynh_app_setting_get --app=$app --key=db_name)
 db_user=$db_name
+db_pwd=$(ynh_app_setting_get --app=$app --key=psqlpwd)
 
 #=================================================
 # CHECK IF THE APP CAN BE RESTORED
@@ -94,9 +95,8 @@ echo yes | cpanm Carton
 ynh_script_progression --message="Restoring the PostregSQL database..."
 
 ynh_psql_test_if_first_run
-db_pwd=$(ynh_app_setting_get --app=$app --key=psqlpwd)
 ynh_psql_setup_db --db_user=$db_user --db_name=$db_name --db_pwd=$db_pwd
-ynh_psql_connect_as --user=$db_user --password=$db_pwd --database=$db_name < ./db.sql
+ynh_psql_execute_file_as_root --file="./db.sql" --database="$db_name"
 
 #=================================================
 # RESTORE SYSTEMD
