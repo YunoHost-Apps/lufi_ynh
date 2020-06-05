@@ -1,12 +1,12 @@
 # Lufi for YunoHost
 
-[![Integration level](https://dash.yunohost.org/integration/lufi.svg)](https://dash.yunohost.org/appci/app/lufi)  
-[![Install lufi with YunoHost](https://install-app.yunohost.org/install-with-yunohost.png)](https://install-app.yunohost.org/?app=lufi)
+[![Integration level](https://dash.yunohost.org/integration/lufi.svg)](https://dash.yunohost.org/appci/app/lufi) ![](https://ci-apps.yunohost.org/ci/badges/lufi.status.svg) ![](https://ci-apps.yunohost.org/ci/badges/lufi.maintain.svg)  
+[![Install Lufi with YunoHost](https://install-app.yunohost.org/install-with-yunohost.png)](https://install-app.yunohost.org/?app=lufi)
 
 *[Lire ce readme en français.](./README_fr.md)*
 
-> *This package allow you to install lufi quickly and simply on a YunoHost server.  
-If you don't have YunoHost, please see [here](https://yunohost.org/#/install) to know how to install and enjoy it.*
+> *This package allows you to install Lufi quickly and simply on a YunoHost server.  
+If you don't have YunoHost, please consult [the guide](https://yunohost.org/#/install) to learn how to install it.*
 
 ## Overview
 It stores files and allows you to download them.
@@ -28,7 +28,7 @@ The encryption key part of the URL is a anchor (Cf. [Fragment Identifier](https:
 
 ## Configuration
 
-How to configure this app: a plain file with SSH.
+How to configure this app: a plain file at `/var/www/lufi/lufi.conf` with SSH.
 
 ## Documentation
 
@@ -36,30 +36,31 @@ How to configure this app: a plain file with SSH.
 
 ## YunoHost specific features
 
-#### Multi-users support
+#### Multi-user support
 
 Are LDAP and HTTP auth supported? **Yes**
 Can the app be used by multiple users? **Yes**
 
 #### Supported architectures
 
-* x86-64b - [![Build Status](https://ci-apps.yunohost.org/ci/logs/lufi%20%28Community%29.svg)](https://ci-apps.yunohost.org/ci/apps/lufi/)
-* ARMv8-A - [![Build Status](https://ci-apps-arm.yunohost.org/ci/logs/lufi%20%28Community%29.svg)](https://ci-apps-arm.yunohost.org/ci/apps/lufi/)
-* Jessie x86-64b - [![Build Status](https://ci-stretch.nohost.me/ci/logs/lufi%20%28Community%29.svg)](https://ci-stretch.nohost.me/ci/apps/lufi/)
+* x86-64 - [![Build Status](https://ci-apps.yunohost.org/ci/logs/lufi%20%28Apps%29.svg)](https://ci-apps.yunohost.org/ci/apps/lufi/)
+* ARMv8-A - [![Build Status](https://ci-apps-arm.yunohost.org/ci/logs/lufi%20%28Apps%29.svg)](https://ci-apps-arm.yunohost.org/ci/apps/lufi/)
+
+**More info on the documentation page:**  
+https://yunohost.org/packaging_apps
 
 ## Links
 
  * Report a bug: https://github.com/YunoHost-Apps/lufi_ynh/issues
- * App website: https://framagit.org/fiat-tux/hat-softwares/lufi
+ * Upstream app repository: https://framagit.org/fiat-tux/hat-softwares/lufi
  * YunoHost website: https://yunohost.org/
 
 ---
 
-Developers info
+Developer info
 ----------------
 
-**Only if you want to use a testing branch for coding, instead of merging directly into master.**
-Please do your pull request to the [testing branch](https://github.com/YunoHost-Apps/lufi_ynh/tree/testing).
+Please send your pull request to the [testing branch](https://github.com/YunoHost-Apps/lufi_ynh/tree/testing).
 
 To try the testing branch, please proceed like that.
 ```
@@ -67,6 +68,3 @@ sudo yunohost app install https://github.com/YunoHost-Apps/lufi_ynh/tree/testing
 or
 sudo yunohost app upgrade lufi -u https://github.com/YunoHost-Apps/lufi_ynh/tree/testing --debug
 ```
-
-**More information on the documentation page:**  
-https://yunohost.org/packaging_apps
