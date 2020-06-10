@@ -48,8 +48,8 @@ Comment configurer cette application: un fichier brut en SSH.
 ## Liens
 
  * Signaler un bug : https://github.com/YunoHost-Apps/lufi_ynh/issues
- * Dépôt de l'application principale: https://framagit.org/fiat-tux/hat-softwares/lufi
- * Site web YunoHost: https://yunohost.org/
+ * Dépôt de l'application principale : https://framagit.org/fiat-tux/hat-softwares/lufi
+ * Site web YunoHost : https://yunohost.org/
 
 ---
 
