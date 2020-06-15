@@ -2,9 +2,6 @@
 	"name": "Lufi",
 	"id": "lufi",
 	"packaging_format": 1,
-	"requirements": {
-		"yunohost": ">= 3.2.2"
-	},
 	"description": {
 		"en": "Self hosting files and sharing anonymous application",
 		"fr": "Application d'hébergement et de partage de fichiers anonyme"
@@ -16,6 +13,9 @@
 		"name": "frju365, cyp",
 		"email": "win10@tutanota.com, cyp@rouquin.me"
 	},
+	"requirements": {
+        "yunohost": ">= 3.5"
+	},
 	"multi_instance": true,
 	"services": [
 		"nginx"
@@ -26,8 +26,8 @@
 				"name": "domain",
 				"type": "domain",
 				"ask": {
-					"en": "Choose a domain for Lufi",
-					"fr": "Choisissez un domaine pour Lufi"
+					"en": "Choose a domain name for Lufi",
+					"fr": "Choisissez un nom de domaine pour Lufi"
 				},
 				"example": "domain.org"
 			},
