@@ -11,9 +11,9 @@ Si vous n'avez pas YunoHost, consultez [le guide](https://yunohost.org/#/install
 ## Vue d'ensemble
 Il stocke vos fichiers et vous permet de les télécharger.
 
-Est-ce tout? Non. Tous les fichiers sont cryptés par le navigateur! Non chiffré. Ça ne marche pas. L'administrateur de l'instance Lufi ne pourra pas voir quel est votre administrateur réseau ou votre FAI.
+Est-ce tout? Non. Tous les fichiers sont chiffrés par le navigateur! L'administrateur de l'instance Lufi ne pourra pas voir quel est votre administrateur réseau ou votre FAI.
 
-La clé de cryptage est une ancre (voir [Fragment Identifier](https://en.wikipedia.org/wiki/Fragment_identifier)), ce qui signifie que cette partie n'est traitée que par le client et n'atteint pas le serveur. :-)
+La clé de déchiffrement est une ancre (voir [Fragment Identifier](https://en.wikipedia.org/wiki/Fragment_identifier)), ce qui signifie que cette partie n'est traitée que par le client et n'atteint pas le serveur. :-)
 
 **Version incluse:** 0.03.5
 
