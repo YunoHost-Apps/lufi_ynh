@@ -32,6 +32,7 @@ La clé de déchiffrement est une ancre (voir [Fragment Identifier](https://en.w
 ## Documentation
 
  * Documentation officielle : https://framagit.org/luc/lufi/wikis/home
+ * Documentation YunoHost : https://yunohost.org/#/app_lufi_fr
 
 ## Caractéristiques spécifiques YunoHost
 

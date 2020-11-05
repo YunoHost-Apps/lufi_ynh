@@ -33,6 +33,7 @@ The encryption key part of the URL is a anchor (Cf. [Fragment Identifier](https:
 ## Documentation
 
  * Official documentation: https://framagit.org/luc/lufi/wikis/home
+  * YunoHost documentation: https://yunohost.org/#/app_lufi
 
 ## YunoHost specific features
 
