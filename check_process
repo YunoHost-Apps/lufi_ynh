@@ -14,21 +14,15 @@
 		setup_private=1
 		setup_public=1
 		upgrade=1
-		# 0.01
-		upgrade=1        from_commit=1d53901957efcf8861b10efc8d3f081cadd2ba9e
 		# 0.03.5
-		upgrade=1        from_commit=6e05053ee90370e659d16abd9dcd9220e9e497f5
+		upgrade=1        from_commit=64a53051c3cd12840ca32b2fdaf0c3063e0158bf
 		backup_restore=1
 		multi_instance=1
-		# This test is no longer necessary since the version 2.7 (PR: https://github.com/YunoHost/yunohost/pull/304), you can still do it if your app could be installed with this version.
-		# incorrect_path=1
 		port_already_use=1 (8095)
 		change_url=1
 ;;; Levels
 	# If the level 5 (Package linter) is forced to 1. Please add justifications here.
 	Level 5=auto
 ;;; Upgrade options
-	; commit=1d53901957efcf8861b10efc8d3f081cadd2ba9e
-		name=0.01
-	; commit=6e05053ee90370e659d16abd9dcd9220e9e497f5
-		name=0.03.5
+	; commit=64a53051c3cd12840ca32b2fdaf0c3063e0158bf
+		name=Merge pull request #42 from YunoHost-Apps/testing
