@@ -16,7 +16,7 @@ The administrator of the Lufi instance you use will not be able to see what is i
 
 The encryption key part of the URL is a anchor (Cf. [Fragment Identifier](https://en.wikipedia.org/wiki/Fragment_identifier)), that means this part is only processed client-side and does not reach the server. :-)
 
-**Shipped version:** 0.03.5
+**Shipped version:** 0.05.7
 
 ## Screenshots
 
@@ -28,11 +28,12 @@ The encryption key part of the URL is a anchor (Cf. [Fragment Identifier](https:
 
 ## Configuration
 
-How to configure this app: a plain file at `/var/www/lufi/lufi.conf` with SSH.
+* How to configure this app: a plain file at `/var/www/lufi/lufi.conf` with SSH.
 
 ## Documentation
 
  * Official documentation: https://framagit.org/luc/lufi/wikis/home
+  * YunoHost documentation: https://yunohost.org/#/app_lufi
 
 ## YunoHost specific features
 
@@ -46,9 +47,6 @@ Can the app be used by multiple users? **Yes**
 * x86-64 - [![Build Status](https://ci-apps.yunohost.org/ci/logs/lufi%20%28Apps%29.svg)](https://ci-apps.yunohost.org/ci/apps/lufi/)
 * ARMv8-A - [![Build Status](https://ci-apps-arm.yunohost.org/ci/logs/lufi%20%28Apps%29.svg)](https://ci-apps-arm.yunohost.org/ci/apps/lufi/)
 
-**More info on the documentation page:**  
-https://yunohost.org/packaging_apps
-
 ## Links
 
  * Report a bug: https://github.com/YunoHost-Apps/lufi_ynh/issues
@@ -57,8 +55,7 @@ https://yunohost.org/packaging_apps
 
 ---
 
-Developer info
-----------------
+## Developer info
 
 Please send your pull request to the [testing branch](https://github.com/YunoHost-Apps/lufi_ynh/tree/testing).
 
