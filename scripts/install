@@ -127,7 +127,7 @@ ynh_system_user_create --username=$app
 #=================================================
 # CONFIGURE LUFI
 #=================================================
-ynh_script_progression --message="Configuring lufi..."
+ynh_script_progression --message="Configuring $app..."
 
 config=${final_path}/lufi.conf
 cp ../conf/lufi.conf.template "$config"
@@ -155,7 +155,7 @@ ynh_store_file_checksum --file="$config"
 #=================================================
 # INSTALL LUFI
 #=================================================
-ynh_script_progression --message="Installing lufi..."
+ynh_script_progression --message="Installing $app..."
 
 pushd $final_path
 	carton install --deployment --without=sqlite  --without=mysql --without=htpasswd --without=test
