@@ -86,9 +86,6 @@ ynh_script_progression --message="Reinstalling dependencies..."
 # Define and install dependencies
 ynh_install_app_dependencies $pkg_dependencies
 
-# Install Carton
-echo yes | cpanm Carton
-
 #=================================================
 # RESTORE THE POSTGRESQL DATABASE
 #=================================================
