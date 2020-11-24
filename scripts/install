@@ -74,13 +74,6 @@ ynh_script_progression --message="Configuring firewall..."
 port=$(ynh_find_port --port=8095)
 ynh_app_setting_set --app=$app --key=port --value=$port
 
-# Optional: Expose this port publicly
-# (N.B. : you only need to do this if the app actually needs to expose the port publicly.
-# If you do this and the app doesn't actually need you are CREATING SECURITY HOLES IN THE SERVER !)
-
-# Open the port
-# ynh_exec_warn_less yunohost firewall allow --no-upnp TCP $port
-
 #=================================================
 # INSTALL DEPENDENCIES
 #=================================================
@@ -113,9 +106,9 @@ ynh_setup_source --dest_dir="$final_path"
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
-ynh_script_progression --message="Configuring nginx web server..."
+ynh_script_progression --message="Configuring NGINX web server..."
 
-# Create a dedicated nginx config
+# Create a dedicated NGINX config
 ynh_add_nginx_config max_file_size
 
 #=================================================
@@ -131,7 +124,7 @@ ynh_system_user_create --username=$app
 #=================================================
 # CONFIGURE LUFI
 #=================================================
-ynh_script_progression --message="Configuring lufi..."
+ynh_script_progression --message="Configuring $app..."
 
 config=${final_path}/lufi.conf
 cp ../conf/lufi.conf.template "$config"
@@ -159,7 +152,7 @@ ynh_store_file_checksum --file="$config"
 #=================================================
 # INSTALL LUFI
 #=================================================
-ynh_script_progression --message="Installing lufi..."
+ynh_script_progression --message="Installing $app..."
 
 pushd $final_path
 	carton install --deployment --without=sqlite  --without=mysql --without=htpasswd --without=test
@@ -236,7 +229,7 @@ fi
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_script_progression --message="Reloading nginx web server..."
+ynh_script_progression --message="Reloading NGINX web server..."
 
 ynh_systemd_action --service_name=nginx --action=reload
 

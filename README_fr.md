@@ -11,11 +11,11 @@ Si vous n'avez pas YunoHost, consultez [le guide](https://yunohost.org/#/install
 ## Vue d'ensemble
 Il stocke vos fichiers et vous permet de les télécharger.
 
-Est-ce tout? Non. Tous les fichiers sont chiffrés par le navigateur! L'administrateur de l'instance Lufi ne pourra pas voir quel est votre administrateur réseau ou votre FAI.
+Est-ce tout ? Non. Tous les fichiers sont chiffrés par le navigateur ! L'administrateur de l'instance Lufi ne pourra pas voir quel est votre administrateur réseau ou votre FAI.
 
 La clé de déchiffrement est une ancre (voir [Fragment Identifier](https://en.wikipedia.org/wiki/Fragment_identifier)), ce qui signifie que cette partie n'est traitée que par le client et n'atteint pas le serveur. :-)
 
-**Version incluse:** 0.03.5
+**Version incluse:** 0.05.7
 
 ## Captures d'écran
 
@@ -27,11 +27,12 @@ La clé de déchiffrement est une ancre (voir [Fragment Identifier](https://en.w
 
 ## Configuration
 
-Comment configurer cette application: un fichier brut en SSH.
+* Comment configurer cette application: un fichier brut `/var/www/lufi/lufi.conf`  en SSH.
 
 ## Documentation
 
- * Documentation officielle: https://framagit.org/luc/lufi/wikis/home
+ * Documentation officielle : https://framagit.org/luc/lufi/wikis/home
+ * Documentation YunoHost : https://yunohost.org/#/app_lufi_fr
 
 ## Caractéristiques spécifiques YunoHost
 
@@ -53,8 +54,7 @@ Comment configurer cette application: un fichier brut en SSH.
 
 ---
 
-Informations pour les développeurs
-----------------
+## Informations pour les développeurs
 
 Merci de faire vos pull request sur la [branche testing](https://github.com/YunoHost-Apps/lufi_ynh/tree/testing).
 
