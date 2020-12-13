@@ -211,7 +211,7 @@ chmod +x $final_path/script/lufi
 #=================================================
 ynh_script_progression --message="Storing the config file checksum..."
 
-yunohost service add $app --description "lufi service" --log "$final_path/log/production.log"
+yunohost service add $app --description="Lufi service" --log="$final_path/log/production.log"
 
 #=================================================
 # SETUP LOGROTATE

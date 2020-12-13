@@ -20,9 +20,6 @@
 		multi_instance=1
 		port_already_use=1 (8095)
 		change_url=1
-;;; Levels
-	# If the level 5 (Package linter) is forced to 1. Please add justifications here.
-	Level 5=auto
 ;;; Upgrade options
 	; commit=64a53051c3cd12840ca32b2fdaf0c3063e0158bf
 		name=Merge pull request #42 from YunoHost-Apps/testing
