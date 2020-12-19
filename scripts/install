@@ -39,9 +39,6 @@ ynh_script_progression --message="Validating installation parameters..."
 final_path=/var/www/$app
 test ! -e "$final_path" || ynh_die --message="This path already contains a folder"
 
-# Normalize the url path syntax
-path_url=$(ynh_normalize_url_path --path_url=$path_url)
-
 # Check if max_file_size is a number
 if ! [[ $max_file_size =~ "^[\-0-9]+$" ]] && [ $max_file_size -lt 0 ]; then
    ynh_die --message="Max file must be a number positive or zero"
@@ -74,22 +71,12 @@ ynh_script_progression --message="Configuring firewall..."
 port=$(ynh_find_port --port=8095)
 ynh_app_setting_set --app=$app --key=port --value=$port
 
-# Optional: Expose this port publicly
-# (N.B. : you only need to do this if the app actually needs to expose the port publicly.
-# If you do this and the app doesn't actually need you are CREATING SECURITY HOLES IN THE SERVER !)
-
-# Open the port
-# ynh_exec_warn_less yunohost firewall allow --no-upnp TCP $port
-
 #=================================================
 # INSTALL DEPENDENCIES
 #=================================================
 ynh_script_progression --message="Installing dependencies..."
 
 ynh_install_app_dependencies $pkg_dependencies
-
-# Install Carton
-echo yes | cpanm Carton
 
 #=================================================
 # CREATE A POSTGRESQL DATABASE
@@ -116,9 +103,9 @@ ynh_setup_source --dest_dir="$final_path"
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
-ynh_script_progression --message="Configuring nginx web server..."
+ynh_script_progression --message="Configuring NGINX web server..."
 
-# Create a dedicated nginx config
+# Create a dedicated NGINX config
 ynh_add_nginx_config max_file_size
 
 #=================================================
@@ -134,7 +121,7 @@ ynh_system_user_create --username=$app
 #=================================================
 # CONFIGURE LUFI
 #=================================================
-ynh_script_progression --message="Configuring lufi..."
+ynh_script_progression --message="Configuring $app..."
 
 config=${final_path}/lufi.conf
 cp ../conf/lufi.conf.template "$config"
@@ -162,7 +149,7 @@ ynh_store_file_checksum --file="$config"
 #=================================================
 # INSTALL LUFI
 #=================================================
-ynh_script_progression --message="Installing lufi..."
+ynh_script_progression --message="Installing $app..."
 
 pushd $final_path
 	carton install --deployment --without=sqlite  --without=mysql --without=htpasswd --without=test
@@ -209,7 +196,7 @@ ynh_use_logrotate
 #=================================================
 ynh_script_progression --message="Integrating service in YunoHost..."
 
-yunohost service add $app --description "Lufi service" --log "$final_path/log/production.log"
+yunohost service add $app --description="Lufi service" --log="$final_path/log/production.log"
 
 #=================================================
 # START SYSTEMD SERVICE
@@ -239,7 +226,7 @@ fi
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_script_progression --message="Reloading nginx web server..."
+ynh_script_progression --message="Reloading NGINX web server..."
 
 ynh_systemd_action --service_name=nginx --action=reload
 

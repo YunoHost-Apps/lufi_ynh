@@ -105,7 +105,7 @@ fi
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
-ynh_script_progression --message="Upgrading nginx web server configuration..."
+ynh_script_progression --message="Upgrading NGINX web server configuration..."
 
 # Create a dedicated nginx config
 ynh_add_nginx_config max_file_size
@@ -211,7 +211,7 @@ chmod +x $final_path/script/lufi
 #=================================================
 ynh_script_progression --message="Storing the config file checksum..."
 
-yunohost service add $app --description "lufi service" --log "$final_path/log/production.log"
+yunohost service add $app --description="Lufi service" --log="$final_path/log/production.log"
 
 #=================================================
 # SETUP LOGROTATE
@@ -266,7 +266,7 @@ ynh_systemd_action --service_name=$app --action="restart" --log_path="$final_pat
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_script_progression --message="Reloading nginx web server..."
+ynh_script_progression --message="Reloading NGINX web server..."
 
 ynh_systemd_action --service_name=nginx --action=reload
 

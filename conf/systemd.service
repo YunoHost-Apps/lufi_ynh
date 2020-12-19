@@ -10,9 +10,9 @@ User=__APP__
 Group=__APP__
 WorkingDirectory=__FINALPATH__
 PIDFile=__FINALPATH__/script/hypnotoad.pid
-ExecStart=/usr/local/bin/carton exec hypnotoad script/lufi
-ExecStop=/usr/local/bin/carton exec hypnotoad -s script/lufi
-ExecReload=/usr/local/bin/carton exec hypnotoad script/lufi
+ExecStart=/usr/bin/carton exec hypnotoad script/lufi
+ExecStop=/usr/bin/carton exec hypnotoad -s script/lufi
+ExecReload=/usr/bin/carton exec hypnotoad script/lufi
 
 [Install]
 WantedBy=multi-user.target

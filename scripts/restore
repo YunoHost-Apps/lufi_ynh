@@ -49,7 +49,7 @@ test ! -d $final_path \
 #=================================================
 # RESTORE THE NGINX CONFIGURATION
 #=================================================
-ynh_script_progression --message="Restoring the nginx configuration..."
+ynh_script_progression --message="Restoring NGINX configuration..."
 
 ynh_restore_file --origin_path="/etc/nginx/conf.d/$domain.d/$app.conf"
 
@@ -86,9 +86,6 @@ ynh_script_progression --message="Reinstalling dependencies..."
 # Define and install dependencies
 ynh_install_app_dependencies $pkg_dependencies
 
-# Install Carton
-echo yes | cpanm Carton
-
 #=================================================
 # RESTORE THE POSTGRESQL DATABASE
 #=================================================
@@ -104,14 +101,14 @@ ynh_psql_execute_file_as_root --file="./db.sql" --database="$db_name"
 ynh_script_progression --message="Restoring the systemd configuration..."
 
 ynh_restore_file --origin_path="/etc/systemd/system/$app.service"
-systemctl enable $app.service
+systemctl enable $app.service --quiet
 
 #=================================================
 # INTEGRATE SERVICE IN YUNOHOST
 #=================================================
 ynh_script_progression --message="Integrating service in YunoHost..."
 
-yunohost service add $app --description "lufi service" --log "$final_path/log/production.log"
+yunohost service add $app --description="Lufi service" --log="$final_path/log/production.log"
 
 #=================================================
 # START SYSTEMD SERVICE
@@ -139,7 +136,7 @@ ynh_restore_file --origin_path="/etc/logrotate.d/$app"
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_script_progression --message="Reloading nginx web server..."
+ynh_script_progression --message="Reloading NGINX web server..."
 
 ynh_systemd_action --service_name=nginx --action=reload
 
