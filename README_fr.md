@@ -15,7 +15,7 @@ Est-ce tout ? Non. Tous les fichiers sont chiffrés par le navigateur ! L'admini
 
 La clé de déchiffrement est une ancre (voir [Fragment Identifier](https://en.wikipedia.org/wiki/Fragment_identifier)), ce qui signifie que cette partie n'est traitée que par le client et n'atteint pas le serveur. :-)
 
-**Version incluse:** 0.05.9
+**Version incluse:** 0.05.12
 
 ## Captures d'écran
 
