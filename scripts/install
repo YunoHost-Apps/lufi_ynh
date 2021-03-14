@@ -56,7 +56,6 @@ ynh_script_progression --message="Storing installation settings..."
 
 ynh_app_setting_set --app=$app --key=domain --value=$domain
 ynh_app_setting_set --app=$app --key=path --value=$path_url
-ynh_app_setting_set --app=$app --key=is_public --value=$is_public
 ynh_app_setting_set --app=$app --key=max_file_size --value=$max_file_size
 ynh_app_setting_set --app=$app --key=secret --value=$secret
 
@@ -211,7 +210,7 @@ ynh_systemd_action --service_name=$app --action="start" --line_match="Creating p
 #=================================================
 ynh_script_progression --message="Configuring SSOwat..."
 
-ynh_app_setting_set --app=$app --key=unprotected_uris --value="/"
+
 if [ $is_public -eq 0 ]
 then
 	if [ "$path_url" == "/" ]; then
@@ -219,8 +218,8 @@ then
 	    path_url=""
 	fi
 	# Modify the domain to be used in a regex
-	domain_regex=$(echo "$domain" | sed 's@-@.@g')
-	ynh_app_setting_set --app=$app --key=protected_regex --value="$domain_regex$path_url/stats$","$domain_regex$path_url/manifest.webapp$","$domain_regex$path_url/$","$domain_regex$path_url/d/.*$","$domain_regex$path_url/m/.*$"
+
+
 fi
 
 #=================================================
