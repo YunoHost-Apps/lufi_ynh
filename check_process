@@ -4,7 +4,7 @@
 		domain="domain.tld"	(DOMAIN)
 		path="/path"	(PATH)
 		max_file_size=100
-		is_public="Yes" (PUBLIC|public=Yes|private=No)
+		is_public=1	(PUBLIC|public=1|private=0)
 		admin="john" (USER)
 	; Checks
 		pkg_linter=1
@@ -18,7 +18,6 @@
 		upgrade=1        from_commit=23e84578464b1fa09f79c98b6a9b5f19bbcf83f3
 		backup_restore=1
 		multi_instance=1
-		port_already_use=1 (8095)
 		change_url=1
 ;;; Upgrade options
 	; commit=23e84578464b1fa09f79c98b6a9b5f19bbcf83f3
