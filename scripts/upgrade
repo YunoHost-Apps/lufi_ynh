@@ -160,22 +160,7 @@ chown $app:$app $final_path/lufi.conf
 ynh_script_progression --message="Building Lufi..."
 
 pushd $final_path
-# Migrate from SQLite to PostgreSQL
-if [ $need_migration_from_sqlite_to_psql -eq 1 ]; then
-	# Preinstall with sqlite
-	carton install --deployment --without=mysql --without=htpasswd --without=test
-
-	# if /var/log/$app/production.log is a symbolic link, then move it to $final_path/log/production.log
-	if [ ! -L "/var/log/$app/production.log" ]
-	then
-		mv "/var/log/$app/production.log" "$final_path/log/production.log"
-		chown -R $app: "$final_path/log/production.log"
-	fi
-
-	carton exec script/lufi sqliteToOtherDB
-fi
-
-carton install --deployment --without=sqlite --without=mysql --without=htpasswd --without=test
+	carton install --deployment --without=sqlite --without=mysql --without=htpasswd --without=test
 popd
 
 #=================================================
