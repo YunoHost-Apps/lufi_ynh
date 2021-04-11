@@ -6,7 +6,7 @@
 		"en": "Self hosting files and sharing anonymous application",
 		"fr": "Application d'hébergement et de partage de fichiers anonyme"
 	},
-	"version": "0.05.12~ynh1",
+	"version": "0.05.13~ynh1",
 	"url": "https://git.framasoft.org/luc/lufi",
 	"license": "AGPL-3.0-or-later",
 	"maintainer": {
@@ -14,7 +14,7 @@
 		"email": "win10@tutanota.com, cyp@rouquin.me"
 	},
 	"requirements": {
-        "yunohost": ">= 4.0.0"
+        "yunohost": ">= 4.1.7"
 	},
 	"multi_instance": true,
 	"services": [
@@ -25,19 +25,11 @@
 			{
 				"name": "domain",
 				"type": "domain",
-				"ask": {
-					"en": "Choose a domain name for Lufi",
-					"fr": "Choisissez un nom de domaine pour Lufi"
-				},
 				"example": "domain.org"
 			},
 			{
 				"name": "path",
 				"type": "path",
-				"ask": {
-					"en": "Choose a path for Lufi",
-					"fr": "Choisissez un chemin pour Lufi"
-				},
 				"example": "/lufi",
 				"default": "/lufi"
 			},
@@ -54,10 +46,6 @@
 			{
 				"name": "is_public",
 				"type": "boolean",
-				"ask": {
-					"en": "Is it a public application?",
-					"fr": "Est-ce une application publique ?"
-				},
 				"default": true
 			}
 		]

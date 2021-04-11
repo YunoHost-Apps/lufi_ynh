@@ -44,8 +44,6 @@ if ! [[ $max_file_size =~ "^[\-0-9]+$" ]] && [ $max_file_size -lt 0 ]; then
    ynh_die --message="Max file must be a number positive or zero"
 fi
 
-# Check web path availability
-ynh_webpath_available --domain=$domain --path_url=$path_url
 # Register (book) web path
 ynh_webpath_register --app=$app --domain=$domain --path_url=$path_url
 
@@ -160,9 +158,10 @@ popd
 #=================================================
 ynh_script_progression --message="Setuping a cron..."
 
-cp ../conf/cron_lufi /etc/cron.d/$app
-ynh_replace_string --match_string="__FINALPATH__" --replace_string="$final_path/" --target_file="/etc/cron.d/$app"
-ynh_replace_string --match_string="__USER__" --replace_string="$app" --target_file="/etc/cron.d/$app"
+# cp ../conf/cron_lufi /etc/cron.d/$app
+# ynh_replace_string --match_string="__FINALPATH__" --replace_string="$final_path/" --target_file="/etc/cron.d/$app"
+# ynh_replace_string --match_string="__USER__" --replace_string="$app" --target_file="/etc/cron.d/$app"
+ynh_add_config --template="../conf/cron_lufi" --destination="/etc/cron.d/$app"
 chmod +x $final_path/script/lufi
 
 #=================================================
@@ -209,9 +208,10 @@ ynh_systemd_action --service_name=$app --action="start" --line_match="Creating p
 #=================================================
 # SETUP SSOWAT
 #=================================================
-ynh_script_progression --message="Configuring SSOwat..."
+ynh_script_progression --message="Configuring permissions..."
 
-ynh_app_setting_set --app=$app --key=unprotected_uris --value="/"
+ynh_permission_update --permission="main" --add="visitors"
+
 if [ $is_public -eq 0 ]
 then
 	if [ "$path_url" == "/" ]; then
