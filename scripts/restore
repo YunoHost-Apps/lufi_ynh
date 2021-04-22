@@ -75,6 +75,8 @@ ynh_script_progression --message="Restoring user rights..."
 
 # Restore permissions on app files
 chown -R $app:$app $final_path
+chown -R $app:$app $public_path
+chmod 750 $public_path
 
 #=================================================
 # SPECIFIC RESTORATION

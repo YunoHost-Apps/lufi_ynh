@@ -95,7 +95,6 @@ db_name=$(ynh_sanitize_dbid --db_name=$app)
 db_user=$db_name
 ynh_app_setting_set --app=$app --key=db_name --value=$db_name
 ynh_psql_setup_db --db_user=$db_user --db_name=$db_name
-db_pwd=$(ynh_app_setting_get --app=$app --key=psqlpwd) # Password created in ynh_psql_setup_db function
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
@@ -105,6 +104,15 @@ ynh_script_progression --message="Setting up source files..."
 ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 # Download, check integrity, uncompress and patch the source from app.src
 ynh_setup_source --dest_dir="$final_path"
+
+#=================================================
+# CREATE DIRECTORIES
+#=================================================
+
+public_path=/home/yunohost.app/$app
+ynh_app_setting_set --app=$app --key=public_path --value=$public_path
+
+mkdir -p $public_path
 
 #=================================================
 # NGINX CONFIGURATION
@@ -121,19 +129,20 @@ ynh_add_nginx_config max_file_size
 #=================================================
 ynh_script_progression --message="Configuring $app..."
 
-config=${final_path}/lufi.conf
+config=$final_path/lufi.conf
 cp ../conf/lufi.conf.template "$config"
 ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$config"
 ynh_replace_string --match_string="__PATH__" --replace_string="$path_url" --target_file="$config"
+ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="$config"
 ynh_replace_string --match_string="__PORT__" --replace_string="$port" --target_file="$config"
 ynh_replace_string --match_string="__DB_NAME__" --replace_string="$db_name" --target_file="$config"
 ynh_replace_string --match_string="__DB_USER__" --replace_string="$db_user" --target_file="$config"
 ynh_replace_string --match_string="__DB_PWD__" --replace_string="$db_pwd" --target_file="$config"
 ynh_replace_string --match_string="__MAX_FILE_SIZE__" --replace_string="$max_file_size" --target_file="$config"
+ynh_replace_string --match_string="__SECRET__" --replace_string="$secret" --target_file="$config"
 if [ $max_file_size -eq 0 ]; then # Comment the limitation line if no limit
 	ynh_replace_string --match_string="max_file_size" --replace_string="#max_file_size" --target_file="$config"
 fi
-ynh_replace_string --match_string="__SECRET__" --replace_string="$secret" --target_file="$config"
 
 if [ $is_public -eq 0 ];
 then
@@ -181,6 +190,8 @@ ynh_script_progression --message="Securing files and directories..."
 
 # Set permissions to app files
 chown -R $app:$app $final_path
+chown -R $app:$app $public_path
+chmod 750 $public_path
 
 #=================================================
 # SETUP LOGROTATE

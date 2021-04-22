@@ -106,7 +106,7 @@
     # Remember that it has to be in a directory writable by Lufi user
     # DO NOT CHANGE THIS IF FILES HAVE BEEN ALREADY UPLOADED: THEY WILL NOT BE DOWNLOADABLE ANYMORE
     # optional, default is 'files'
-    #upload_dir           => 'files',
+    upload_dir           => '/home/yunohost.app/__APP__',
 
     # allow to add a password on files, asked before allowing to download files
     # optional, default is 0
