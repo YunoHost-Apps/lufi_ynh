@@ -44,8 +44,8 @@ Can the app be used by multiple users? **Yes**
 
 #### Supported architectures
 
-* x86-64 - [![Build Status](https://ci-apps.yunohost.org/ci/logs/lufi%20%28Apps%29.svg)](https://ci-apps.yunohost.org/ci/apps/lufi/)
-* ARMv8-A - [![Build Status](https://ci-apps-arm.yunohost.org/ci/logs/lufi%20%28Apps%29.svg)](https://ci-apps-arm.yunohost.org/ci/apps/lufi/)
+* x86-64 - [![Build Status](https://ci-apps.yunohost.org/ci/logs/lufi.svg)](https://ci-apps.yunohost.org/ci/apps/lufi/)
+* ARMv8-A - [![Build Status](https://ci-apps-arm.yunohost.org/ci/logs/lufi.svg)](https://ci-apps-arm.yunohost.org/ci/apps/lufi/)
 
 ## Links
 

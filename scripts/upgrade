@@ -39,17 +39,16 @@ upgrade_type=$(ynh_check_app_version_changed)
 #=================================================
 ynh_script_progression --message="Ensuring downward compatibility..."
 
+# If db_name doesn't exist, create it
+if [ -z "$db_name" ]; then
+	db_name=$(ynh_sanitize_dbid --db_name=$app)
+	ynh_app_setting_set --app=$app --key=db_name --value=$db_name
+fi
+
 # If final_path doesn't exist, create it
 if [ -z "$final_path" ]; then
 	final_path=/var/www/$app
 	ynh_app_setting_set --app=$app --key=final_path --value=$final_path
-fi
-
-if [ -z "$db_pwd" ]; then
-	# Need to install new dependencies before creating the new database
-	need_migration_from_sqlite_to_psql=1
-else
-	need_migration_from_sqlite_to_psql=0
 fi
 
 if [ -z "$max_file_size" ]; then
@@ -86,7 +85,15 @@ ynh_abort_if_errors
 #=================================================
 ynh_script_progression --message="Stopping a systemd service..."
 
-ynh_systemd_action --service_name=$app --action="stop" --log_path="$final_path/log/production.log"
+ynh_systemd_action --service_name=$app --action=stop --log_path="$final_path/log/production.log"
+
+#=================================================
+# CREATE DEDICATED USER
+#=================================================
+ynh_script_progression --message="Making sure dedicated system user exists..."
+
+# Create a dedicated user (if not existing)
+ynh_system_user_create --username=$app
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
@@ -116,35 +123,9 @@ ynh_script_progression --message="Upgrading dependencies..."
 ynh_exec_warn_less ynh_install_app_dependencies $pkg_dependencies
 
 #=================================================
-# CREATE DEDICATED USER
-#=================================================
-ynh_script_progression --message="Making sure dedicated system user exists..."
-
-# Create a dedicated user (if not existing)
-ynh_system_user_create --username=$app
-
-#=================================================
-# SPECIFIC UPGRADE
-#=================================================
-# CREATE A POSTGRESQL DATABASE IF NEEDED
-#=================================================
-
-if [ $need_migration_from_sqlite_to_psql -eq 1 ]; then
-	ynh_print_info --message="Creating a PostgreSQL database..."
-	# Create postgresql database
-	ynh_psql_test_if_first_run
-	db_name=$(ynh_sanitize_dbid --db_name=$app)
-	db_user=$db_name
-	ynh_app_setting_set --app=$app --key=db_name --value=$db_name
-	# Initialize database and store postgres password for upgrade
-	ynh_psql_setup_db --db_user=$db_user --db_name=$db_name
-	db_pwd=$(ynh_app_setting_get --app=$app --key=psqlpwd) # Password created in ynh_psql_setup_db function
-fi
-
-#=================================================
 # SETUP LUFI
 #=================================================
-ynh_script_progression --message="Configuring lufi..."
+ynh_script_progression --message="Configuring Lufi..."
 
 config=${final_path}/lufi.conf
 ynh_backup_if_checksum_is_different --file="$config"
@@ -170,28 +151,16 @@ fi
 
 ynh_store_file_checksum --file="$config"
 
+chmod 600 $final_path/lufi.conf
+chown $app:$app $final_path/lufi.conf
+
 #=================================================
 # BUILD LUFI
 #=================================================
 ynh_script_progression --message="Building Lufi..."
 
 pushd $final_path
-# Migrate from SQLite to PostgreSQL
-if [ $need_migration_from_sqlite_to_psql -eq 1 ]; then
-	# Preinstall with sqlite
-	carton install --deployment --without=mysql --without=htpasswd --without=test
-
-	# if /var/log/$app/production.log is a symbolic link, then move it to $final_path/log/production.log
-	if [ ! -L "/var/log/$app/production.log" ]
-	then
-		mv "/var/log/$app/production.log" "$final_path/log/production.log"
-		chown -R $app: "$final_path/log/production.log"
-	fi
-
-	carton exec script/lufi sqliteToOtherDB
-fi
-
-carton install --deployment --without=sqlite --without=mysql --without=htpasswd --without=test
+	carton install --deployment --without=sqlite --without=mysql --without=htpasswd --without=test
 popd
 
 #=================================================
@@ -233,12 +202,12 @@ ynh_add_systemd_config
 ynh_script_progression --message="Securing files and directories..."
 
 # Set permissions on app files
-chown -R $app: $final_path
+chown -R $app:$app $final_path
 
 #=================================================
 # SETUP SSOWAT
 #=================================================
-ynh_script_progression --message="Upgrading SSOwat configuration..."
+ynh_script_progression --message="Upgrading permissions..."
 
 ynh_permission_update --permission="main" --add="visitors"
 

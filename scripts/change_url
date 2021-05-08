@@ -141,10 +141,13 @@ else
 fi
 ynh_store_file_checksum --file="$config"
 
+chmod 600 $final_path/lufi.conf
+chown $app:$app $final_path/lufi.conf
+
 #=================================================
 # UPDATE SSOWAT
 #=================================================
-ynh_script_progression --message="Reconfigure SSOwat"
+ynh_script_progression --message="Reconfiguring permissions..."
 
 ynh_permission_update --permission="main" --add="visitors"
 
