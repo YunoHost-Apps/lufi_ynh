@@ -21,6 +21,7 @@ path_url=$(ynh_app_setting_get --app=$app --key=path)
 is_public=$(ynh_app_setting_get --app=$app --key=is_public)
 port=$(ynh_app_setting_get --app=$app --key=port)
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
+public_path=$(ynh_app_setting_get --app=$app --key=public_path)
 secret=$(ynh_app_setting_get --app=$app --key=secret)
 db_name=$(ynh_app_setting_get --app=$app --key=db_name)
 db_user=$db_name
@@ -49,6 +50,13 @@ fi
 if [ -z "$final_path" ]; then
 	final_path=/var/www/$app
 	ynh_app_setting_set --app=$app --key=final_path --value=$final_path
+fi
+
+# If public_path doesn't exist, create it
+if [ -z "$public_path" ]; then
+        public_path=/home/yunohost.app/$app
+        mkdir -p $public_path
+        ynh_app_setting_set --app=$app --key=public_path --value=$public_path
 fi
 
 if [ -z "$max_file_size" ]; then
@@ -104,7 +112,7 @@ then
 	ynh_script_progression --message="Upgrading source files..."
 
 	# Download, check integrity, uncompress and patch the source from app.src
-	ynh_setup_source --dest_dir="$final_path"
+	ynh_setup_source --dest_dir="$final_path" --keep="$final_path/lufi.conf"
 fi
 
 #=================================================
@@ -121,38 +129,6 @@ ynh_add_nginx_config max_file_size
 ynh_script_progression --message="Upgrading dependencies..."
 
 ynh_exec_warn_less ynh_install_app_dependencies $pkg_dependencies
-
-#=================================================
-# SETUP LUFI
-#=================================================
-ynh_script_progression --message="Configuring Lufi..."
-
-config=${final_path}/lufi.conf
-ynh_backup_if_checksum_is_different --file="$config"
-cp ../conf/lufi.conf.template "$config"
-ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$config"
-ynh_replace_string --match_string="__PATH__" --replace_string="$path_url" --target_file="$config"
-ynh_replace_string --match_string="__PORT__" --replace_string="$port" --target_file="$config"
-ynh_replace_string --match_string="__DB_NAME__" --replace_string="$db_name" --target_file="$config"
-ynh_replace_string --match_string="__DB_USER__" --replace_string="$db_user" --target_file="$config"
-ynh_replace_string --match_string="__DB_PWD__" --replace_string="$db_pwd" --target_file="$config"
-ynh_replace_string --match_string="__MAX_FILE_SIZE__" --replace_string="$max_file_size" --target_file="$config"
-if [ $max_file_size -eq 0 ]; then # Comment the limitation line if no limit
-	ynh_replace_string --match_string="max_file_size" --replace_string="#max_file_size" --target_file="$config"
-fi
-ynh_replace_string --match_string="__SECRET__" --replace_string="$secret" --target_file="$config"
-
-if [ $is_public -eq 0 ];
-then
-	ynh_replace_string --match_string="__IS_PUBLIC__" --replace_string="" --target_file="$config"
-else
-	ynh_replace_string --match_string="__IS_PUBLIC__" --replace_string="#" --target_file="$config"
-fi
-
-ynh_store_file_checksum --file="$config"
-
-chmod 600 $final_path/lufi.conf
-chown $app:$app $final_path/lufi.conf
 
 #=================================================
 # BUILD LUFI
@@ -202,7 +178,10 @@ ynh_add_systemd_config
 ynh_script_progression --message="Securing files and directories..."
 
 # Set permissions on app files
-chown -R $app:$app $final_path
+chown -R $app:www-data $final_path
+chmod -R o-rwx "$final_path"
+chown -R $app:www-data $public_path
+chmod 755 $public_path
 
 #=================================================
 # SETUP SSOWAT
