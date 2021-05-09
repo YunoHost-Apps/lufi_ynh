@@ -162,7 +162,7 @@ chown $app:$app $final_path/lufi.conf
 ynh_script_progression --message="Installing $app..."
 
 pushd $final_path
-	carton install --deployment --without=sqlite  --without=mysql --without=htpasswd --without=test
+	carton install --deployment --without=sqlite --without=mysql --without=htpasswd --without=test
 popd
 
 #=================================================
@@ -190,6 +190,7 @@ ynh_script_progression --message="Securing files and directories..."
 
 # Set permissions to app files
 chown -R $app:www-data $final_path
+chmod -R o-rwx "$final_path"
 chown -R $app:www-data $public_path
 chmod 755 $public_path
 

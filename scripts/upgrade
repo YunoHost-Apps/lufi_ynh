@@ -212,6 +212,7 @@ ynh_script_progression --message="Securing files and directories..."
 
 # Set permissions on app files
 chown -R $app:www-data $final_path
+chmod -R o-rwx "$final_path"
 chown -R $app:www-data $public_path
 chmod 755 $public_path
 
