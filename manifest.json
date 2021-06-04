@@ -6,7 +6,7 @@
 		"en": "Self hosting files and sharing anonymous application",
 		"fr": "Application d'hébergement et de partage de fichiers anonyme"
 	},
-	"version": "0.05.13~ynh1",
+	"version": "0.05.13~ynh2",
 	"url": "https://git.framasoft.org/luc/lufi",
 	"license": "AGPL-3.0-or-later",
 	"maintainer": {
@@ -14,7 +14,7 @@
 		"email": "win10@tutanota.com, cyp@rouquin.me"
 	},
 	"requirements": {
-        "yunohost": ">= 4.1.7"
+        "yunohost": ">= 4.2.0"
 	},
 	"multi_instance": true,
 	"services": [
