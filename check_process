@@ -1,11 +1,11 @@
 ;; Nom du test
 	auto_remove=1
 	; Manifest
-		domain="domain.tld"	(DOMAIN)
-		path="/path"	(PATH)
+		domain="domain.tld"
+		path="/path"
 		max_file_size=100
-		is_public=1	(PUBLIC|public=1|private=0)
-		admin="john" (USER)
+		is_public=1
+		admin="john"
 	; Checks
 		pkg_linter=1
 		setup_sub_dir=1

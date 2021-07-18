@@ -6,8 +6,16 @@
 		"en": "Self hosting files and sharing anonymous application",
 		"fr": "Application d'hébergement et de partage de fichiers anonyme"
 	},
-	"version": "0.05.13~ynh1",
+	"version": "0.05.13~ynh3",
 	"url": "https://git.framasoft.org/luc/lufi",
+	"upstream": {
+        "license": "AGPL-3.0-or-later",
+        "website": "https://example.com",
+        "demo": "https://demo.lufi.io/",
+        "admindoc": "https://framagit.org/luc/lufi/wikis/home",
+        "userdoc": "https://yunohost.org/en/app_lufi",
+        "code": "https://framagit.org/fiat-tux/hat-softwares/lufi"
+    },
 	"license": "AGPL-3.0-or-later",
 	"maintainer": {
 		"name": "frju365, cyp",
