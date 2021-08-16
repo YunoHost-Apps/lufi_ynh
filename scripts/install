@@ -117,6 +117,8 @@ public_path=/home/yunohost.app/$app
 ynh_app_setting_set --app=$app --key=public_path --value=$public_path
 
 mkdir -p $public_path
+chown -R $app:www-data $public_path
+chmod 755 $public_path
 
 #=================================================
 # NGINX CONFIGURATION
@@ -184,19 +186,6 @@ ynh_script_progression --message="Configuring a systemd service..."
 
 # Create a dedicated systemd config
 ynh_add_systemd_config
-
-#=================================================
-# GENERIC FINALIZATION
-#=================================================
-# SECURE FILES AND DIRECTORIES
-#=================================================
-ynh_script_progression --message="Securing files and directories..."
-
-# Set permissions to app files
-chown -R $app:www-data $final_path
-chmod -R o-rwx "$final_path"
-chown -R $app:www-data $public_path
-chmod 755 $public_path
 
 #=================================================
 # SETUP LOGROTATE
