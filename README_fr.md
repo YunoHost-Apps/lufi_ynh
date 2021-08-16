@@ -13,7 +13,7 @@ Si vous n'avez pas YunoHost, regardez [ici](https://yunohost.org/#/install) pour
 
 Application d'hébergement et de partage de fichiers anonyme
 
-**Version incluse :** 0.05.13~ynh3
+**Version incluse :** 0.05.14~ynh1
 
 **Démo :** https://demo.lufi.io/
 

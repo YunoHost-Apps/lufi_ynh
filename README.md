@@ -17,7 +17,7 @@ If you don't have YunoHost, please consult [the guide](https://yunohost.org/#/in
 
 Self hosting files and sharing anonymous application
 
-**Shipped version:** 0.05.13~ynh3
+**Shipped version:** 0.05.14~ynh1
 
 **Demo:** https://demo.lufi.io/
 
