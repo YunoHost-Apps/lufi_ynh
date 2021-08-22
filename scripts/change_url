@@ -35,7 +35,6 @@ is_public=$(ynh_app_setting_get --app=$app --key=is_public)
 db_name=$(ynh_app_setting_get --app=$app --key=db_name)
 db_pwd=$(ynh_app_setting_get --app=$app --key=psqlpwd)
 db_user=$db_name
-public_path=$(ynh_app_setting_get --app=$app --key=public_path)
 secret=$(ynh_app_setting_get --app=$app --key=secret)
 max_file_size=$(ynh_app_setting_get --app=$app --key=max_file_size)
 
