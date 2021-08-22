@@ -31,6 +31,14 @@
 	"arguments": {
 		"install": [
 			{
+                "name": "warning",
+                "type": "display_text",
+                "ask": {
+                    "en": "/!\\ The media path has been changed to /home/yunohost.app/lufi, the files already uploaded and shared won't be downloadable anymore.",
+                    "fr": "/!\\ Le chemin des médias partagés a été changé en /home/yunohost.app/lufi, les fichiers déjà téléchargés et partagés ne seront plus téléchargeables."
+                }
+            },
+			{
 				"name": "domain",
 				"type": "domain",
 				"example": "domain.org"
