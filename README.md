@@ -17,7 +17,7 @@ If you don't have YunoHost, please consult [the guide](https://yunohost.org/#/in
 
 Self hosting files and sharing anonymous application
 
-**Shipped version:** 0.05.13~ynh3
+**Shipped version:** 0.05.16~ynh1
 
 **Demo:** https://demo.lufi.io/
 
@@ -33,8 +33,6 @@ Self hosting files and sharing anonymous application
 
 ## Documentation and resources
 
-* Official app website: https://example.com
-* Official user documentation: https://yunohost.org/en/app_lufi
 * Official admin documentation: https://framagit.org/luc/lufi/wikis/home
 * Upstream app code repository: https://framagit.org/fiat-tux/hat-softwares/lufi
 * YunoHost documentation for this app: https://yunohost.org/app_lufi
