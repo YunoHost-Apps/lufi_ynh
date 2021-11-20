@@ -13,7 +13,7 @@ Si vous n'avez pas YunoHost, regardez [ici](https://yunohost.org/#/install) pour
 
 Application d'hébergement et de partage de fichiers anonyme
 
-**Version incluse :** 0.05.13~ynh3
+**Version incluse :** 0.05.16~ynh1
 
 **Démo :** https://demo.lufi.io/
 
@@ -29,8 +29,6 @@ Application d'hébergement et de partage de fichiers anonyme
 
 ## Documentations et ressources
 
-* Site officiel de l'app : https://example.com
-* Documentation officielle utilisateur : https://yunohost.org/en/app_lufi
 * Documentation officielle de l'admin : https://framagit.org/luc/lufi/wikis/home
 * Dépôt de code officiel de l'app : https://framagit.org/fiat-tux/hat-softwares/lufi
 * Documentation YunoHost pour cette app : https://yunohost.org/app_lufi
