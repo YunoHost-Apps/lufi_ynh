@@ -49,8 +49,25 @@
 				"default": "100"
 			},
 			{
+				"name": "use_ldap",
+				"type": "boolean",
+				"ask": {
+					"en": "Install Lufi with LDAP configuration?",
+					"fr": "Installer Lufi avec la configuration LDAP ?"
+				},
+				"help": {
+					"en": "A Lufi with LDAP enabled will allow only YunoHost users to upload.",
+					"fr": "Un Lufi avec LDAP activé autorisera seulement les utilisateurs YunoHost à téléverser."
+				},
+				"default": false
+			},
+			{
 				"name": "is_public",
 				"type": "boolean",
+				"help": {
+					"en": "A public Lufi will be publicly visible for everyone.",
+					"fr": "Un Lufi public sera visible publiquement pour tous."
+				},
 				"default": true
 			}
 		]

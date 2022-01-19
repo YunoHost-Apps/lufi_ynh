@@ -27,6 +27,7 @@ domain=$YNH_APP_ARG_DOMAIN
 path_url=$YNH_APP_ARG_PATH
 max_file_size=$YNH_APP_ARG_MAX_FILE_SIZE
 is_public=$YNH_APP_ARG_IS_PUBLIC
+use_ldap=$YNH_APP_ARG_USE_LDAP
 secret=$(ynh_string_random --length=24)
 
 app=$YNH_APP_INSTANCE_NAME
@@ -54,7 +55,7 @@ ynh_script_progression --message="Storing installation settings..."
 
 ynh_app_setting_set --app=$app --key=domain --value=$domain
 ynh_app_setting_set --app=$app --key=path --value=$path_url
-ynh_app_setting_set --app=$app --key=is_public --value=$is_public
+ynh_app_setting_set --app=$app --key=use_ldap --value=$use_ldap
 ynh_app_setting_set --app=$app --key=max_file_size --value=$max_file_size
 ynh_app_setting_set --app=$app --key=secret --value=$secret
 
@@ -139,11 +140,12 @@ if [ $max_file_size -eq 0 ]; then # Comment the limitation line if no limit
 fi
 ynh_replace_string --match_string="__SECRET__" --replace_string="$secret" --target_file="$config"
 
-if [ $is_public -eq 0 ];
+if [ $use_ldap -eq 1 ];
 then
-	ynh_replace_string --match_string="__IS_PUBLIC__" --replace_string="" --target_file="$config"
+	ynh_replace_string --match_string="__USE_LDAP__" --replace_string="" --target_file="$config"
+	ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="$config"
 else
-	ynh_replace_string --match_string="__IS_PUBLIC__" --replace_string="#" --target_file="$config"
+	ynh_replace_string --match_string="__USE_LDAP__" --replace_string="#" --target_file="$config"
 fi
 
 ynh_store_file_checksum --file="$config"
@@ -204,17 +206,9 @@ ynh_systemd_action --service_name=$app --action="start" --line_match="Creating p
 #=================================================
 ynh_script_progression --message="Configuring permissions..."
 
-ynh_permission_update --permission="main" --add="visitors"
-
-if [ $is_public -eq 0 ]
+if [ $is_public -eq 1 ]
 then
-	if [ "$path_url" == "/" ]; then
-	    # If the path is /, clear it to prevent any error with the regex.
-	    path_url=""
-	fi
-	# Modify the domain to be used in a regex
-	domain_regex=$(echo "$domain" | sed 's@-@.@g')
-	ynh_app_setting_set --app=$app --key=protected_regex --value="$domain_regex$path_url/stats$","$domain_regex$path_url/manifest.webapp$","$domain_regex$path_url/$","$domain_regex$path_url/d/.*$","$domain_regex$path_url/m/.*$"
+	ynh_permission_update --permission="main" --add="visitors"
 fi
 
 #=================================================

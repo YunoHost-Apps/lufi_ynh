@@ -18,7 +18,7 @@ app=$YNH_APP_INSTANCE_NAME
 
 domain=$(ynh_app_setting_get --app=$app --key=domain)
 path_url=$(ynh_app_setting_get --app=$app --key=path)
-is_public=$(ynh_app_setting_get --app=$app --key=is_public)
+use_ldap=$(ynh_app_setting_get --app=$app --key=use_ldap)
 port=$(ynh_app_setting_get --app=$app --key=port)
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 secret=$(ynh_app_setting_get --app=$app --key=secret)
@@ -70,10 +70,36 @@ if [ -z "$max_file_size" ]; then
 	ynh_app_setting_set --app=$app --key=max_file_size --value=$max_file_size
 fi
 
-# Cleaning legacy permissions
+# Check if is_public settings exist and is set to true
+was_public=$(ynh_app_setting_get --app=$app --key=is_public)
+if [ $was_public -eq 1 ]
+then
+	# Fix permissions if true
+	ynh_print_info --message="Upgrading from legacy permission..."
+	ynh_print_info --message="Legacy public instance detected, allow visitors with new permission."
+	use_ldap=0
+
+	# Add new permission to allow visitors
+	ynh_permission_update --permission="main" --add="visitors"
+
+	# Remove deprecated is_public settings
+	ynh_app_setting_delete --app=$app --key=is_public
+fi
+
+# Check if legacy permissions exists (meanning that is_public was set to false)
 if ynh_legacy_permissions_exists; then
+
+	ynh_print_info --message="Upgrading from legacy permission..."
+	ynh_print_info --message="Legacy private instance detected, keep LDAP enabled."
+
+	# Legacy private install have LDAP enabled
+	use_ldap=1
+
+	# Cleaning legacy permissions
+	ynh_print_info --message="Removing legacy permission..."
 	ynh_legacy_permissions_delete_all
 
+	# Remove deprecated is_public settings
 	ynh_app_setting_delete --app=$app --key=is_public
 fi
 
@@ -145,11 +171,12 @@ if [ $max_file_size -eq 0 ]; then # Comment the limitation line if no limit
 fi
 ynh_replace_string --match_string="__SECRET__" --replace_string="$secret" --target_file="$config"
 
-if [ $is_public -eq 0 ];
+if [ $use_ldap -eq 1 ];
 then
-	ynh_replace_string --match_string="__IS_PUBLIC__" --replace_string="" --target_file="$config"
+	ynh_replace_string --match_string="__USE_LDAP__" --replace_string="" --target_file="$config"
+	ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="$config"
 else
-	ynh_replace_string --match_string="__IS_PUBLIC__" --replace_string="#" --target_file="$config"
+	ynh_replace_string --match_string="__USE_LDAP__" --replace_string="#" --target_file="$config"
 fi
 
 ynh_store_file_checksum --file="$config"
@@ -196,24 +223,6 @@ ynh_script_progression --message="Upgrading systemd configuration..."
 
 # Create a dedicated systemd config
 ynh_add_systemd_config
-
-#=================================================
-# SETUP SSOWAT
-#=================================================
-ynh_script_progression --message="Upgrading permissions..."
-
-ynh_permission_update --permission="main" --add="visitors"
-
-if [ $is_public -eq 0 ]
-then
-	if [ "$path_url" == "/" ]; then
-	    # If the path is /, clear it to prevent any error with the regex.
-	    path_url=""
-	fi
-	# Modify the domain to be used in a regex
-	domain_regex=$(echo "$domain" | sed 's@-@.@g')
-	ynh_app_setting_set --app=$app --key=protected_regex --value="$domain_regex$path_url/stats$","$domain_regex$path_url/manifest.webapp$","$domain_regex$path_url/$","$domain_regex$path_url/d/.*$","$domain_regex$path_url/m/.*$"
-fi
 
 #=================================================
 # START SYSTEMD SERVICE

@@ -199,20 +199,20 @@
     # set `ldap` if you want that only authenticated users can upload files
     # please note that everybody can still download files
     # optional, no default
-    __IS_PUBLIC__ldap => {
-    __IS_PUBLIC__    uri         => 'ldap://localhost:389',                      # server URI
-    __IS_PUBLIC__    user_tree   => 'dc=yunohost,dc=org',                        # search base DN
-    __IS_PUBLIC__    bind_dn     => 'ou=users,dc=yunohost,dc=org',               # search bind DN
-    __IS_PUBLIC__    #bind_pwd    => 'secr3t',                                   # search bind password
-    __IS_PUBLIC__    user_attr   => 'uid',                                       # user attribute (uid, mail, sAMAccountName, etc.)
-    __IS_PUBLIC__    #user_filter => '(!(uid=ldap_user))',                       # user filter (to exclude some users, etc.)
-    __IS_PUBLIC__    # optional start_tls configuration. See https://metacpan.org/pod/distribution/perl-ldap/lib/Net/LDAP.pod#start_tls
-    __IS_PUBLIC__    # don't set or uncomment if you don't want to configure it
-    __IS_PUBLIC__    #start_tls => {
-    __IS_PUBLIC__    #   verify     => 'optional',
-    __IS_PUBLIC__    #   clientcert => '/etc/ssl/certs/ca-bundle.pem'
-    __IS_PUBLIC__    #}
-    __IS_PUBLIC__},
+    __USE_LDAP__ldap => {
+    __USE_LDAP__    uri         => 'ldap://localhost:389',                      # server URI
+    __USE_LDAP__    user_tree   => 'dc=yunohost,dc=org',                        # search base DN
+    __USE_LDAP__    bind_dn     => 'ou=users,dc=yunohost,dc=org',               # search bind DN
+    __USE_LDAP__    #bind_pwd    => 'secr3t',                                   # search bind password
+    __USE_LDAP__    user_attr   => 'uid',                                       # user attribute (uid, mail, sAMAccountName, etc.)
+    __USE_LDAP__    user_filter => '(&(objectClass=posixAccount)(permission=cn=__APP__.main,ou=permission,dc=yunohost,dc=org))', # user filter (to exclude some users, etc.)
+    __USE_LDAP__    # optional start_tls configuration. See https://metacpan.org/pod/distribution/perl-ldap/lib/Net/LDAP.pod#start_tls
+    __USE_LDAP__    # don't set or uncomment if you don't want to configure it
+    __USE_LDAP__    #start_tls => {
+    __USE_LDAP__    #   verify     => 'optional',
+    __USE_LDAP__    #   clientcert => '/etc/ssl/certs/ca-bundle.pem'
+    __USE_LDAP__    #}
+    __USE_LDAP__},
 
     # if you've set ldap above, the session will last `session_duration` seconds before
     # the user needs to reauthenticate

@@ -31,7 +31,7 @@ final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 
 # Add settings here as needed by your application
 port=$(ynh_app_setting_get --app=$app --key=port)
-is_public=$(ynh_app_setting_get --app=$app --key=is_public)
+use_ldap=$(ynh_app_setting_get --app=$app --key=use_ldap)
 db_name=$(ynh_app_setting_get --app=$app --key=db_name)
 db_pwd=$(ynh_app_setting_get --app=$app --key=psqlpwd)
 db_user=$db_name
@@ -133,34 +133,17 @@ if [ $max_file_size -eq 0 ]; then # Comment the limitation line if no limit
 	ynh_replace_string --match_string="max_file_size" --replace_string="#max_file_size" --target_file="$config"
 fi
 ynh_replace_string --match_string="__SECRET__" --replace_string="$secret" --target_file="$config"
-if [ $is_public -eq 0 ];
+if [ $use_ldap -eq 1 ];
 then
-	ynh_replace_string --match_string="__IS_PUBLIC__" --replace_string="" --target_file="$config"
+	ynh_replace_string --match_string="__USE_LDAP__" --replace_string="" --target_file="$config"
+	ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="$config"
 else
-	ynh_replace_string --match_string="__IS_PUBLIC__" --replace_string="#" --target_file="$config"
+	ynh_replace_string --match_string="__USE_LDAP__" --replace_string="#" --target_file="$config"
 fi
 ynh_store_file_checksum --file="$config"
 
 chmod 600 $final_path/lufi.conf
 chown $app:$app $final_path/lufi.conf
-
-#=================================================
-# UPDATE SSOWAT
-#=================================================
-ynh_script_progression --message="Reconfiguring permissions..."
-
-ynh_permission_update --permission="main" --add="visitors"
-
-if [ $is_public -eq 0 ]
-then
-	if [ "$path_url" == "/" ]; then
-	    # If the path is /, clear it to prevent any error with the regex.
-	    path_url=""
-	fi
-	# Modify the domain to be used in a regex
-	domain_regex=$(echo "$domain" | sed 's@-@.@g')
-	ynh_app_setting_set --app=$app --key=protected_regex --value="$domain_regex$path_url/stats$","$domain_regex$path_url/manifest.webapp$","$domain_regex$path_url/$","$domain_regex$path_url/d/.*$","$domain_regex$path_url/m/.*$"
-fi
 
 #=================================================
 # GENERIC FINALISATION

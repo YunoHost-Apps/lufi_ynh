@@ -5,6 +5,7 @@
 		path="/path"
 		max_file_size=100
 		is_public=1
+		use_ldap=0
 		admin="john"
 	; Checks
 		pkg_linter=1
