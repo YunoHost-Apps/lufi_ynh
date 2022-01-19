@@ -126,29 +126,18 @@ ynh_add_nginx_config max_file_size
 #=================================================
 ynh_script_progression --message="Configuring $app..."
 
-config=${final_path}/lufi.conf
-cp ../conf/lufi.conf.template "$config"
-ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$config"
-ynh_replace_string --match_string="__PATH__" --replace_string="$path_url" --target_file="$config"
-ynh_replace_string --match_string="__PORT__" --replace_string="$port" --target_file="$config"
-ynh_replace_string --match_string="__DB_NAME__" --replace_string="$db_name" --target_file="$config"
-ynh_replace_string --match_string="__DB_USER__" --replace_string="$db_user" --target_file="$config"
-ynh_replace_string --match_string="__DB_PWD__" --replace_string="$db_pwd" --target_file="$config"
-ynh_replace_string --match_string="__MAX_FILE_SIZE__" --replace_string="$max_file_size" --target_file="$config"
-if [ $max_file_size -eq 0 ]; then # Comment the limitation line if no limit
-	ynh_replace_string --match_string="max_file_size" --replace_string="#max_file_size" --target_file="$config"
-fi
-ynh_replace_string --match_string="__SECRET__" --replace_string="$secret" --target_file="$config"
-
+ldap="#"
 if [ $use_ldap -eq 1 ];
 then
-	ynh_replace_string --match_string="__USE_LDAP__" --replace_string="" --target_file="$config"
-	ynh_replace_string --match_string="__APP__" --replace_string="$app" --target_file="$config"
-else
-	ynh_replace_string --match_string="__USE_LDAP__" --replace_string="#" --target_file="$config"
+	ldap=""
 fi
 
-ynh_store_file_checksum --file="$config"
+max_size_set=""
+if [ $max_file_size -eq 0 ]; then # Comment the limitation line if no limit
+	max_size_set="#"
+fi
+
+ynh_add_config --template="../conf/lufi.conf.template" --destination="$final_path/lufi.conf"
 
 chmod 600 $final_path/lufi.conf
 chown $app:$app $final_path/lufi.conf
