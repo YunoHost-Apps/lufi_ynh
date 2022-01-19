@@ -20,7 +20,7 @@
 		"email": "win10@tutanota.com, cyp@rouquin.me"
 	},
 	"requirements": {
-        "yunohost": ">= 4.2.3"
+        "yunohost": ">= 4.3"
 	},
 	"multi_instance": true,
 	"services": [
