@@ -15,7 +15,13 @@ If you don't have YunoHost, please consult [the guide](https://yunohost.org/#/in
 
 ## Overview
 
-Self hosting files and sharing anonymous application
+It stores files and allows you to download them.
+
+Is that all? No. All the files are encrypted **by the browser**! It means that your files **never** leave your computer unencrypted.
+The administrator of the Lufi instance you use will not be able to see what is in your file, neither will your network administrator, or your ISP.
+
+The encryption key part of the URL is a anchor (Cf. [Fragment Identifier](https://en.wikipedia.org/wiki/Fragment_identifier)), that means this part is only processed client-side and does not reach the server. :-)
+
 
 **Shipped version:** 0.05.16~ynh1
 
