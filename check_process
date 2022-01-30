@@ -4,9 +4,8 @@
 		domain="domain.tld"
 		path="/path"
 		max_file_size=100
-		is_public=1
 		use_ldap=0
-		admin="john"
+		is_public=1
 	; Checks
 		pkg_linter=1
 		setup_sub_dir=1
@@ -16,7 +15,7 @@
 		setup_public=1
 		upgrade=1
 		# 0.03.5
-		upgrade=1        from_commit=23e84578464b1fa09f79c98b6a9b5f19bbcf83f3
+		upgrade=1	from_commit=23e84578464b1fa09f79c98b6a9b5f19bbcf83f3
 		backup_restore=1
 		multi_instance=1
 		change_url=1

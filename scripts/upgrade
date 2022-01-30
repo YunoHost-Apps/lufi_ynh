@@ -30,6 +30,7 @@ max_file_size=$(ynh_app_setting_get --app=$app --key=max_file_size)
 #=================================================
 # CHECK VERSION
 #=================================================
+ynh_script_progression --message="Checking version..."
 
 upgrade_type=$(ynh_check_app_version_changed)
 
@@ -42,11 +43,20 @@ ynh_script_progression --message="Backing up the app before upgrading (may take 
 ynh_backup_before_upgrade
 ynh_clean_setup () {
 	ynh_clean_check_starting
-	# restore it if the upgrade fails
+	# Restore it if the upgrade fails
 	ynh_restore_upgradebackup
 }
 # Exit if an error occurs during the execution of the script
 ynh_abort_if_errors
+
+#=================================================
+# STANDARD UPGRADE STEPS
+#=================================================
+# STOP SYSTEMD SERVICE
+#=================================================
+ynh_script_progression --message="Stopping a systemd service..."
+
+ynh_systemd_action --service_name=$app --action=stop --log_path="$final_path/log/production.log"
 
 #=================================================
 # ENSURE DOWNWARD COMPATIBILITY
@@ -104,15 +114,6 @@ if ynh_legacy_permissions_exists; then
 fi
 
 #=================================================
-# STANDARD UPGRADE STEPS
-#=================================================
-# STOP SYSTEMD SERVICE
-#=================================================
-ynh_script_progression --message="Stopping a systemd service..."
-
-ynh_systemd_action --service_name=$app --action=stop --log_path="$final_path/log/production.log"
-
-#=================================================
 # CREATE DEDICATED USER
 #=================================================
 ynh_script_progression --message="Making sure dedicated system user exists..."
@@ -141,8 +142,8 @@ chown -R $app:www-data "$final_path"
 #=================================================
 ynh_script_progression --message="Upgrading NGINX web server configuration..."
 
-# Create a dedicated nginx config
-ynh_add_nginx_config max_file_size
+# Create a dedicated NGINX config
+ynh_add_nginx_config
 
 #=================================================
 # UPGRADE DEPENDENCIES
@@ -151,6 +152,8 @@ ynh_script_progression --message="Upgrading dependencies..."
 
 ynh_exec_warn_less ynh_install_app_dependencies $pkg_dependencies
 
+#=================================================
+# SPECIFIC UPGRADE
 #=================================================
 # SETUP LUFI
 #=================================================
@@ -190,12 +193,15 @@ ynh_add_config --template="../conf/cron_lufi" --destination="/etc/cron.d/$app"
 chmod +x $final_path/script/lufi
 
 #=================================================
-# ADVERTISE SERVICE IN ADMIN PANEL
+# SETUP SYSTEMD
 #=================================================
-ynh_script_progression --message="Storing the config file checksum..."
+ynh_script_progression --message="Upgrading systemd configuration..."
 
-yunohost service add $app --description="Lufi service" --log="$final_path/log/production.log"
+# Create a dedicated systemd config
+ynh_add_systemd_config
 
+#=================================================
+# GENERIC FINALIZATION
 #=================================================
 # SETUP LOGROTATE
 #=================================================
@@ -205,12 +211,11 @@ ynh_script_progression --message="Upgrading logrotate configuration..."
 ynh_use_logrotate --non-append
 
 #=================================================
-# SETUP SYSTEMD
+# INTEGRATE SERVICE IN YUNOHOST
 #=================================================
-ynh_script_progression --message="Upgrading systemd configuration..."
+ynh_script_progression --message="Integrating service in YunoHost..."
 
-# Create a dedicated systemd config
-ynh_add_systemd_config
+yunohost service add $app --description="Lufi service" --log="$final_path/log/production.log"
 
 #=================================================
 # START SYSTEMD SERVICE

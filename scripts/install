@@ -25,8 +25,8 @@ ynh_abort_if_errors
 
 domain=$YNH_APP_ARG_DOMAIN
 path_url=$YNH_APP_ARG_PATH
-max_file_size=$YNH_APP_ARG_MAX_FILE_SIZE
 is_public=$YNH_APP_ARG_IS_PUBLIC
+max_file_size=$YNH_APP_ARG_MAX_FILE_SIZE
 use_ldap=$YNH_APP_ARG_USE_LDAP
 secret=$(ynh_string_random --length=24)
 
@@ -117,7 +117,7 @@ chown -R $app:www-data "$final_path"
 ynh_script_progression --message="Configuring NGINX web server..."
 
 # Create a dedicated NGINX config
-ynh_add_nginx_config max_file_size
+ynh_add_nginx_config
 
 #=================================================
 # SPECIFIC SETUP
