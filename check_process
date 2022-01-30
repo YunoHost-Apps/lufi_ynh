@@ -3,9 +3,9 @@
 	; Manifest
 		domain="domain.tld"
 		path="/path"
+		is_public=1
 		max_file_size=100
 		use_ldap=0
-		is_public=1
 	; Checks
 		pkg_linter=1
 		setup_sub_dir=1
