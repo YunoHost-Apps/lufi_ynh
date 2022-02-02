@@ -59,7 +59,7 @@
     # max file size, in octets
     # you can write it 100*1024*1024
     # optional, no default
-    max_file_size     => __MAX_FILE_SIZE__*1024*1024,
+    __MAX_SIZE_SET__max_file_size     => __MAX_FILE_SIZE__*1024*1024,
 
     # if you want to have piwik statistics, provide a piwik image tracker
     # only the image tracker is allowed, no javascript
@@ -199,20 +199,20 @@
     # set `ldap` if you want that only authenticated users can upload files
     # please note that everybody can still download files
     # optional, no default
-    __IS_PUBLIC__ldap => {
-    __IS_PUBLIC__    uri         => 'ldap://localhost:389',                      # server URI
-    __IS_PUBLIC__    user_tree   => 'dc=yunohost,dc=org',                        # search base DN
-    __IS_PUBLIC__    bind_dn     => 'ou=users,dc=yunohost,dc=org',               # search bind DN
-    __IS_PUBLIC__    #bind_pwd    => 'secr3t',                                   # search bind password
-    __IS_PUBLIC__    user_attr   => 'uid',                                       # user attribute (uid, mail, sAMAccountName, etc.)
-    __IS_PUBLIC__    #user_filter => '(!(uid=ldap_user))',                       # user filter (to exclude some users, etc.)
-    __IS_PUBLIC__    # optional start_tls configuration. See https://metacpan.org/pod/distribution/perl-ldap/lib/Net/LDAP.pod#start_tls
-    __IS_PUBLIC__    # don't set or uncomment if you don't want to configure it
-    __IS_PUBLIC__    #start_tls => {
-    __IS_PUBLIC__    #   verify     => 'optional',
-    __IS_PUBLIC__    #   clientcert => '/etc/ssl/certs/ca-bundle.pem'
-    __IS_PUBLIC__    #}
-    __IS_PUBLIC__},
+    __LDAP__ldap => {
+    __LDAP__    uri         => 'ldap://localhost:389',                      # server URI
+    __LDAP__    user_tree   => 'dc=yunohost,dc=org',                        # search base DN
+    __LDAP__    bind_dn     => 'ou=users,dc=yunohost,dc=org',               # search bind DN
+    __LDAP__    #bind_pwd    => 'secr3t',                                   # search bind password
+    __LDAP__    user_attr   => 'uid',                                       # user attribute (uid, mail, sAMAccountName, etc.)
+    __LDAP__    user_filter => '(&(objectClass=posixAccount)(permission=cn=__APP__.main,ou=permission,dc=yunohost,dc=org))', # user filter (to exclude some users, etc.)
+    __LDAP__    # optional start_tls configuration. See https://metacpan.org/pod/distribution/perl-ldap/lib/Net/LDAP.pod#start_tls
+    __LDAP__    # don't set or uncomment if you don't want to configure it
+    __LDAP__    #start_tls => {
+    __LDAP__    #   verify     => 'optional',
+    __LDAP__    #   clientcert => '/etc/ssl/certs/ca-bundle.pem'
+    __LDAP__    #}
+    __LDAP__},
 
     # if you've set ldap above, the session will last `session_duration` seconds before
     # the user needs to reauthenticate

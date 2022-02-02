@@ -6,7 +6,7 @@
         "en": "Self hosting files and sharing anonymous application",
         "fr": "Application d'hébergement et de partage de fichiers anonyme"
     },
-    "version": "0.05.16~ynh1",
+    "version": "0.05.16~ynh2",
     "url": "https://git.framasoft.org/luc/lufi",
     "upstream": {
         "license": "AGPL-3.0-or-later",
@@ -52,6 +52,19 @@
                 },
                 "example": "100",
                 "default": "100"
+            },
+            {
+                "name": "use_ldap",
+                "type": "boolean",
+                "ask": {
+                    "en": "Install Lufi with LDAP configuration?",
+                    "fr": "Installer Lufi avec la configuration LDAP ?"
+                },
+                "help": {
+                    "en": "A Lufi with LDAP enabled will allow only YunoHost users to upload.",
+                    "fr": "Un Lufi avec LDAP activé autorisera seulement les utilisateurs YunoHost à téléverser."
+                },
+                "default": false
             }
         ]
     }
