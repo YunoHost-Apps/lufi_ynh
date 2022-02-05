@@ -1,58 +1,71 @@
 {
-	"name": "Lufi",
-	"id": "lufi",
-	"packaging_format": 1,
-	"description": {
-		"en": "Self hosting files and sharing anonymous application",
-		"fr": "Application d'hébergement et de partage de fichiers anonyme"
-	},
-	"version": "0.05.16~ynh1",
-	"url": "https://git.framasoft.org/luc/lufi",
-	"upstream": {
+    "name": "Lufi",
+    "id": "lufi",
+    "packaging_format": 1,
+    "description": {
+        "en": "Self hosting files and sharing anonymous application",
+        "fr": "Application d'hébergement et de partage de fichiers anonyme"
+    },
+    "version": "0.05.16~ynh2",
+    "url": "https://git.framasoft.org/luc/lufi",
+    "upstream": {
         "license": "AGPL-3.0-or-later",
         "demo": "https://demo.lufi.io/",
         "admindoc": "https://framagit.org/luc/lufi/wikis/home",
         "code": "https://framagit.org/fiat-tux/hat-softwares/lufi"
     },
-	"license": "AGPL-3.0-or-later",
-	"maintainer": {
-		"name": "frju365, cyp",
-		"email": "win10@tutanota.com, cyp@rouquin.me"
-	},
-	"requirements": {
-        "yunohost": ">= 4.2.3"
-	},
-	"multi_instance": true,
-	"services": [
-		"nginx"
-	],
-	"arguments": {
-		"install": [
-			{
-				"name": "domain",
-				"type": "domain"
-			},
-			{
-				"name": "path",
-				"type": "path",
-				"example": "/lufi",
-				"default": "/lufi"
-			},
-			{
-				"name": "max_file_size",
-				"type": "string",
-				"ask": {
-					"en": "Choose a max file size, in Mo (0 = no limit)",
-					"fr": "Choisissez une taille de fichier maximum chemin, en Mo (0 = pas de limite)"
-				},
-				"example": "100",
-				"default": "100"
-			},
-			{
-				"name": "is_public",
-				"type": "boolean",
-				"default": true
-			}
-		]
-	}
+    "license": "AGPL-3.0-or-later",
+    "maintainer": {
+        "name": "frju365, cyp",
+        "email": "win10@tutanota.com, cyp@rouquin.me"
+    },
+    "requirements": {
+        "yunohost": ">= 4.3.0"
+    },
+    "multi_instance": true,
+    "services": [
+        "nginx"
+    ],
+    "arguments": {
+        "install": [
+            {
+                "name": "domain",
+                "type": "domain"
+            },
+            {
+                "name": "path",
+                "type": "path",
+                "example": "/lufi",
+                "default": "/lufi"
+            },
+            {
+                "name": "is_public",
+                "type": "boolean",
+                "default": true
+            },
+            {
+                "name": "max_file_size",
+                "type": "string",
+                "ask": {
+                    "en": "Choose a max file size, in Mo (0 = no limit)",
+                    "fr": "Choisissez une taille de fichier maximum chemin, en Mo (0 = pas de limite)"
+                },
+                "example": "100",
+                "default": "100"
+            },
+            {
+                "name": "use_ldap",
+                "type": "boolean",
+                "ask": {
+                    "en": "Install Lufi with LDAP configuration?",
+                    "fr": "Installer Lufi avec la configuration LDAP ?"
+                },
+                "help": {
+                    "en": "A Lufi with LDAP enabled will allow only YunoHost users to upload.",
+                    "fr": "Un Lufi avec LDAP activé autorisera seulement les utilisateurs YunoHost à téléverser."
+                },
+                "default": false
+            }
+        ]
+    }
 }

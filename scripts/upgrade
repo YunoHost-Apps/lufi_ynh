@@ -18,7 +18,7 @@ app=$YNH_APP_INSTANCE_NAME
 
 domain=$(ynh_app_setting_get --app=$app --key=domain)
 path_url=$(ynh_app_setting_get --app=$app --key=path)
-is_public=$(ynh_app_setting_get --app=$app --key=is_public)
+use_ldap=$(ynh_app_setting_get --app=$app --key=use_ldap)
 port=$(ynh_app_setting_get --app=$app --key=port)
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 secret=$(ynh_app_setting_get --app=$app --key=secret)
@@ -30,6 +30,7 @@ max_file_size=$(ynh_app_setting_get --app=$app --key=max_file_size)
 #=================================================
 # CHECK VERSION
 #=================================================
+ynh_script_progression --message="Checking version..."
 
 upgrade_type=$(ynh_check_app_version_changed)
 
@@ -42,11 +43,20 @@ ynh_script_progression --message="Backing up the app before upgrading (may take 
 ynh_backup_before_upgrade
 ynh_clean_setup () {
 	ynh_clean_check_starting
-	# restore it if the upgrade fails
+	# Restore it if the upgrade fails
 	ynh_restore_upgradebackup
 }
 # Exit if an error occurs during the execution of the script
 ynh_abort_if_errors
+
+#=================================================
+# STANDARD UPGRADE STEPS
+#=================================================
+# STOP SYSTEMD SERVICE
+#=================================================
+ynh_script_progression --message="Stopping a systemd service..."
+
+ynh_systemd_action --service_name=$app --action=stop --log_path="$final_path/log/production.log"
 
 #=================================================
 # ENSURE DOWNWARD COMPATIBILITY
@@ -70,21 +80,38 @@ if [ -z "$max_file_size" ]; then
 	ynh_app_setting_set --app=$app --key=max_file_size --value=$max_file_size
 fi
 
-# Cleaning legacy permissions
-if ynh_legacy_permissions_exists; then
-	ynh_legacy_permissions_delete_all
+# Check if is_public settings exist and is set to true
+was_public=$(ynh_app_setting_get --app=$app --key=is_public)
+if [ $was_public -eq 1 ]
+then
+	# Fix permissions if true
+	ynh_print_info --message="Upgrading from legacy permission..."
+	ynh_print_info --message="Legacy public instance detected, allow visitors with new permission."
+	use_ldap=0
 
+	# Add new permission to allow visitors
+	ynh_permission_update --permission="main" --add="visitors"
+
+	# Remove deprecated is_public settings
 	ynh_app_setting_delete --app=$app --key=is_public
 fi
 
-#=================================================
-# STANDARD UPGRADE STEPS
-#=================================================
-# STOP SYSTEMD SERVICE
-#=================================================
-ynh_script_progression --message="Stopping a systemd service..."
+# Check if legacy permissions exists (meanning that is_public was set to false)
+if ynh_legacy_permissions_exists; then
 
-ynh_systemd_action --service_name=$app --action=stop --log_path="$final_path/log/production.log"
+	ynh_print_info --message="Upgrading from legacy permission..."
+	ynh_print_info --message="Legacy private instance detected, keep LDAP enabled."
+
+	# Legacy private install have LDAP enabled
+	use_ldap=1
+
+	# Cleaning legacy permissions
+	ynh_print_info --message="Removing legacy permission..."
+	ynh_legacy_permissions_delete_all
+
+	# Remove deprecated is_public settings
+	ynh_app_setting_delete --app=$app --key=is_public
+fi
 
 #=================================================
 # CREATE DEDICATED USER
@@ -115,8 +142,8 @@ chown -R $app:www-data "$final_path"
 #=================================================
 ynh_script_progression --message="Upgrading NGINX web server configuration..."
 
-# Create a dedicated nginx config
-ynh_add_nginx_config max_file_size
+# Create a dedicated NGINX config
+ynh_add_nginx_config
 
 #=================================================
 # UPGRADE DEPENDENCIES
@@ -126,33 +153,24 @@ ynh_script_progression --message="Upgrading dependencies..."
 ynh_exec_warn_less ynh_install_app_dependencies $pkg_dependencies
 
 #=================================================
+# SPECIFIC UPGRADE
+#=================================================
 # SETUP LUFI
 #=================================================
 ynh_script_progression --message="Configuring Lufi..."
 
-config=${final_path}/lufi.conf
-ynh_backup_if_checksum_is_different --file="$config"
-cp ../conf/lufi.conf.template "$config"
-ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="$config"
-ynh_replace_string --match_string="__PATH__" --replace_string="$path_url" --target_file="$config"
-ynh_replace_string --match_string="__PORT__" --replace_string="$port" --target_file="$config"
-ynh_replace_string --match_string="__DB_NAME__" --replace_string="$db_name" --target_file="$config"
-ynh_replace_string --match_string="__DB_USER__" --replace_string="$db_user" --target_file="$config"
-ynh_replace_string --match_string="__DB_PWD__" --replace_string="$db_pwd" --target_file="$config"
-ynh_replace_string --match_string="__MAX_FILE_SIZE__" --replace_string="$max_file_size" --target_file="$config"
-if [ $max_file_size -eq 0 ]; then # Comment the limitation line if no limit
-	ynh_replace_string --match_string="max_file_size" --replace_string="#max_file_size" --target_file="$config"
-fi
-ynh_replace_string --match_string="__SECRET__" --replace_string="$secret" --target_file="$config"
-
-if [ $is_public -eq 0 ];
+ldap="#"
+if [ $use_ldap -eq 1 ];
 then
-	ynh_replace_string --match_string="__IS_PUBLIC__" --replace_string="" --target_file="$config"
-else
-	ynh_replace_string --match_string="__IS_PUBLIC__" --replace_string="#" --target_file="$config"
+	ldap=""
 fi
 
-ynh_store_file_checksum --file="$config"
+max_size_set=""
+if [ $max_file_size -eq 0 ]; then # Comment the limitation line if no limit
+	max_size_set="#"
+fi
+
+ynh_add_config --template="../conf/lufi.conf.template" --destination="$final_path/lufi.conf"
 
 chmod 600 $final_path/lufi.conf
 chown $app:$app $final_path/lufi.conf
@@ -175,12 +193,15 @@ ynh_add_config --template="../conf/cron_lufi" --destination="/etc/cron.d/$app"
 chmod +x $final_path/script/lufi
 
 #=================================================
-# ADVERTISE SERVICE IN ADMIN PANEL
+# SETUP SYSTEMD
 #=================================================
-ynh_script_progression --message="Storing the config file checksum..."
+ynh_script_progression --message="Upgrading systemd configuration..."
 
-yunohost service add $app --description="Lufi service" --log="$final_path/log/production.log"
+# Create a dedicated systemd config
+ynh_add_systemd_config
 
+#=================================================
+# GENERIC FINALIZATION
 #=================================================
 # SETUP LOGROTATE
 #=================================================
@@ -190,30 +211,11 @@ ynh_script_progression --message="Upgrading logrotate configuration..."
 ynh_use_logrotate --non-append
 
 #=================================================
-# SETUP SYSTEMD
+# INTEGRATE SERVICE IN YUNOHOST
 #=================================================
-ynh_script_progression --message="Upgrading systemd configuration..."
+ynh_script_progression --message="Integrating service in YunoHost..."
 
-# Create a dedicated systemd config
-ynh_add_systemd_config
-
-#=================================================
-# SETUP SSOWAT
-#=================================================
-ynh_script_progression --message="Upgrading permissions..."
-
-ynh_permission_update --permission="main" --add="visitors"
-
-if [ $is_public -eq 0 ]
-then
-	if [ "$path_url" == "/" ]; then
-	    # If the path is /, clear it to prevent any error with the regex.
-	    path_url=""
-	fi
-	# Modify the domain to be used in a regex
-	domain_regex=$(echo "$domain" | sed 's@-@.@g')
-	ynh_app_setting_set --app=$app --key=protected_regex --value="$domain_regex$path_url/stats$","$domain_regex$path_url/manifest.webapp$","$domain_regex$path_url/$","$domain_regex$path_url/d/.*$","$domain_regex$path_url/m/.*$"
-fi
+yunohost service add $app --description="Lufi service" --log="$final_path/log/production.log"
 
 #=================================================
 # START SYSTEMD SERVICE
