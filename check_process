@@ -1,5 +1,4 @@
-;; Nom du test
-	auto_remove=1
+;; Test complet
 	; Manifest
 		domain="domain.tld"
 		path="/path"
@@ -18,7 +17,11 @@
 		upgrade=1	from_commit=23e84578464b1fa09f79c98b6a9b5f19bbcf83f3
 		backup_restore=1
 		multi_instance=1
+		port_already_use=0
 		change_url=1
+;;; Options
+Email=
+Notification=none
 ;;; Upgrade options
 	; commit=23e84578464b1fa09f79c98b6a9b5f19bbcf83f3
 		name=Merge pull request #35 from YunoHost-Apps/fix-buster
