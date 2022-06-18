@@ -119,7 +119,7 @@ if [ -z "$datadir" ]; then
 	datadir=/home/yunohost.app/$app
 	ynh_app_setting_set --app=$app --key=datadir --value=$datadir
 	mkdir -p $datadir
-	mv -f "$final_path/upload" "$datadir/upload"
+	mv -f "$final_path/files" "$datadir/upload"
 	chmod 750 "$datadir"
 	chmod -R o-rwx "$datadir"
 	chown -R $app:www-data "$datadir"
