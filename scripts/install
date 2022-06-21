@@ -195,8 +195,11 @@ ynh_systemd_action --service_name=$app --action="start" --line_match="Creating p
 #=================================================
 ynh_script_progression --message="Configuring permissions..."
 
+# Make app public if necessary
 if [ $is_public -eq 1 ]
 then
+	# Everyone can access the app.
+	# The "main" permission is automatically created before the install script.
 	ynh_permission_update --permission="main" --add="visitors"
 fi
 
