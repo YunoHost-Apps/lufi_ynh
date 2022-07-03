@@ -169,7 +169,7 @@
 
     # Disable sending mail through the server
     # optional, default is false
-    #disable_mail_sending => 0,
+    disable_mail_sending => 1,
 
     #############
     # DB settings
