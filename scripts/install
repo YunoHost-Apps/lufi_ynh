@@ -122,6 +122,20 @@ ynh_add_nginx_config
 #=================================================
 # SPECIFIC SETUP
 #=================================================
+# CREATE DATA DIRECTORY
+#=================================================
+ynh_script_progression --message="Creating a data directory..."
+
+datadir=/home/yunohost.app/$app
+ynh_app_setting_set --app=$app --key=datadir --value=$datadir
+
+mkdir -p $datadir/upload
+
+chmod 750 "$datadir"
+chmod -R o-rwx "$datadir"
+chown -R $app:www-data "$datadir"
+
+#=================================================
 # CONFIGURE LUFI
 #=================================================
 ynh_script_progression --message="Configuring $app..."

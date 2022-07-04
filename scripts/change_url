@@ -37,6 +37,7 @@ db_pwd=$(ynh_app_setting_get --app=$app --key=psqlpwd)
 db_user=$db_name
 secret=$(ynh_app_setting_get --app=$app --key=secret)
 max_file_size=$(ynh_app_setting_get --app=$app --key=max_file_size)
+datadir=$(ynh_app_setting_get --app=$app --key=datadir)
 
 #=================================================
 # BACKUP BEFORE CHANGE URL THEN ACTIVE TRAP

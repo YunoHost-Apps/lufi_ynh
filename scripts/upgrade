@@ -26,6 +26,7 @@ db_name=$(ynh_app_setting_get --app=$app --key=db_name)
 db_user=$db_name
 db_pwd=$(ynh_app_setting_get --app=$app --key=psqlpwd)
 max_file_size=$(ynh_app_setting_get --app=$app --key=max_file_size)
+datadir=$(ynh_app_setting_get --app=$app --key=datadir)
 
 #=================================================
 # CHECK VERSION
@@ -111,6 +112,17 @@ if ynh_legacy_permissions_exists; then
 
 	# Remove deprecated is_public settings
 	ynh_app_setting_delete --app=$app --key=is_public
+fi
+
+# If datadir doesn't exist, create it
+if [ -z "$datadir" ]; then
+	datadir=/home/yunohost.app/$app
+	ynh_app_setting_set --app=$app --key=datadir --value=$datadir
+	mkdir -p $datadir
+	mv -f "$final_path/files" "$datadir/upload"
+	chmod 750 "$datadir"
+	chmod -R o-rwx "$datadir"
+	chown -R $app:www-data "$datadir"
 fi
 
 #=================================================
