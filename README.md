@@ -25,6 +25,7 @@ The encryption key part of the URL is a anchor (Cf. [Fragment Identifier](https:
 
 **Shipped version:** 0.05.18~ynh2
 
+
 **Demo:** https://demo.lufi.io/
 
 ## Screenshots
