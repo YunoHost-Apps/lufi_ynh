@@ -1,0 +1,14 @@
+version = "1.0"
+
+[main]
+name = "Lufi configuration"
+services = ["__APP__"]
+
+    [main.config]
+    name = "Configuration Options"
+
+        [main.config.max_file_size]
+        ask = "Max file size",
+        type = "number"
+        help = "Choose a max file size, in Mo (0 = no limit)"
+        bind = "max_file_size:/var/www/lufi/lufi.conf"
