@@ -47,8 +47,8 @@
                 "name": "max_file_size",
                 "type": "string",
                 "ask": {
-                    "en": "Choose a max file size, in Mo (0 = no limit)",
-                    "fr": "Choisissez une taille de fichier maximum chemin, en Mo (0 = pas de limite)"
+                    "en": "Choose a max file size in Mo (0 = no limit)",
+                    "fr": "Choisissez une taille de fichier maximum en Mo (0 = pas de limite)"
                 },
                 "example": "100",
                 "default": "100"
