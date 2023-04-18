@@ -21,7 +21,7 @@ The administrator of the Lufi instance you use will not be able to see what is i
 The encryption key part of the URL is a anchor (Cf. [Fragment Identifier](https://en.wikipedia.org/wiki/Fragment_identifier)), that means this part is only processed client-side and does not reach the server. :-)
 
 
-**Version incluse :** 0.05.18~ynh2
+**Version incluse :** 0.05.21~ynh1
 
 **Démo :** https://demo.lufi.io/
 
@@ -29,14 +29,9 @@ The encryption key part of the URL is a anchor (Cf. [Fragment Identifier](https:
 
 ![Capture d’écran de Lufi](./doc/screenshots/screenshot_lufi_1.png)
 
-## Avertissements / informations importantes
-
-## Configuration
-
-* Comment configurer cette application : un fichier brut `/var/www/lufi/lufi.conf` en SSH.
-
 ## Documentations et ressources
 
+* Site officiel de l’app : <https://git.framasoft.org/luc/lufi>
 * Documentation officielle de l’admin : <https://framagit.org/luc/lufi/wikis/home>
 * Dépôt de code officiel de l’app : <https://framagit.org/fiat-tux/hat-softwares/lufi>
 * Documentation YunoHost pour cette app : <https://yunohost.org/app_lufi>
