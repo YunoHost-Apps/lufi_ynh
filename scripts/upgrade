@@ -50,14 +50,6 @@ chmod -R o-rwx "$install_dir"
 chown -R $app:www-data "$install_dir"
 
 #=================================================
-# NGINX CONFIGURATION
-#=================================================
-ynh_script_progression --message="Upgrading NGINX web server configuration..."
-
-# Create a dedicated NGINX config
-ynh_add_nginx_config
-
-#=================================================
 # SPECIFIC UPGRADE
 #=================================================
 # SETUP LUFI
@@ -89,31 +81,17 @@ popd
 #=================================================
 ynh_script_progression --message="Setuping cron..."
 
+# Create a dedicated NGINX config
+ynh_add_nginx_config
+
 ynh_add_config --template="../conf/cron" --destination="/etc/cron.d/$app"
 chmod +x $install_dir/script/lufi
-
-#=================================================
-# SETUP SYSTEMD
-#=================================================
-ynh_script_progression --message="Upgrading systemd configuration..."
 
 # Create a dedicated systemd config
 ynh_add_systemd_config
 
-#=================================================
-# GENERIC FINALIZATION
-#=================================================
-# SETUP LOGROTATE
-#=================================================
-ynh_script_progression --message="Upgrading logrotate configuration..."
-
 # Use logrotate to manage app-specific logfile(s)
 ynh_use_logrotate --non-append
-
-#=================================================
-# INTEGRATE SERVICE IN YUNOHOST
-#=================================================
-ynh_script_progression --message="Integrating service in YunoHost..."
 
 yunohost service add $app --description="Lufi service" --log="$install_dir/log/production.log"
 
