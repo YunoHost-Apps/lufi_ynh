@@ -1,3 +1,1 @@
-## Configuration
-
-* Comment configurer cette application : un fichier brut `/var/www/lufi/lufi.conf` en SSH.
+Comment configurer cette application : un fichier brut `__INSTALL_DIR__/lufi.conf` en SSH.
