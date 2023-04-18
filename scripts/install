@@ -54,11 +54,6 @@ then
 	ldap=""
 fi
 
-max_size_set=""
-if [ $max_file_size -eq 0 ]; then # Comment the limitation line if no limit
-	max_size_set="#"
-fi
-
 ynh_add_config --template="../conf/lufi.conf.template" --destination="$install_dir/lufi.conf"
 
 chmod 600 $install_dir/lufi.conf
