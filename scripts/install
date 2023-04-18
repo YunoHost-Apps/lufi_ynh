@@ -54,7 +54,7 @@ then
 	ldap=""
 fi
 
-ynh_add_config --template="../conf/lufi.conf.template" --destination="$install_dir/lufi.conf"
+ynh_add_config --template="../conf/lufi.conf" --destination="$install_dir/lufi.conf"
 
 chmod 600 $install_dir/lufi.conf
 chown $app:$app $install_dir/lufi.conf
