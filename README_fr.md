@@ -5,15 +5,16 @@ It shall NOT be edited by hand.
 
 # Lufi pour YunoHost
 
-[![Niveau d'intégration](https://dash.yunohost.org/integration/lufi.svg)](https://dash.yunohost.org/appci/app/lufi) ![Statut du fonctionnement](https://ci-apps.yunohost.org/ci/badges/lufi.status.svg) ![Statut de maintenance](https://ci-apps.yunohost.org/ci/badges/lufi.maintain.svg)  
+[![Niveau d’intégration](https://dash.yunohost.org/integration/lufi.svg)](https://dash.yunohost.org/appci/app/lufi) ![Statut du fonctionnement](https://ci-apps.yunohost.org/ci/badges/lufi.status.svg) ![Statut de maintenance](https://ci-apps.yunohost.org/ci/badges/lufi.maintain.svg)
+
 [![Installer Lufi avec YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=lufi)
 
 *[Read this readme in english.](./README.md)*
 
-> *Ce package vous permet d'installer Lufi rapidement et simplement sur un serveur YunoHost.
-Si vous n'avez pas YunoHost, regardez [ici](https://yunohost.org/#/install) pour savoir comment l'installer et en profiter.*
+> *Ce package vous permet d’installer Lufi rapidement et simplement sur un serveur YunoHost.
+Si vous n’avez pas YunoHost, regardez [ici](https://yunohost.org/#/install) pour savoir comment l’installer et en profiter.*
 
-## Vue d'ensemble
+## Vue d’ensemble
 
 Lufi stores files and allows you to download them. Is that all? No. All the files are encrypted **by the browser**! It means that your files **never** leave your computer unencrypted.
 The administrator of the Lufi instance you use will not be able to see what is in your file, neither will your network administrator, or your ISP.
@@ -24,9 +25,9 @@ The encryption key part of the URL is a anchor (Cf. [Fragment Identifier](https:
 
 **Démo :** https://demo.lufi.io/
 
-## Captures d'écran
+## Captures d’écran
 
-![Capture d'écran de Lufi](./doc/screenshots/screenshot_lufi_1.png)
+![Capture d’écran de Lufi](./doc/screenshots/screenshot_lufi_1.png)
 
 ## Avertissements / informations importantes
 
@@ -36,8 +37,8 @@ The encryption key part of the URL is a anchor (Cf. [Fragment Identifier](https:
 
 ## Documentations et ressources
 
-* Documentation officielle de l'admin : <https://framagit.org/luc/lufi/wikis/home>
-* Dépôt de code officiel de l'app : <https://framagit.org/fiat-tux/hat-softwares/lufi>
+* Documentation officielle de l’admin : <https://framagit.org/luc/lufi/wikis/home>
+* Dépôt de code officiel de l’app : <https://framagit.org/fiat-tux/hat-softwares/lufi>
 * Documentation YunoHost pour cette app : <https://yunohost.org/app_lufi>
 * Signaler un bug : <https://github.com/YunoHost-Apps/lufi_ynh/issues>
 
@@ -53,4 +54,4 @@ ou
 sudo yunohost app upgrade lufi -u https://github.com/YunoHost-Apps/lufi_ynh/tree/testing --debug
 ```
 
-**Plus d'infos sur le packaging d'applications :** <https://yunohost.org/packaging_apps>
+**Plus d’infos sur le packaging d’applications :** <https://yunohost.org/packaging_apps>
