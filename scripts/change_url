@@ -41,12 +41,7 @@ then
 	ldap=""
 fi
 
-max_size_set=""
-if [ $max_file_size -eq 0 ]; then # Comment the limitation line if no limit
-	max_size_set="#"
-fi
-
-ynh_add_config --template="../conf/lufi.conf.template" --destination="$install_dir/lufi.conf"
+ynh_add_config --template="../conf/lufi.conf" --destination="$install_dir/lufi.conf"
 
 chmod 600 $install_dir/lufi.conf
 chown $app:$app $install_dir/lufi.conf
@@ -60,7 +55,6 @@ ynh_script_progression --message="Starting a systemd service..."
 
 # Start a systemd service
 ynh_systemd_action --service_name=$app --action="start" --log_path="$install_dir/log/production.log" --line_match="Creating process id file"
-
 
 #=================================================
 # END OF SCRIPT

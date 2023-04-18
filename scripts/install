@@ -73,7 +73,7 @@ popd
 #=================================================
 ynh_script_progression --message="Setuping a cron..."
 
-ynh_add_config --template="../conf/cron_lufi" --destination="/etc/cron.d/$app"
+ynh_add_config --template="../conf/cron" --destination="/etc/cron.d/$app"
 chmod +x $install_dir/script/lufi
 
 #=================================================
