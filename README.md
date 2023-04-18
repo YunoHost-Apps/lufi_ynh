@@ -5,7 +5,8 @@ It shall NOT be edited by hand.
 
 # Lufi for YunoHost
 
-[![Integration level](https://dash.yunohost.org/integration/lufi.svg)](https://dash.yunohost.org/appci/app/lufi) ![Working status](https://ci-apps.yunohost.org/ci/badges/lufi.status.svg) ![Maintenance status](https://ci-apps.yunohost.org/ci/badges/lufi.maintain.svg)  
+[![Integration level](https://dash.yunohost.org/integration/lufi.svg)](https://dash.yunohost.org/appci/app/lufi) ![Working status](https://ci-apps.yunohost.org/ci/badges/lufi.status.svg) ![Maintenance status](https://ci-apps.yunohost.org/ci/badges/lufi.maintain.svg)
+
 [![Install Lufi with YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=lufi)
 
 *[Lire ce readme en français.](./README_fr.md)*
@@ -20,7 +21,7 @@ The administrator of the Lufi instance you use will not be able to see what is i
 The encryption key part of the URL is a anchor (Cf. [Fragment Identifier](https://en.wikipedia.org/wiki/Fragment_identifier)), that means this part is only processed client-side and does not reach the server. :-)
 
 
-**Shipped version:** 0.05.18~ynh2
+**Shipped version:** 0.05.21~ynh1
 
 **Demo:** https://demo.lufi.io/
 
@@ -28,14 +29,9 @@ The encryption key part of the URL is a anchor (Cf. [Fragment Identifier](https:
 
 ![Screenshot of Lufi](./doc/screenshots/screenshot_lufi_1.png)
 
-## Disclaimers / important information
-
-## Configuration
-
-* How to configure this app: a plain file at `/var/www/lufi/lufi.conf` with SSH.
-
 ## Documentation and resources
 
+* Official app website: <https://git.framasoft.org/luc/lufi>
 * Official admin documentation: <https://framagit.org/luc/lufi/wikis/home>
 * Upstream app code repository: <https://framagit.org/fiat-tux/hat-softwares/lufi>
 * YunoHost documentation for this app: <https://yunohost.org/app_lufi>

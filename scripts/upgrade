@@ -10,45 +10,10 @@ source _common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
-# LOAD SETTINGS
-#=================================================
-ynh_script_progression --message="Loading installation settings..."
-
-app=$YNH_APP_INSTANCE_NAME
-
-domain=$(ynh_app_setting_get --app=$app --key=domain)
-path_url=$(ynh_app_setting_get --app=$app --key=path)
-use_ldap=$(ynh_app_setting_get --app=$app --key=use_ldap)
-port=$(ynh_app_setting_get --app=$app --key=port)
-final_path=$(ynh_app_setting_get --app=$app --key=final_path)
-secret=$(ynh_app_setting_get --app=$app --key=secret)
-db_name=$(ynh_app_setting_get --app=$app --key=db_name)
-db_user=$db_name
-db_pwd=$(ynh_app_setting_get --app=$app --key=psqlpwd)
-max_file_size=$(ynh_app_setting_get --app=$app --key=max_file_size)
-datadir=$(ynh_app_setting_get --app=$app --key=datadir)
-
-#=================================================
 # CHECK VERSION
 #=================================================
-ynh_script_progression --message="Checking version..."
 
 upgrade_type=$(ynh_check_app_version_changed)
-
-#=================================================
-# BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
-#=================================================
-ynh_script_progression --message="Backing up the app before upgrading (may take a while)..."
-
-# Backup the current version of the app
-ynh_backup_before_upgrade
-ynh_clean_setup () {
-	ynh_clean_check_starting
-	# Restore it if the upgrade fails
-	ynh_restore_upgradebackup
-}
-# Exit if an error occurs during the execution of the script
-ynh_abort_if_errors
 
 #=================================================
 # STANDARD UPGRADE STEPS
@@ -57,81 +22,17 @@ ynh_abort_if_errors
 #=================================================
 ynh_script_progression --message="Stopping a systemd service..."
 
-ynh_systemd_action --service_name=$app --action="stop" --log_path="$final_path/log/production.log"
+ynh_systemd_action --service_name=$app --action="stop" --log_path="$install_dir/log/production.log"
 
 #=================================================
 # ENSURE DOWNWARD COMPATIBILITY
 #=================================================
 ynh_script_progression --message="Ensuring downward compatibility..."
 
-# If db_name doesn't exist, create it
-if [ -z "$db_name" ]; then
-	db_name=$(ynh_sanitize_dbid --db_name=$app)
-	ynh_app_setting_set --app=$app --key=db_name --value=$db_name
-fi
-
-# If final_path doesn't exist, create it
-if [ -z "$final_path" ]; then
-	final_path=/var/www/$app
-	ynh_app_setting_set --app=$app --key=final_path --value=$final_path
-fi
-
-if [ -z "$max_file_size" ]; then
+if [ -z "${max_file_size:-}" ]; then
 	max_file_size=100 # 100 Mo
 	ynh_app_setting_set --app=$app --key=max_file_size --value=$max_file_size
 fi
-
-# Check if is_public settings exist and is set to true
-was_public=$(ynh_app_setting_get --app=$app --key=is_public)
-if [ $was_public -eq 1 ]
-then
-	# Fix permissions if true
-	ynh_print_info --message="Upgrading from legacy permission..."
-	ynh_print_info --message="Legacy public instance detected, allow visitors with new permission."
-	use_ldap=0
-
-	# Add new permission to allow visitors
-	ynh_permission_update --permission="main" --add="visitors"
-
-	# Remove deprecated is_public settings
-	ynh_app_setting_delete --app=$app --key=is_public
-fi
-
-# Check if legacy permissions exists (meanning that is_public was set to false)
-if ynh_legacy_permissions_exists; then
-
-	ynh_print_info --message="Upgrading from legacy permission..."
-	ynh_print_info --message="Legacy private instance detected, keep LDAP enabled."
-
-	# Legacy private install have LDAP enabled
-	use_ldap=1
-
-	# Cleaning legacy permissions
-	ynh_print_info --message="Removing legacy permission..."
-	ynh_legacy_permissions_delete_all
-
-	# Remove deprecated is_public settings
-	ynh_app_setting_delete --app=$app --key=is_public
-fi
-
-# If datadir doesn't exist, create it
-if [ -z "$datadir" ]; then
-	datadir=/home/yunohost.app/$app
-	ynh_app_setting_set --app=$app --key=datadir --value=$datadir
-	mkdir -p $datadir
-	mv -f "$final_path/files" "$datadir/upload"
-	chmod 750 "$datadir"
-	chmod -R o-rwx "$datadir"
-	chown -R $app:www-data "$datadir"
-fi
-
-#=================================================
-# CREATE DEDICATED USER
-#=================================================
-ynh_script_progression --message="Making sure dedicated system user exists..."
-
-# Create a dedicated user (if not existing)
-ynh_system_user_create --username=$app --home_dir="$final_path"
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
@@ -142,27 +43,11 @@ then
 	ynh_script_progression --message="Upgrading source files..."
 
 	# Download, check integrity, uncompress and patch the source from app.src
-	ynh_setup_source --dest_dir="$final_path"
+	ynh_setup_source --dest_dir="$install_dir"
 fi
 
-chmod 750 "$final_path"
-chmod -R o-rwx "$final_path"
-chown -R $app:www-data "$final_path"
-
-#=================================================
-# UPGRADE DEPENDENCIES
-#=================================================
-ynh_script_progression --message="Upgrading dependencies..."
-
-ynh_exec_warn_less ynh_install_app_dependencies $pkg_dependencies
-
-#=================================================
-# NGINX CONFIGURATION
-#=================================================
-ynh_script_progression --message="Upgrading NGINX web server configuration..."
-
-# Create a dedicated NGINX config
-ynh_add_nginx_config
+chmod -R o-rwx "$install_dir"
+chown -R $app:www-data "$install_dir"
 
 #=================================================
 # SPECIFIC UPGRADE
@@ -177,22 +62,17 @@ then
 	ldap=""
 fi
 
-max_size_set=""
-if [ $max_file_size -eq 0 ]; then # Comment the limitation line if no limit
-	max_size_set="#"
-fi
+ynh_add_config --template="../conf/lufi.conf" --destination="$install_dir/lufi.conf"
 
-ynh_add_config --template="../conf/lufi.conf.template" --destination="$final_path/lufi.conf"
-
-chmod 600 $final_path/lufi.conf
-chown $app:$app $final_path/lufi.conf
+chmod 600 $install_dir/lufi.conf
+chown $app:$app $install_dir/lufi.conf
 
 #=================================================
 # BUILD LUFI
 #=================================================
 ynh_script_progression --message="Building Lufi..."
 
-pushd $final_path
+pushd $install_dir
 	carton install --deployment --without=sqlite --without=mysql --without=htpasswd --without=test
 popd
 
@@ -201,47 +81,26 @@ popd
 #=================================================
 ynh_script_progression --message="Setuping cron..."
 
-ynh_add_config --template="../conf/cron_lufi" --destination="/etc/cron.d/$app"
-chmod +x $final_path/script/lufi
+# Create a dedicated NGINX config
+ynh_add_nginx_config
 
-#=================================================
-# SETUP SYSTEMD
-#=================================================
-ynh_script_progression --message="Upgrading systemd configuration..."
+ynh_add_config --template="../conf/cron" --destination="/etc/cron.d/$app"
+chmod +x $install_dir/script/lufi
 
 # Create a dedicated systemd config
 ynh_add_systemd_config
 
-#=================================================
-# GENERIC FINALIZATION
-#=================================================
-# SETUP LOGROTATE
-#=================================================
-ynh_script_progression --message="Upgrading logrotate configuration..."
-
 # Use logrotate to manage app-specific logfile(s)
 ynh_use_logrotate --non-append
 
-#=================================================
-# INTEGRATE SERVICE IN YUNOHOST
-#=================================================
-ynh_script_progression --message="Integrating service in YunoHost..."
-
-yunohost service add $app --description="Lufi service" --log="$final_path/log/production.log"
+yunohost service add $app --description="Lufi service" --log="$install_dir/log/production.log"
 
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
 ynh_script_progression --message="Starting a systemd service..."
 
-ynh_systemd_action --service_name=$app --action="restart" --log_path="$final_path/log/production.log" --line_match="Creating process id file"
-
-#=================================================
-# RELOAD NGINX
-#=================================================
-ynh_script_progression --message="Reloading NGINX web server..."
-
-ynh_systemd_action --service_name=nginx --action=reload
+ynh_systemd_action --service_name=$app --action="restart" --log_path="$install_dir/log/production.log" --line_match="Creating process id file"
 
 #=================================================
 # END OF SCRIPT
