@@ -1,0 +1,10 @@
+test_format = 1.0
+
+[default]
+
+    # -------------------------------
+    # Default args to use for install
+    # -------------------------------
+
+    args.max_file_size=100
+    args.use_ldap=0

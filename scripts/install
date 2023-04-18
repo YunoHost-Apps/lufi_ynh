@@ -8,106 +8,37 @@
 
 source _common.sh
 source /usr/share/yunohost/helpers
-
-#=================================================
-# MANAGE SCRIPT FAILURE
-#=================================================
-
-#REMOVEME? ynh_clean_setup () {
-	ynh_clean_check_starting
-}
-# Exit if an error occurs during the execution of the script
-#REMOVEME? ynh_abort_if_errors
-
 #=================================================
 # RETRIEVE ARGUMENTS FROM THE MANIFEST
 #=================================================
 
-#REMOVEME? domain=$YNH_APP_ARG_DOMAIN
-#REMOVEME? path=$YNH_APP_ARG_PATH
-#REMOVEME? is_public=$YNH_APP_ARG_IS_PUBLIC
-#REMOVEME? max_file_size=$YNH_APP_ARG_MAX_FILE_SIZE
-#REMOVEME? use_ldap=$YNH_APP_ARG_USE_LDAP
 secret=$(ynh_string_random --length=24)
-
-#REMOVEME? app=$YNH_APP_INSTANCE_NAME
 
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
 #=================================================
-#REMOVEME? ynh_script_progression --message="Validating installation parameters..."
-
-#REMOVEME? install_dir=/var/www/$app
-#REMOVEME? test ! -e "$install_dir" || ynh_die --message="This path already contains a folder"
 
 # Check if max_file_size is a number
 if ! [[ $max_file_size =~ "^[\-0-9]+$" ]] && [ $max_file_size -lt 0 ]; then
    ynh_die --message="Max file must be a number positive or zero"
 fi
 
-# Register (book) web path
-#REMOVEME? ynh_webpath_register --app=$app --domain=$domain --path=$path
-
 #=================================================
 # STORE SETTINGS FROM MANIFEST
 #=================================================
-#REMOVEME? ynh_script_progression --message="Storing installation settings..."
 
-#REMOVEME? ynh_app_setting_set --app=$app --key=domain --value=$domain
-#REMOVEME? ynh_app_setting_set --app=$app --key=path --value=$path
 ynh_app_setting_set --app=$app --key=use_ldap --value=$use_ldap
 ynh_app_setting_set --app=$app --key=max_file_size --value=$max_file_size
 ynh_app_setting_set --app=$app --key=secret --value=$secret
-
-#=================================================
-# STANDARD MODIFICATIONS
-#=================================================
-# FIND AND OPEN A PORT
-#=================================================
-#REMOVEME? ynh_script_progression --message="Finding an available port..."
-
-# Find an available port
-#REMOVEME? port=$(ynh_find_port --port=8095)
-#REMOVEME? ynh_app_setting_set --app=$app --key=port --value=$port
-
-#=================================================
-# INSTALL DEPENDENCIES
-#=================================================
-#REMOVEME? ynh_script_progression --message="Installing dependencies..."
-
-#REMOVEME? ynh_exec_warn_less ynh_install_app_dependencies $pkg_dependencies
-
-#=================================================
-# CREATE DEDICATED USER
-#=================================================
-#REMOVEME? ynh_script_progression --message="Configuring system user..."
-
-# Create a system user
-#REMOVEME? ynh_system_user_create --username=$app --home_dir="$install_dir"
-
-#=================================================
-# CREATE A POSTGRESQL DATABASE
-#=================================================
-#REMOVEME? ynh_script_progression --message="Creating a PostgreSQL database..."
-
-# Create postgresql database
-#REMOVEME? ynh_psql_test_if_first_run
-#REMOVEME? db_name=$(ynh_sanitize_dbid --db_name=$app)
-#REMOVEME? db_user=$db_name
-#REMOVEME? ynh_app_setting_set --app=$app --key=db_name --value=$db_name
-#REMOVEME? ynh_psql_setup_db --db_user=$db_user --db_name=$db_name
-#REMOVEME? #REMOVEME? db_pwd=$(ynh_app_setting_get --app=$app --key=psqlpwd) # Password created in ynh_psql_setup_db function
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
 ynh_script_progression --message="Setting up source files..."
 
-#REMOVEME? ynh_app_setting_set --app=$app --key=install_dir --value=$install_dir
 # Download, check integrity, uncompress and patch the source from app.src
 ynh_setup_source --dest_dir="$install_dir"
 
-chmod 750 "$install_dir"
 chmod -R o-rwx "$install_dir"
 chown -R $app:www-data "$install_dir"
 
@@ -118,22 +49,6 @@ ynh_script_progression --message="Configuring NGINX web server..."
 
 # Create a dedicated NGINX config
 ynh_add_nginx_config
-
-#=================================================
-# SPECIFIC SETUP
-#=================================================
-# CREATE DATA DIRECTORY
-#=================================================
-ynh_script_progression --message="Creating a data directory..."
-
-#REMOVEME? data_dir=/home/yunohost.app/$app
-#REMOVEME? ynh_app_setting_set --app=$app --key=data_dir --value=$data_dir
-
-mkdir -p $data_dir/upload
-
-chmod 750 "$data_dir"
-chmod -R o-rwx "$data_dir"
-chown -R $app:www-data "$data_dir"
 
 #=================================================
 # CONFIGURE LUFI
@@ -203,26 +118,6 @@ ynh_script_progression --message="Starting a systemd service..."
 
 # Start a systemd service
 ynh_systemd_action --service_name=$app --action="start" --line_match="Creating process id file" --log_path="$install_dir/log/production.log"
-
-#=================================================
-# SETUP SSOWAT
-#=================================================
-#REMOVEME? ynh_script_progression --message="Configuring permissions..."
-
-# Make app public if necessary
-#REMOVEME? if [ $is_public -eq 1 ]
-then
-	# Everyone can access the app.
-	# The "main" permission is automatically created before the install script.
-#REMOVEME? 	ynh_permission_update --permission="main" --add="visitors"
-fi
-
-#=================================================
-# RELOAD NGINX
-#=================================================
-#REMOVEME? ynh_script_progression --message="Reloading NGINX web server..."
-
-#REMOVEME? ynh_systemd_action --service_name=nginx --action=reload
 
 #=================================================
 # END OF SCRIPT
