@@ -29,8 +29,7 @@ ynh_systemd_action --service_name=$app --action="stop" --log_path="$install_dir/
 #=================================================
 ynh_script_progression --message="Ensuring downward compatibility..."
 
-
-if [ -z "$max_file_size" ]; then
+if [ -z "${max_file_size:-}" ]; then
 	max_file_size=100 # 100 Mo
 	ynh_app_setting_set --app=$app --key=max_file_size --value=$max_file_size
 fi

@@ -2,8 +2,8 @@ packaging_format = 2
 
 id = "lufi"
 name = "Lufi"
-description.en = "Self hosting files and sharing anonymous application"
-description.fr = "Application d'hébergement et de partage de fichiers anonyme"
+description.en = "Files and sharing anonymous application"
+description.fr = "Application de partage de fichiers anonyme"
 
 version = "0.05.21~ynh1"
 
@@ -20,7 +20,7 @@ website = "https://git.framasoft.org/luc/lufi"
 yunohost = ">= 11.1.17"
 architectures = "all"
 multi_instance = true
-ldap = false
+ldap = true
 sso = false
 disk = "50M"
 ram.build = "50M"
@@ -38,18 +38,11 @@ ram.runtime = "50M"
     type = "group"
     default = "visitors"
 
-    [install.max_file_size]
-    ask.en = "Choose a max file size, in Mo (0 = no limit)"
-    ask.fr = "Choisissez une taille de fichier maximum chemin, en Mo (0 = pas de limite)"
-    type = "string"
-    example = "100"
-    default = "100"
-
     [install.use_ldap]
     ask.en = "Install Lufi with LDAP configuration?"
     ask.fr = "Installer Lufi avec la configuration LDAP ?"
-    help.en = "A Lufi with LDAP enabled will allow only YunoHost users to upload."
-    help.fr = "Un Lufi avec LDAP activé autorisera seulement les utilisateurs YunoHost à téléverser."
+    help.en = "Lufi with LDAP enabled will allow only YunoHost users to upload."
+    help.fr = "Lufi avec LDAP activé autorisera seulement les utilisateurs YunoHost à téléverser."
     type = "boolean"
     default = false
 
