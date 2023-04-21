@@ -1,5 +1,5 @@
 
-__FINALPATH__/log/production.log {
+__INSTALL_DIR__/log/production.log {
 		# Effectue une rotation des logs tout les mois
 	monthly
 		# Ou si le fichier de log dépasse 100Mo

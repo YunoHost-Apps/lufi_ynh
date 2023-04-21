@@ -1,0 +1,70 @@
+packaging_format = 2
+
+id = "lufi"
+name = "Lufi"
+description.en = "Files and sharing anonymous application"
+description.fr = "Application de partage de fichiers anonyme"
+
+version = "0.05.21~ynh1"
+
+maintainers = ["frju365, cyp"]
+
+[upstream]
+license = "AGPL-3.0-or-later"
+demo = "https://demo.lufi.io/"
+admindoc = "https://framagit.org/luc/lufi/wikis/home"
+code = "https://framagit.org/fiat-tux/hat-softwares/lufi"
+website = "https://git.framasoft.org/luc/lufi"
+
+[integration]
+yunohost = ">= 11.1.17"
+architectures = "all"
+multi_instance = true
+ldap = true
+sso = false
+disk = "50M"
+ram.build = "550M"
+ram.runtime = "50M"
+
+[install]
+    [install.domain]
+    type = "domain"
+
+    [install.path]
+    type = "path"
+    default = "/lufi"
+
+    [install.init_main_permission]
+    type = "group"
+    default = "visitors"
+
+    [install.use_ldap]
+    ask.en = "Install Lufi with LDAP configuration?"
+    ask.fr = "Installer Lufi avec la configuration LDAP ?"
+    help.en = "Lufi with LDAP enabled will allow only YunoHost users to upload."
+    help.fr = "Lufi avec LDAP activé autorisera seulement les utilisateurs YunoHost à téléverser."
+    type = "boolean"
+    default = false
+
+[resources]
+        [resources.sources.main]
+        url = "https://framagit.org/fiat-tux/hat-softwares/lufi/-/archive/0.05.21/lufi-0.05.21.tar.gz"
+        sha256 = "a1da42688d82239a9441355ad0e1d773e24d0225edcdc463b425a5032133765a"
+
+    [resources.ports]
+
+    [resources.system_user]
+
+    [resources.install_dir]
+
+    [resources.data_dir]
+    subdirs = "upload"
+
+    [resources.permissions]
+    main.url = "/"
+
+    [resources.apt]
+    packages = "build-essential libssl-dev libio-socket-ssl-perl liblwp-protocol-https-perl libpq-dev postgresql carton"
+
+    [resources.database]
+    type = "postgresql"
