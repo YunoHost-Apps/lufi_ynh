@@ -34,6 +34,15 @@ if [ -z "${max_file_size:-}" ]; then
 	ynh_app_setting_set --app=$app --key=max_file_size --value=$max_file_size
 fi
 
+if [ -z "${use_ldap:-}" ]; then
+	use_ldap=0
+	ynh_app_setting_set --app=$app --key=use_ldap --value=$use_ldap
+fi
+
+if [ -z "${secret:-}" ]; then
+	secret=$(ynh_string_random --length=24)
+	ynh_app_setting_set --app=$app --key=secret --value=$secret
+fi
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
