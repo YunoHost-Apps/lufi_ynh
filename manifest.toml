@@ -5,7 +5,7 @@ name = "Lufi"
 description.en = "Files and sharing anonymous application"
 description.fr = "Application de partage de fichiers anonyme"
 
-version = "0.05.21~ynh1"
+version = "0.05.21~ynh2"
 
 maintainers = ["frju365, cyp"]
 
@@ -17,7 +17,7 @@ code = "https://framagit.org/fiat-tux/hat-softwares/lufi"
 website = "https://git.framasoft.org/luc/lufi"
 
 [integration]
-yunohost = ">= 11.1.17"
+yunohost = ">= 11.1.21"
 architectures = "all"
 multi_instance = true
 ldap = true
