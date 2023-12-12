@@ -64,7 +64,16 @@ ram.runtime = "50M"
     main.url = "/"
 
     [resources.apt]
-    packages = "build-essential libssl-dev libio-socket-ssl-perl liblwp-protocol-https-perl libpq-dev postgresql carton"
+    packages = [
+        "build-essential",
+        "libssl-dev",
+        "zlib1g-dev",
+        "libpq-dev",
+        "libio-socket-ssl-perl",
+        "liblwp-protocol-https-perl",
+        "carton",
+        "postgresql",
+    ]
 
     [resources.database]
     type = "postgresql"
