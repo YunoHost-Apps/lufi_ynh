@@ -82,6 +82,9 @@ chown $app:$app $install_dir/lufi.conf
 ynh_script_progression --message="Building Lufi..."
 
 pushd $install_dir
+	# Patch cpanfile.snapshot to bump dependency
+	sed -i 's|Cpanel-JSON-XS-4.19|Cpanel-JSON-XS-4.37|' cpanfile.snapshot
+	sed -i 's|Cpanel::JSON::XS 4.19|Cpanel::JSON::XS 4.37|' cpanfile.snapshot
 	carton install --deployment --without=sqlite --without=mysql --without=htpasswd --without=test
 popd
 
