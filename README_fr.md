@@ -34,7 +34,7 @@ The encryption key part of the URL is a anchor (Cf. [Fragment Identifier](https:
 * Site officiel de l’app : <https://git.framasoft.org/luc/lufi>
 * Documentation officielle de l’admin : <https://framagit.org/luc/lufi/wikis/home>
 * Dépôt de code officiel de l’app : <https://framagit.org/fiat-tux/hat-softwares/lufi>
-* Documentation YunoHost pour cette app : <https://yunohost.org/app_lufi>
+* YunoHost Store: <https://apps.yunohost.org/app/lufi>
 * Signaler un bug : <https://github.com/YunoHost-Apps/lufi_ynh/issues>
 
 ## Informations pour les développeurs
