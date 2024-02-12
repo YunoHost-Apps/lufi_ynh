@@ -7,7 +7,7 @@ description.fr = "Application de partage de fichiers anonyme"
 
 version = "0.05.21~ynh2"
 
-maintainers = ["frju365, cyp"]
+maintainers = [ "frju365, cyp" ]
 
 [upstream]
 license = "AGPL-3.0-or-later"
@@ -47,24 +47,25 @@ ram.runtime = "50M"
     default = false
 
 [resources]
-        [resources.sources.main]
-        url = "https://framagit.org/fiat-tux/hat-softwares/lufi/-/archive/0.05.21/lufi-0.05.21.tar.gz"
-        sha256 = "a1da42688d82239a9441355ad0e1d773e24d0225edcdc463b425a5032133765a"
+    [resources.sources.main]
+    url = "https://framagit.org/fiat-tux/hat-softwares/lufi/-/archive/0.05.21/lufi-0.05.21.tar.gz"
+    sha256 = "a1da42688d82239a9441355ad0e1d773e24d0225edcdc463b425a5032133765a"
+    autoupdate.strategy = "latest_gitlab_release"
 
-    [resources.ports]
+[resources.ports]
 
-    [resources.system_user]
+[resources.system_user]
 
-    [resources.install_dir]
+[resources.install_dir]
 
-    [resources.data_dir]
-    subdirs = ["upload"]
+[resources.data_dir]
+subdirs = [ "upload" ]
 
-    [resources.permissions]
-    main.url = "/"
+[resources.permissions]
+main.url = "/"
 
-    [resources.apt]
-    packages = "build-essential libssl-dev libio-socket-ssl-perl liblwp-protocol-https-perl libpq-dev postgresql carton"
+[resources.apt]
+packages = "build-essential libssl-dev libio-socket-ssl-perl liblwp-protocol-https-perl libpq-dev postgresql carton"
 
-    [resources.database]
-    type = "postgresql"
+[resources.database]
+type = "postgresql"
