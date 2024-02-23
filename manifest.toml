@@ -5,7 +5,7 @@ name = "Lufi"
 description.en = "Files and sharing anonymous application"
 description.fr = "Application de partage de fichiers anonyme"
 
-version = "0.05.21~ynh2"
+version = "0.07.0~ynh1"
 
 maintainers = [ "frju365, cyp" ]
 
@@ -48,8 +48,8 @@ ram.runtime = "50M"
 
 [resources]
     [resources.sources.main]
-    url = "https://framagit.org/fiat-tux/hat-softwares/lufi/-/archive/0.05.21/lufi-0.05.21.tar.gz"
-    sha256 = "a1da42688d82239a9441355ad0e1d773e24d0225edcdc463b425a5032133765a"
+    url = "https://framagit.org/fiat-tux/hat-softwares/lufi/-/archive/0.07.0/lufi-0.07.0.tar.bz2"
+    sha256 = "a4d9a960d3542198221926e8781709f4f40dbb2c873cab113013d8f0be101769"
     autoupdate.strategy = "latest_gitlab_release"
 
 [resources.ports]
