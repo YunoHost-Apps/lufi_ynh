@@ -9,7 +9,7 @@ It shall NOT be edited by hand.
 
 [![Install Lufi with YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=lufi)
 
-*[Read this README is other languages.](./ALL_README.md)*
+*[Read this README in other languages.](./ALL_README.md)*
 
 > *This package allows you to install Lufi quickly and simply on a YunoHost server.*  
 > *If you don't have YunoHost, please consult [the guide](https://yunohost.org/install) to learn how to install it.*
@@ -21,7 +21,7 @@ The administrator of the Lufi instance you use will not be able to see what is i
 The encryption key part of the URL is a anchor (Cf. [Fragment Identifier](https://en.wikipedia.org/wiki/Fragment_identifier)), that means this part is only processed client-side and does not reach the server. :-)
 
 
-**Shipped version:** 0.05.21~ynh2
+**Shipped version:** 0.07.0~ynh1
 
 **Demo:** <https://demo.lufi.io/>
 
