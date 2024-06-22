@@ -3,7 +3,7 @@
 请勿手动编辑。
 -->
 
-# YunoHost 的 Lufi
+# YunoHost 上的 Lufi
 
 [![集成程度](https://dash.yunohost.org/integration/lufi.svg)](https://dash.yunohost.org/appci/app/lufi) ![工作状态](https://ci-apps.yunohost.org/ci/badges/lufi.status.svg) ![维护状态](https://ci-apps.yunohost.org/ci/badges/lufi.maintain.svg)
 
