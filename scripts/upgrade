@@ -1,69 +1,56 @@
 #!/bin/bash
 
-#=================================================
-# GENERIC START
-#=================================================
-# IMPORT GENERIC HELPERS
-#=================================================
-
 source _common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
-# CHECK VERSION
-#=================================================
-
-upgrade_type=$(ynh_check_app_version_changed)
-
-#=================================================
-# STANDARD UPGRADE STEPS
-#=================================================
 # STOP SYSTEMD SERVICE
 #=================================================
-ynh_script_progression --message="Stopping a systemd service..."
+ynh_script_progression "Stopping $app's systemd service..."
 
-ynh_systemd_action --service_name=$app --action="stop" --log_path="$install_dir/log/production.log"
+ynh_systemctl --service=$app --action="stop" --log_path="$install_dir/log/production.log"
 
 #=================================================
 # ENSURE DOWNWARD COMPATIBILITY
 #=================================================
-ynh_script_progression --message="Ensuring downward compatibility..."
+ynh_script_progression "Ensuring downward compatibility..."
 
+# FIXMEhelpers2.1: maybe replace with: ynh_app_setting_set_default --key=max_file_size --value=100 # 100 Mo
 if [ -z "${max_file_size:-}" ]; then
 	max_file_size=100 # 100 Mo
-	ynh_app_setting_set --app=$app --key=max_file_size --value=$max_file_size
+	ynh_app_setting_set --key=max_file_size --value=$max_file_size
 fi
 
+# FIXMEhelpers2.1: maybe replace with: ynh_app_setting_set_default --key=use_ldap --value=0
 if [ -z "${use_ldap:-}" ]; then
 	use_ldap=0
-	ynh_app_setting_set --app=$app --key=use_ldap --value=$use_ldap
+	ynh_app_setting_set --key=use_ldap --value=$use_ldap
 fi
 
+# FIXMEhelpers2.1: maybe replace with: ynh_app_setting_set_default --key=secret --value=$(ynh_string_random --length=24)
 if [ -z "${secret:-}" ]; then
 	secret=$(ynh_string_random --length=24)
-	ynh_app_setting_set --app=$app --key=secret --value=$secret
+	ynh_app_setting_set --key=secret --value=$secret
 fi
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
 
-if [ "$upgrade_type" == "UPGRADE_APP" ]
+# FIXME: this is still supported but the recommendation is now to *always* re-setup the app sources wether or not the upstream sources changed
+if ynh_app_upstream_version_changed
 then
-	ynh_script_progression --message="Upgrading source files..."
+	ynh_script_progression "Upgrading source files..."
 
 	# Download, check integrity, uncompress and patch the source from app.src
 	ynh_setup_source --dest_dir="$install_dir"
 fi
 
-chmod -R o-rwx "$install_dir"
-chown -R $app:www-data "$install_dir"
-
-#=================================================
-# SPECIFIC UPGRADE
+#REMOVEME? Assuming the install dir is setup using ynh_setup_source, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chmod -R o-rwx "$install_dir"
+#REMOVEME? Assuming the install dir is setup using ynh_setup_source, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chown -R $app:www-data "$install_dir"
 #=================================================
 # SETUP LUFI
 #=================================================
-ynh_script_progression --message="Configuring Lufi..."
+ynh_script_progression "Configuring Lufi..."
 
 ldap="#"
 if [ $use_ldap -eq 1 ];
@@ -71,7 +58,7 @@ then
 	ldap=""
 fi
 
-ynh_add_config --template="../conf/lufi.conf" --destination="$install_dir/lufi.conf"
+ynh_config_add --template="lufi.conf" --destination="$install_dir/lufi.conf"
 
 chmod 600 $install_dir/lufi.conf
 chown $app:$app $install_dir/lufi.conf
@@ -79,7 +66,7 @@ chown $app:$app $install_dir/lufi.conf
 #=================================================
 # BUILD LUFI
 #=================================================
-ynh_script_progression --message="Building Lufi..."
+ynh_script_progression "Building Lufi..."
 
 pushd $install_dir
 	# Patch cpanfile.snapshot to bump dependency
@@ -91,31 +78,31 @@ popd
 #=================================================
 # SETUP CRON
 #=================================================
-ynh_script_progression --message="Setuping cron..."
+ynh_script_progression "Setuping cron..."
 
 # Create a dedicated NGINX config
-ynh_add_nginx_config
+ynh_config_add_nginx
 
-ynh_add_config --template="../conf/cron" --destination="/etc/cron.d/$app"
+ynh_config_add --template="cron" --destination="/etc/cron.d/$app"
 chmod +x $install_dir/script/lufi
 
 # Create a dedicated systemd config
-ynh_add_systemd_config
+ynh_config_add_systemd
 
 # Use logrotate to manage app-specific logfile(s)
-ynh_use_logrotate --non-append
+ynh_config_add_logrotate
 
 yunohost service add $app --description="Lufi service" --log="$install_dir/log/production.log"
 
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
-ynh_script_progression --message="Starting a systemd service..."
+ynh_script_progression "Starting $app's systemd service..."
 
-ynh_systemd_action --service_name=$app --action="restart" --log_path="$install_dir/log/production.log" --line_match="Creating process id file"
+ynh_systemctl --service=$app --action="restart" --log_path="$install_dir/log/production.log" --wait_until="Creating process id file"
 
 #=================================================
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Upgrade of $app completed"
+ynh_script_progression "Upgrade of $app completed"

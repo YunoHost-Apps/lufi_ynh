@@ -17,7 +17,8 @@ code = "https://framagit.org/fiat-tux/hat-softwares/lufi"
 website = "https://git.framasoft.org/luc/lufi"
 
 [integration]
-yunohost = ">= 11.1.21"
+yunohost = ">= 11.2.18"
+helpers_version = "2.1"
 architectures = "all"
 multi_instance = true
 ldap = true
