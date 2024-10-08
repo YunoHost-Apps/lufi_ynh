@@ -12,4 +12,4 @@ services = ["__APP__"]
         type = "number"
         default = 100
         help = "Choose the maximum file size allowed to send, in Mo (0 = no limit)"
-        bind = "max_file_size:/var/www/__APP__/lufi.conf"
+        bind = "max_file_size:__INSTALL_DIR__/lufi.conf"
