@@ -1,16 +1,8 @@
 #!/bin/bash
 
-#=================================================
-# GENERIC START
-#=================================================
-# IMPORT GENERIC HELPERS
-#=================================================
-
 source _common.sh
 source /usr/share/yunohost/helpers
 
-#=================================================
-# STANDARD REMOVE
 #=================================================
 # REMOVE SERVICE INTEGRATION IN YUNOHOST
 #=================================================
@@ -33,9 +25,6 @@ ynh_remove_nginx_config
 
 # Remove a cron file
 ynh_secure_remove --file="/etc/cron.d/$app"
-
-# Remove the log files
-ynh_secure_remove --file="/var/log/$app"
 
 #=================================================
 # END OF SCRIPT
