@@ -23,8 +23,6 @@ ynh_script_progression "Updating NGINX web server configuration..."
 ynh_config_change_url_nginx
 
 #=================================================
-# SPECIFIC MODIFICATIONS
-#=================================================
 # CONFIGURE LUFI
 #=================================================
 ynh_script_progression "Configuring lufi..."
@@ -48,7 +46,6 @@ chown $app:$app $install_dir/lufi.conf
 #=================================================
 ynh_script_progression "Starting $app's systemd service..."
 
-# Start a systemd service
 ynh_systemctl --service=$app --action="start" --log_path="$install_dir/log/production.log" --wait_until="Creating process id file"
 
 #=================================================
