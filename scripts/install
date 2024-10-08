@@ -1,13 +1,8 @@
 #!/bin/bash
 
-#=================================================
-# GENERIC START
-#=================================================
-# IMPORT GENERIC HELPERS
-#=================================================
-
 source _common.sh
 source /usr/share/yunohost/helpers
+
 #=================================================
 # RETRIEVE ARGUMENTS FROM THE MANIFEST
 #=================================================
@@ -29,7 +24,6 @@ ynh_app_setting_set --app=$app --key=secret --value=$secret
 #=================================================
 ynh_script_progression --message="Setting up source files..."
 
-# Download, check integrity, uncompress and patch the source from app.src
 ynh_setup_source --dest_dir="$install_dir"
 
 chmod -R o-rwx "$install_dir"
@@ -40,13 +34,10 @@ chown -R $app:www-data "$install_dir"
 #=================================================
 ynh_script_progression --message="Configuring NGINX web server..."
 
-# Create a dedicated NGINX config
 ynh_add_nginx_config
 
-# Create a dedicated systemd config
 ynh_add_systemd_config
 
-# Use logrotate to manage application logfile(s)
 ynh_use_logrotate
 
 yunohost service add $app --description="Lufi service" --log="$install_dir/log/production.log"
@@ -87,7 +78,6 @@ popd
 #=================================================
 ynh_script_progression --message="Starting a systemd service..."
 
-# Start a systemd service
 ynh_systemd_action --service_name=$app --action="start" --line_match="Creating process id file" --log_path="$install_dir/log/production.log"
 
 #=================================================
