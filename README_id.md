@@ -5,7 +5,9 @@ Ini TIDAK boleh diedit dengan tangan.
 
 # Lufi untuk YunoHost
 
-[![Tingkat integrasi](https://dash.yunohost.org/integration/lufi.svg)](https://ci-apps.yunohost.org/ci/apps/lufi/) ![Status kerja](https://ci-apps.yunohost.org/ci/badges/lufi.status.svg) ![Status pemeliharaan](https://ci-apps.yunohost.org/ci/badges/lufi.maintain.svg)
+[![Tingkat integrasi](https://apps.yunohost.org/badge/integration/lufi)](https://ci-apps.yunohost.org/ci/apps/lufi/)
+![Status kerja](https://apps.yunohost.org/badge/state/lufi)
+![Status pemeliharaan](https://apps.yunohost.org/badge/maintained/lufi)
 
 [![Pasang Lufi dengan YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=lufi)
 

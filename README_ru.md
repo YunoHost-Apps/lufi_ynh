@@ -5,7 +5,9 @@
 
 # Lufi для YunoHost
 
-[![Уровень интеграции](https://dash.yunohost.org/integration/lufi.svg)](https://ci-apps.yunohost.org/ci/apps/lufi/) ![Состояние работы](https://ci-apps.yunohost.org/ci/badges/lufi.status.svg) ![Состояние сопровождения](https://ci-apps.yunohost.org/ci/badges/lufi.maintain.svg)
+[![Уровень интеграции](https://apps.yunohost.org/badge/integration/lufi)](https://ci-apps.yunohost.org/ci/apps/lufi/)
+![Состояние работы](https://apps.yunohost.org/badge/state/lufi)
+![Состояние сопровождения](https://apps.yunohost.org/badge/maintained/lufi)
 
 [![Установите Lufi с YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=lufi)
 

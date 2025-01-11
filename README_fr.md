@@ -5,7 +5,9 @@ Il NE doit PAS être modifié à la main.
 
 # Lufi pour YunoHost
 
-[![Niveau d’intégration](https://dash.yunohost.org/integration/lufi.svg)](https://ci-apps.yunohost.org/ci/apps/lufi/) ![Statut du fonctionnement](https://ci-apps.yunohost.org/ci/badges/lufi.status.svg) ![Statut de maintenance](https://ci-apps.yunohost.org/ci/badges/lufi.maintain.svg)
+[![Niveau d’intégration](https://apps.yunohost.org/badge/integration/lufi)](https://ci-apps.yunohost.org/ci/apps/lufi/)
+![Statut du fonctionnement](https://apps.yunohost.org/badge/state/lufi)
+![Statut de maintenance](https://apps.yunohost.org/badge/maintained/lufi)
 
 [![Installer Lufi avec YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=lufi)
 
