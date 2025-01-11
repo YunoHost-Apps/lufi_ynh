@@ -1,22 +1,8 @@
 #!/bin/bash
 
-#=================================================
-# GENERIC START
-#=================================================
-# IMPORT GENERIC HELPERS
-#=================================================
-
 source _common.sh
 source /usr/share/yunohost/helpers
 
-#=================================================
-# CHECK VERSION
-#=================================================
-
-upgrade_type=$(ynh_check_app_version_changed)
-
-#=================================================
-# STANDARD UPGRADE STEPS
 #=================================================
 # STOP SYSTEMD SERVICE
 #=================================================
@@ -43,23 +29,17 @@ if [ -z "${secret:-}" ]; then
 	secret=$(ynh_string_random --length=24)
 	ynh_app_setting_set --app=$app --key=secret --value=$secret
 fi
+
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
+ynh_script_progression --message="Upgrading source files..."
 
-if [ "$upgrade_type" == "UPGRADE_APP" ]
-then
-	ynh_script_progression --message="Upgrading source files..."
-
-	# Download, check integrity, uncompress and patch the source from app.src
-	ynh_setup_source --dest_dir="$install_dir"
-fi
+ynh_setup_source --dest_dir="$install_dir"
 
 chmod -R o-rwx "$install_dir"
 chown -R $app:www-data "$install_dir"
 
-#=================================================
-# SPECIFIC UPGRADE
 #=================================================
 # SETUP LUFI
 #=================================================
@@ -93,16 +73,13 @@ popd
 #=================================================
 ynh_script_progression --message="Setuping cron..."
 
-# Create a dedicated NGINX config
 ynh_add_nginx_config
 
 ynh_add_config --template="../conf/cron" --destination="/etc/cron.d/$app"
 chmod +x $install_dir/script/lufi
 
-# Create a dedicated systemd config
 ynh_add_systemd_config
 
-# Use logrotate to manage app-specific logfile(s)
 ynh_use_logrotate --non-append
 
 yunohost service add $app --description="Lufi service" --log="$install_dir/log/production.log"
