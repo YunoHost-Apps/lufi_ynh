@@ -5,7 +5,9 @@ No se debe editar a mano.
 
 # Lufi para Yunohost
 
-[![Nivel de integración](https://dash.yunohost.org/integration/lufi.svg)](https://dash.yunohost.org/appci/app/lufi) ![Estado funcional](https://ci-apps.yunohost.org/ci/badges/lufi.status.svg) ![Estado En Mantención](https://ci-apps.yunohost.org/ci/badges/lufi.maintain.svg)
+[![Nivel de integración](https://apps.yunohost.org/badge/integration/lufi)](https://ci-apps.yunohost.org/ci/apps/lufi/)
+![Estado funcional](https://apps.yunohost.org/badge/state/lufi)
+![Estado En Mantención](https://apps.yunohost.org/badge/maintained/lufi)
 
 [![Instalar Lufi con Yunhost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=lufi)
 
@@ -39,7 +41,7 @@ The encryption key part of the URL is a anchor (Cf. [Fragment Identifier](https:
 
 ## Información para desarrolladores
 
-Por favor enviar sus correcciones a la [`branch testing`](https://github.com/YunoHost-Apps/lufi_ynh/tree/testing
+Por favor enviar sus correcciones a la [rama `testing`](https://github.com/YunoHost-Apps/lufi_ynh/tree/testing).
 
 Para probar la rama `testing`, sigue asÍ:
 

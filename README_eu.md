@@ -5,7 +5,9 @@ EZ editatu eskuz.
 
 # Lufi YunoHost-erako
 
-[![Integrazio maila](https://dash.yunohost.org/integration/lufi.svg)](https://dash.yunohost.org/appci/app/lufi) ![Funtzionamendu egoera](https://ci-apps.yunohost.org/ci/badges/lufi.status.svg) ![Mantentze egoera](https://ci-apps.yunohost.org/ci/badges/lufi.maintain.svg)
+[![Integrazio maila](https://apps.yunohost.org/badge/integration/lufi)](https://ci-apps.yunohost.org/ci/apps/lufi/)
+![Funtzionamendu egoera](https://apps.yunohost.org/badge/state/lufi)
+![Mantentze egoera](https://apps.yunohost.org/badge/maintained/lufi)
 
 [![Instalatu Lufi YunoHost-ekin](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=lufi)
 
