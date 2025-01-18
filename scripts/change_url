@@ -43,7 +43,7 @@ chown $app:$app $install_dir/lufi.conf
 #=================================================
 ynh_script_progression "Starting $app's systemd service..."
 
-ynh_systemctl --service=$app --action="start" --log_path="$install_dir/log/production.log" --wait_until="Creating process id file"
+ynh_systemctl --service=$app --action="start" --log_path="$install_dir/log/production.log" --wait_until="Web application available"
 
 #=================================================
 # END OF SCRIPT
