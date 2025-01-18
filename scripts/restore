@@ -38,7 +38,7 @@ yunohost service add $app --description="Lufi service" --log="$install_dir/log/p
 #=================================================
 ynh_script_progression "Reloading NGINX web server and $app's service..."
 
-ynh_systemctl --service=$app --action="start" --log_path="$install_dir/log/production.log" --wait_until="Creating process id file"
+ynh_systemctl --service=$app --action="start" --log_path="$install_dir/log/production.log" --wait_until="Web application available"
 
 ynh_systemctl --service=nginx --action=reload
 

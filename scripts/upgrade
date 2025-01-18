@@ -75,7 +75,7 @@ yunohost service add $app --description="Lufi service" --log="$install_dir/log/p
 #=================================================
 ynh_script_progression "Starting $app's systemd service..."
 
-ynh_systemctl --service=$app --action="restart" --log_path="$install_dir/log/production.log" --wait_until="Creating process id file"
+ynh_systemctl --service=$app --action="restart" --log_path="$install_dir/log/production.log" --wait_until="Web application available"
 
 #=================================================
 # END OF SCRIPT
