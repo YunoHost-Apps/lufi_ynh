@@ -15,42 +15,21 @@ ynh_systemctl --service=$app --action="stop" --log_path="$install_dir/log/produc
 #=================================================
 ynh_script_progression "Ensuring downward compatibility..."
 
-# FIXMEhelpers2.1: maybe replace with: ynh_app_setting_set_default --key=max_file_size --value=100 # 100 Mo
-if [ -z "${max_file_size:-}" ]; then
-	max_file_size=100 # 100 Mo
-	ynh_app_setting_set --key=max_file_size --value=$max_file_size
-fi
+ynh_app_setting_set_default --key=max_file_size --value=100 # 100 Mo
+ynh_app_setting_set_default --key=use_ldap --value=0
+ynh_app_setting_set_default --key=secret --value=$(ynh_string_random --length=24)
 
-# FIXMEhelpers2.1: maybe replace with: ynh_app_setting_set_default --key=use_ldap --value=0
-if [ -z "${use_ldap:-}" ]; then
-	use_ldap=0
-	ynh_app_setting_set --key=use_ldap --value=$use_ldap
-fi
-
-# FIXMEhelpers2.1: maybe replace with: ynh_app_setting_set_default --key=secret --value=$(ynh_string_random --length=24)
-if [ -z "${secret:-}" ]; then
-	secret=$(ynh_string_random --length=24)
-	ynh_app_setting_set --key=secret --value=$secret
-fi
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
+ynh_script_progression "Upgrading source files..."
 
-# FIXME: this is still supported but the recommendation is now to *always* re-setup the app sources wether or not the upstream sources changed
-if ynh_app_upstream_version_changed
-then
-	ynh_script_progression "Upgrading source files..."
+ynh_setup_source --dest_dir="$install_dir"
 
-	# Download, check integrity, uncompress and patch the source from app.src
-	ynh_setup_source --dest_dir="$install_dir"
-fi
-
-#REMOVEME? Assuming the install dir is setup using ynh_setup_source, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chmod -R o-rwx "$install_dir"
-#REMOVEME? Assuming the install dir is setup using ynh_setup_source, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chown -R $app:www-data "$install_dir"
 #=================================================
 # SETUP LUFI
 #=================================================
-ynh_script_progression "Configuring Lufi..."
+ynh_script_progression "Configuring $app..."
 
 ldap="#"
 if [ $use_ldap -eq 1 ];
@@ -80,16 +59,13 @@ popd
 #=================================================
 ynh_script_progression "Setuping cron..."
 
-# Create a dedicated NGINX config
 ynh_config_add_nginx
 
 ynh_config_add --template="cron" --destination="/etc/cron.d/$app"
 chmod +x $install_dir/script/lufi
 
-# Create a dedicated systemd config
 ynh_config_add_systemd
 
-# Use logrotate to manage app-specific logfile(s)
 ynh_config_add_logrotate
 
 yunohost service add $app --description="Lufi service" --log="$install_dir/log/production.log"

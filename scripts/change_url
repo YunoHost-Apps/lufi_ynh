@@ -25,10 +25,7 @@ ynh_config_change_url_nginx
 #=================================================
 # CONFIGURE LUFI
 #=================================================
-ynh_script_progression "Configuring lufi..."
-
-domain="$new_domain"
-path="$new_path"
+ynh_script_progression "Configuring $app..."
 
 ldap="#"
 if [ $use_ldap -eq 1 ];
