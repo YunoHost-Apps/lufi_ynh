@@ -23,7 +23,7 @@ The administrator of the Lufi instance you use will not be able to see what is i
 The encryption key part of the URL is a anchor (Cf. [Fragment Identifier](https://en.wikipedia.org/wiki/Fragment_identifier)), that means this part is only processed client-side and does not reach the server. :-)
 
 
-**Versi terkirim:** 0.07.0~ynh1
+**Versi terkirim:** 0.07.0~ynh2
 
 **Demo:** <https://demo.lufi.io/>
 
