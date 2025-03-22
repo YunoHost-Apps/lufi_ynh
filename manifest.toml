@@ -1,3 +1,5 @@
+#:schema https://raw.githubusercontent.com/YunoHost/apps/master/schemas/manifest.v2.schema.json
+
 packaging_format = 2
 
 id = "lufi"
@@ -23,6 +25,7 @@ architectures = "all"
 multi_instance = true
 
 ldap = true
+
 sso = false
 
 disk = "50M"
@@ -55,29 +58,29 @@ ram.runtime = "50M"
     sha256 = "a4d9a960d3542198221926e8781709f4f40dbb2c873cab113013d8f0be101769"
     autoupdate.strategy = "latest_gitlab_release"
 
-[resources.ports]
+    [resources.system_user]
 
-[resources.system_user]
+    [resources.install_dir]
 
-[resources.install_dir]
+    [resources.data_dir]
+    subdirs = [ "upload" ]
 
-[resources.data_dir]
-subdirs = [ "upload" ]
+    [resources.permissions]
+    main.url = "/"
 
-[resources.permissions]
-main.url = "/"
+    [resources.ports]
 
-[resources.apt]
-packages = [
-    "build-essential",
-    "libssl-dev",
-    "zlib1g-dev",
-    "libpq-dev",
-    "libio-socket-ssl-perl",
-    "liblwp-protocol-https-perl",
-    "carton",
-    "postgresql",
-]
+    [resources.apt]
+    packages = [
+        "build-essential",
+        "libssl-dev",
+        "zlib1g-dev",
+        "libpq-dev",
+        "libio-socket-ssl-perl",
+        "liblwp-protocol-https-perl",
+        "carton",
+        "postgresql",
+    ]
 
-[resources.database]
-type = "postgresql"
+    [resources.database]
+    type = "postgresql"
