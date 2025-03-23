@@ -1,5 +1,10 @@
 #!/bin/bash
 
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
+
+# Keep this path for calling _common.sh inside the execution's context of backup and restore scripts
 source ../settings/scripts/_common.sh
 source /usr/share/yunohost/helpers
 
@@ -18,27 +23,31 @@ ynh_script_progression "Restoring the PostregSQL database..."
 ynh_psql_db_shell < ./db.sql
 
 #=================================================
-# RESTORE SYSTEM CONFIGURATIONS
+# RESTORE SYSTEM CONFIGURATION
 #=================================================
 ynh_script_progression "Restoring system configurations related to $app..."
 
 ynh_restore "/etc/nginx/conf.d/$domain.d/$app.conf"
 
-ynh_restore "/etc/cron.d/$app"
-
 ynh_restore "/etc/systemd/system/$app.service"
-systemctl enable $app.service --quiet
+systemctl enable "$app.service" --quiet
+yunohost service add "$app" --description="Lufi service" --log="$install_dir/log/production.log"
 
 ynh_restore "/etc/logrotate.d/$app"
 
-yunohost service add $app --description="Lufi service" --log="$install_dir/log/production.log"
+
+#=================================================
+# RESTORE VARIOUS FILES
+#=================================================
+
+ynh_restore "/etc/cron.d/$app"
 
 #=================================================
 # RELOAD NGINX AND PHP-FPM OR THE APP SERVICE
 #=================================================
 ynh_script_progression "Reloading NGINX web server and $app's service..."
 
-ynh_systemctl --service=$app --action="start" --log_path="$install_dir/log/production.log" --wait_until="Web application available"
+ynh_systemctl --service="$app" --action="start" --log_path="systemd" --wait_until="Web application available"
 
 ynh_systemctl --service=nginx --action=reload
 
