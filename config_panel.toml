@@ -11,5 +11,5 @@ services = ["__APP__"]
         ask = "Max file size"
         type = "number"
         default = 100000000
-        help = "Choose the maximum file size allowed to send, in MB (0 = no limit)"
+        help = "Choose the maximum file size allowed to send, in bytes (0 = no limit, default is 100000000=100MB)"
         bind = "max_file_size:__INSTALL_DIR__/lufi.conf"
