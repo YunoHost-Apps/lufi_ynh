@@ -4,19 +4,15 @@
 # IMPORT GENERIC HELPERS
 #=================================================
 
-
 source /usr/share/yunohost/helpers
 
 #=================================================
 # INITIALIZE AND STORE SETTINGS
 #=================================================
 
-secret=$(ynh_string_random --length=24)
-max_file_size=100
-
 ynh_app_setting_set --key=use_ldap --value=$use_ldap
-ynh_app_setting_set --key=max_file_size --value=$max_file_size
-ynh_app_setting_set --key=secret --value=$secret
+ynh_app_setting_set_default --key=max_file_size --value=100000000
+ynh_app_setting_set_default --key=secret --value=$(ynh_string_random --length=24)
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE

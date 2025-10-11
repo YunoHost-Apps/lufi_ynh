@@ -19,7 +19,7 @@ ynh_systemctl --service="$app" --action="stop" --log_path="systemd"
 #=================================================
 ynh_script_progression "Ensuring downward compatibility..."
 
-ynh_app_setting_set_default --key=max_file_size --value=100 # 100 Mo
+ynh_app_setting_set_default --key=max_file_size --value=100000000
 ynh_app_setting_set_default --key=use_ldap --value=0
 ynh_app_setting_set_default --key=secret --value=$(ynh_string_random --length=24)
 
