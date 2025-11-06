@@ -4,8 +4,6 @@
 # IMPORT GENERIC HELPERS
 #=================================================
 
-
-
 source /usr/share/yunohost/helpers
 
 #=================================================
@@ -34,7 +32,6 @@ systemctl enable "$app.service" --quiet
 yunohost service add "$app" --description="Lufi service" --log="$install_dir/log/production.log"
 
 ynh_restore "/etc/logrotate.d/$app"
-
 
 #=================================================
 # RESTORE VARIOUS FILES

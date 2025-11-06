@@ -4,7 +4,6 @@
 # IMPORT GENERIC HELPERS
 #=================================================
 
-
 source /usr/share/yunohost/helpers
 
 #=================================================
@@ -70,7 +69,6 @@ ynh_config_add_systemd
 yunohost service add "$app" --description="Lufi service" --log="$install_dir/log/production.log"
 
 ynh_config_add_logrotate
-
 
 ynh_config_add --template="cron" --destination="/etc/cron.d/$app"
 chmod +x $install_dir/script/lufi
