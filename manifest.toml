@@ -7,7 +7,7 @@ name = "Lufi"
 description.en = "Files and sharing anonymous application"
 description.fr = "Application de partage de fichiers anonyme"
 
-version = "0.07.2~ynh1"
+version = "0.07.3~ynh1"
 
 maintainers = [ "frju365", "cyp" ]
 
