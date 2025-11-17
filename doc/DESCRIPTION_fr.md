@@ -1,0 +1,3 @@
+Lufi stocke des fichiers et vous permet de les télécharger. Tous les fichiers sont chiffrés **par le navigateur** ! Cela signifie que vos fichiers ne quittent **jamais** votre ordinateur sans être chiffrés.
+L'administrateur de l'instance Lufi que vous utilisez ne pourra pas voir le contenu de votre fichier, pas plus que votre administrateur réseau ou votre FAI.
+La partie de l'URL correspondant à la clé de cryptage est une ancre (cf. [Fragment Identifier](https://en.wikipedia.org/wiki/Fragment_identifier)), ce qui signifie que cette partie est uniquement traitée côté client et n'atteint pas le serveur. :-)
